@@ -12,16 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 public class OdiApplication {
 
-	// 연결 테스트
-	@Operation(summary = "Hello World", description = "연결 테스트 메서드")
-	@GetMapping("/api/hello")
-	String hello() {
-		return "Hello World~";
-	}
+    // 연결 테스트
+    @Operation(summary = "Hello World", description = "연결 테스트 메서드")
+    @GetMapping("/api/hello")
+    String hello() {
+        return "Hello World~";
+    }
 
-
-	public static void main(String[] args) {
-		SpringApplication.run(OdiApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(OdiApplication.class, args);
+    }
 
 }
