@@ -1,5 +1,6 @@
 package com.homegravity.Odi;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OdiApplication {
 
 	// 연결 테스트
+	@Operation(summary = "Hello World", description = "연결 테스트 메서드")
 	@GetMapping("/api/hello")
 	String hello() {
 		return "Hello World~";
