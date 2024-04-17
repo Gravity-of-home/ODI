@@ -1,5 +1,6 @@
 package com.homegravity.Odi.global.response.error;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,20 +13,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-@Entity
+@Schema(description = "에러 데이터 모델")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ErrorResponse {
-
-    // 에러 상태 코드
+    @Schema(description = "에러 상태 코드")
     private int status;
 
-    // 에러 메시지
+    @Schema(description = "에러 메시지")
     private String message;
 
-    // 상태 에러 메시지
+    @Schema(description = "상세 에러 메시지")
     private List<FieldError> errors;
 
-    // 에러 이유
+    @Schema(description = "에러 이유")
     private String reason;
 
     /**

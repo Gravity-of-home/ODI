@@ -1,6 +1,7 @@
 package com.homegravity.Odi;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @EnableJpaAuditing
 @SpringBootApplication
+@Tag(name="오디", description = "odi server api")
 public class OdiApplication {
 
     // 연결 테스트
