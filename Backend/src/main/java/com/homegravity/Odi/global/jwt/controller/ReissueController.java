@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
 
+@Slf4j
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class ReissueController {
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         //todo: service단으로 나누기
         //get refresh token
+
         String refresh = null;
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
@@ -35,6 +38,7 @@ public class ReissueController {
                 refresh = cookie.getValue();
             }
         }
+
 
         if (refresh == null) {
             //response status code
@@ -69,7 +73,7 @@ public class ReissueController {
         String id = jwtUtil.getId(refresh);
 
         //make new JWT
-        String newAccess = jwtUtil.createJwt("access", username, role, id, 60000000L);
+        String newAccess = jwtUtil.createJwt("access", username, role, id, 300000L);
         String newRefresh = jwtUtil.createJwt("refresh", username, role, id, 86400000L);
 
         //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장

@@ -8,17 +8,18 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Date;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE member SET deleted_at =NOW() WHERE member_id = ?")
 public class Member extends BaseTime implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +43,7 @@ public class Member extends BaseTime implements UserDetails {
     private String email;   //이메일
 
     @Column(name = "birth")
-    private Date birth; //생년월일
+    private LocalDate birth; //생년월일
 
     @Column(name = "nickname")
     private String nickname;   //  닉네임
@@ -60,11 +61,10 @@ public class Member extends BaseTime implements UserDetails {
     private boolean isVerifired;    //실명인증확인여부
 
     @Column(name = "brix")
-    private double brix;    //매너온도
+    private Double brix;    //매너온도
 
     @Builder
-    public Member(Long id, String name, String gender, String providerCode, OAuthProvider provider, String email, Date birth, String nickname, int point, String image, String role, boolean isVerifired, double brix) {
-        this.id = id;
+    private Member(String name, String gender, String providerCode, OAuthProvider provider, String email, LocalDate birth, String nickname, int point, String image, String role, boolean isVerifired, double brix) {
         this.name = name;
         this.gender = gender;
         this.providerCode = providerCode;
@@ -79,25 +79,21 @@ public class Member extends BaseTime implements UserDetails {
         this.brix = brix;
     }
 
-
     //사용자 정보 저장 시 사용
     public static Member of(String name, String gender, String providerCode, OAuthProvider provider, String email, String birthyear, String birthday, String nickname, String image, String role) {
-        try {
-            return builder()
-                    .name(name)
-                    .providerCode(providerCode)
-                    .email(email)
-                    .image(image)
-                    .gender(gender)
-                    .role(role)
-                    .provider(provider)
-                    .isVerifired(false)
-                    .nickname(nickname)
-                    .birth(new SimpleDateFormat("yyyy-MM-dd").parse(birthyear + "-" + birthday))
-                    .build();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+
+        return builder()
+                .name(name)
+                .providerCode(providerCode)
+                .email(email)
+                .image(image)
+                .gender(gender)
+                .role(role)
+                .provider(provider)
+                .isVerifired(false)
+                .nickname(nickname)
+                .birth(LocalDate.parse(birthyear + "-" + birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .build();
     }
 
     public void updateEmail(String email) {
