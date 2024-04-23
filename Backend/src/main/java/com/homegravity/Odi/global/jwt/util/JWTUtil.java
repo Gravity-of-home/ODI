@@ -46,11 +46,10 @@ public class JWTUtil {
                 .parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createJwt(String category, String username, String role, String memberId, Long expiredMs) {
+    public String createJwt(String category, String role, String memberId, Long expiredMs) {
 
         return Jwts.builder()
                 .claim("category", category)
-                .claim("username", username)
                 .claim("role", role)
                 .claim("id", memberId)
                 .issuedAt(new Date(System.currentTimeMillis()))

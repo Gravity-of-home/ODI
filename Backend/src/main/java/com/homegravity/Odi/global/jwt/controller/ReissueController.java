@@ -73,8 +73,8 @@ public class ReissueController {
         String id = jwtUtil.getId(refresh);
 
         //make new JWT
-        String newAccess = jwtUtil.createJwt("access", username, role, id, 300000L);
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, id, 86400000L);
+        String newAccess = jwtUtil.createJwt("access",  role, id, 60000000L);
+        String newRefresh = jwtUtil.createJwt("refresh",  role, id, 86400000L);
 
         //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
         //todo access token들을 기억한 뒤 블랙리스트 처리를 진행하는 로직 작성해야 함
