@@ -7,6 +7,8 @@ spring:
     include:
       - db
       - security
+      - oauth
+      - jwt
   datasource:
     driver-class-name: ${DATABASE_DRIVER}
     url: ${DATABASE_URL}
@@ -17,6 +19,25 @@ spring:
       ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
     open-in-view: false
     dialect: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
+
+  security:
+    oauth2:
+      client:
+        registration:
+          naver:
+            client-name: naver
+            client-id: ${NAVER_CLIENT_ID}
+            client-secret: ${NAVER_SECRET}
+            redirect-uri: ${BACK_BASE_URL}/login/oauth2/code/naver
+            authorization-grant-type: authorization_code
+            scope: nickname, name, email, gender, birthday, profile_image, birthyear
+
+        provider:
+          naver:
+            authorization_uri: https://nid.naver.com/oauth2.0/authorize
+            token-uri: https://nid.naver.com/oauth2.0/token
+            user-info-uri: https://openapi.naver.com/v1/nid/me
+            userNameAttribute: response
 
 springdoc:
   swagger-ui:
@@ -29,3 +50,6 @@ springdoc:
       title: 🍇 O d! API Server
       description: <b>오디</b>까지 가세유~? 🚕
       version: 0.0.1
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
