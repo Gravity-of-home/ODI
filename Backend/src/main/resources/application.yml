@@ -18,6 +18,7 @@ spring:
     hibernate:
       ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
     open-in-view: false
+    dialect: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
 
   security:
     oauth2:
