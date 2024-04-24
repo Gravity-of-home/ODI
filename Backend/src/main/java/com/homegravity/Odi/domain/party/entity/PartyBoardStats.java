@@ -19,10 +19,10 @@ public class PartyBoardStats extends BaseBy {
     private Long id;
 
     @Column(name = "view_count")
-    private int viewCount;
+    private Integer viewCount;
 
     @Column(name = "request_count")
-    private int requestCount;
+    private Integer requestCount;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId // partyId를 party의 id와 매핑
@@ -30,23 +30,23 @@ public class PartyBoardStats extends BaseBy {
     private Party party;
 
     @Builder
-    private PartyBoardStats(int viewCount, int requestCount) {
+    private PartyBoardStats(Integer viewCount, Integer requestCount) {
         this.viewCount = viewCount;
         this.requestCount = requestCount;
     }
 
-    public static PartyBoardStats of(int viewCount, int requestCount) {
+    public static PartyBoardStats of(Integer viewCount, Integer requestCount) {
         return builder()
                 .viewCount(viewCount)
                 .requestCount(requestCount)
                 .build();
     }
 
-    public void updateViewCount(int viewCount) {
+    public void updateViewCount(Integer viewCount) {
         this.viewCount = viewCount;
     }
 
-    public void updateRequestCount(int requestCount) {
+    public void updateRequestCount(Integer requestCount) {
         this.requestCount = requestCount;
     }
 

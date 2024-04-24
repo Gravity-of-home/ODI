@@ -43,19 +43,19 @@ public class Party extends BaseBy {
     private String arrivalsLongitude;
 
     @Column(name = "expected_cost")
-    private int expectedCost;
+    private Integer expectedCost;
 
     @Column(name = "departures_date")
     private LocalDateTime departuresDate;
 
     @Column(name = "max_participants")
-    private int maxParticipants;
+    private Integer maxParticipants;
 
     @Column(name = "category")
     private String category;
 
     @Column(name = "gender")
-    private boolean gender;
+    private Boolean gender;
 
     @Column(name = "state")
     private String state;
@@ -69,8 +69,8 @@ public class Party extends BaseBy {
     @Builder
     private Party(String title, String departuresName, String departuresLatitude, String departuresLongitude,
                   String arrivalsName, String arrivalsLatitude, String arrivalsLongitude,
-                  int expectedCost, LocalDateTime departuresDate, int maxParticipants,
-                  String category, boolean gender, String state, String content) {
+                  Integer expectedCost, LocalDateTime departuresDate, Integer maxParticipants,
+                  String category, Boolean gender, String state, String content) {
         this.title = title;
         this.departuresName = departuresName;
         this.departuresLatitude = departuresLatitude;
@@ -89,8 +89,8 @@ public class Party extends BaseBy {
 
     public static Party of(String title, String departuresName, String departuresLatitude, String departuresLongitude,
                            String arrivalsName, String arrivalsLatitude, String arrivalsLongitude,
-                           int expectedCost, LocalDateTime departuresDate, int maxParticipants,
-                           String category, boolean gender, String state, String content) {
+                           Integer expectedCost, LocalDateTime departuresDate, Integer maxParticipants,
+                           String category, Boolean gender, String state, String content) {
 
         return Party.builder()
                 .title(title)
