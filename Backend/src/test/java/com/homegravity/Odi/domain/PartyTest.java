@@ -5,11 +5,17 @@ import com.homegravity.Odi.domain.party.entity.PartyBoardStats;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @Transactional
@@ -71,6 +77,23 @@ public class PartyTest {
         // 삭제 확인
         PartyBoardStats deletedStats = em.find(PartyBoardStats.class, stats.getId());
         System.out.println(deletedStats.getDeletedAt());
+    }
+
+    @Test
+    public void testCreateAndFind() {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point departuresLocation = geometryFactory.createPoint(new Coordinate(36.107, 128.41));
+        Point arrivalsLocation = geometryFactory.createPoint(new Coordinate(36.121233, 128.347247));
+        Party party = Party.builder().title("Create Party").departuresName("출발지")
+                .departuresLocation(departuresLocation).arrivalsLocation(arrivalsLocation).build();
+
+        em.persist(party);
+        em.flush();
+        em.clear();
+
+        List<Party> foundParty = em.createQuery("SELECT p FROM Party p", Party.class).getResultList();
+        assertThat(foundParty.get(0)).isNotNull();
+        assertEquals(foundParty.get(0).getDeparturesLocation(), departuresLocation);
     }
 
 }

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
 
@@ -27,20 +28,14 @@ public class Party extends BaseBy {
     @Column(name = "departures_name", length = 50)
     private String departuresName;
 
-    @Column(name = "departures_latitude")
-    private String departuresLatitude;
-
-    @Column(name = "departures_longitude")
-    private String departuresLongitude;
+    @Column(name = "departures_location", columnDefinition = "Point")
+    private Point departuresLocation;
 
     @Column(name = "arrivals_name", length = 50)
     private String arrivalsName;
 
-    @Column(name = "arrivals_latitude")
-    private String arrivalsLatitude;
-
-    @Column(name = "arrivals_longitude")
-    private String arrivalsLongitude;
+    @Column(name = "arrivals_location", columnDefinition = "Point")
+    private Point arrivalsLocation;
 
     @Column(name = "expected_cost")
     private Integer expectedCost;
@@ -67,17 +62,15 @@ public class Party extends BaseBy {
     private PartyBoardStats partyBoardStats;
 
     @Builder
-    private Party(String title, String departuresName, String departuresLatitude, String departuresLongitude,
-                  String arrivalsName, String arrivalsLatitude, String arrivalsLongitude,
+    private Party(String title, String departuresName, Point departuresLocation,
+                  String arrivalsName, Point arrivalsLocation,
                   Integer expectedCost, LocalDateTime departuresDate, Integer maxParticipants,
                   String category, Boolean gender, String state, String content) {
         this.title = title;
         this.departuresName = departuresName;
-        this.departuresLatitude = departuresLatitude;
-        this.departuresLongitude = departuresLongitude;
+        this.departuresLocation = departuresLocation;
         this.arrivalsName = arrivalsName;
-        this.arrivalsLatitude = arrivalsLatitude;
-        this.arrivalsLongitude = arrivalsLongitude;
+        this.arrivalsLocation = arrivalsLocation;
         this.expectedCost = expectedCost;
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
@@ -87,19 +80,17 @@ public class Party extends BaseBy {
         this.content = content;
     }
 
-    public static Party of(String title, String departuresName, String departuresLatitude, String departuresLongitude,
-                           String arrivalsName, String arrivalsLatitude, String arrivalsLongitude,
+    public static Party of(String title, String departuresName, Point departuresLocation,
+                           String arrivalsName, Point arrivalsLocation,
                            Integer expectedCost, LocalDateTime departuresDate, Integer maxParticipants,
                            String category, Boolean gender, String state, String content) {
 
         return Party.builder()
                 .title(title)
                 .departuresName(departuresName)
-                .departuresLatitude(departuresLatitude)
-                .departuresLongitude(departuresLongitude)
+                .departuresLocation(departuresLocation)
                 .arrivalsName(arrivalsName)
-                .arrivalsLatitude(arrivalsLatitude)
-                .arrivalsLongitude(arrivalsLongitude)
+                .arrivalsLocation(arrivalsLocation)
                 .expectedCost(expectedCost)
                 .departuresDate(departuresDate)
                 .maxParticipants(maxParticipants)
@@ -113,6 +104,22 @@ public class Party extends BaseBy {
 
     public void updatePartyBoardStats(PartyBoardStats partyBoardStats) {
         this.partyBoardStats = partyBoardStats;
+    }
+
+    public void updateDeparturesName(String departuresName) {
+        this.departuresName = departuresName;
+    }
+
+    public void updateArrivalsName(String arrivalsName) {
+        this.arrivalsName = arrivalsName;
+    }
+
+    public void updateDeparturesLocation(Point departuresLocation) {
+        this.departuresLocation = departuresLocation;
+    }
+
+    public void updateArrivalsLocation(Point arrivalsLocation) {
+        this.arrivalsLocation = arrivalsLocation;
     }
 
 }
