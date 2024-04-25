@@ -122,7 +122,7 @@ pipeline {
         stage("Push to Docker Hub-FE") {
             steps {
                 echo '프론트 도커 이미지를 Docker Hub에 푸시 시작!'
-                withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'odi-docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
                 }
                 dir("./Frontend") {
