@@ -58,8 +58,8 @@ public class Party extends BaseBy {
     @Column(name = "category")
     private String category;
 
-    @Column(name = "gender")
-    private Boolean gender;
+    @Column(name = "gender_restriction")
+    private String genderRestriction;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state")
@@ -76,7 +76,7 @@ public class Party extends BaseBy {
                   String arrivalsName, Point arrivalsLocation,
                   Integer expectedCost, LocalDateTime expectedDuration,
                   LocalDateTime departuresDate, Integer maxParticipants,
-                  String category, Boolean gender, String content) {
+                  String category, String genderRestriction, String content) {
 
         this.title = title;
         this.departuresName = departuresName;
@@ -88,16 +88,16 @@ public class Party extends BaseBy {
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
         this.category = category;
-        this.gender = gender;
+        this.genderRestriction = genderRestriction;
         this.state = StateType.GATHERING;
         this.content = content;
     }
 
-    public static Party from(String title, String departuresName, Point departuresLocation,
-                             String arrivalsName, Point arrivalsLocation,
-                             Integer expectedCost, LocalDateTime expectedDuration,
-                             LocalDateTime departuresDate, Integer maxParticipants,
-                             String category, Boolean gender, String content) {
+    public static Party of(String title, String departuresName, Point departuresLocation,
+                           String arrivalsName, Point arrivalsLocation,
+                           Integer expectedCost, LocalDateTime expectedDuration,
+                           LocalDateTime departuresDate, Integer maxParticipants,
+                           String category, String genderRestriction, String content) {
 
         return Party.builder()
                 .title(title)
@@ -110,17 +110,22 @@ public class Party extends BaseBy {
                 .departuresDate(departuresDate)
                 .maxParticipants(maxParticipants)
                 .category(category)
-                .gender(gender)
+                .genderRestriction(genderRestriction)
                 .content(content)
                 .build();
 
     }
 
-    public static Party from(PartyRequestDTO partyRequestDTO) {
+    public static Party of(PartyRequestDTO partyRequestDTO, String gender) {
 
         GeometryFactory geometryFactory = new GeometryFactory();
         Point departuresLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getDeparturesLocation().getX(), partyRequestDTO.getDeparturesLocation().getY()));
         Point arrivalsLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getArrivalsLocation().getX(), partyRequestDTO.getArrivalsLocation().getY()));
+
+        String genderRestriction = "ANY";
+        if (partyRequestDTO.getGenderRestriction()) { // 성별 제한이 있다면
+            genderRestriction = gender;
+        }
 
         return Party.builder()
                 .title(partyRequestDTO.getTitle())
@@ -133,7 +138,7 @@ public class Party extends BaseBy {
                 .departuresDate(partyRequestDTO.getDeparturesDate())
                 .maxParticipants(partyRequestDTO.getMaxParticipants())
                 .category(partyRequestDTO.getCategory())
-                .gender(partyRequestDTO.getGender())
+                .genderRestriction(genderRestriction)
                 .content(partyRequestDTO.getContent())
                 .build();
     }

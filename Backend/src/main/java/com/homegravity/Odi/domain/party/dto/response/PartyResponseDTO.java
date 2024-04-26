@@ -23,6 +23,12 @@ public class PartyResponseDTO {
 
     private Long id;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH-mm")
+    private LocalDateTime createAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH-mm")
+    private LocalDateTime modifiedAt;
+
     @NotNull
     private String title;
 
@@ -49,12 +55,13 @@ public class PartyResponseDTO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime departuresDate;
 
-    @NotNull
     private Integer maxParticipants;
+
+    private Integer currentParticipants;
 
     private String category;
 
-    private Boolean gender;
+    private String genderRestriction; // M, F, ANY
 
     @NotNull
     private StateType state;
@@ -74,14 +81,18 @@ public class PartyResponseDTO {
     private List<PartyMemberDTO> guests;
 
     @Builder
-    private PartyResponseDTO(Long id, String title, String departuresName, GeoPoint departuresLocation,
-                             String arrivalsName, GeoPoint arrivalsLocation, Integer expectedCost, LocalDateTime expectedDuration,
-                             LocalDateTime departuresDate, Integer maxParticipants, String category,
-                             Boolean gender, StateType state, String content,
+    private PartyResponseDTO(Long id, String title, LocalDateTime createAt, LocalDateTime modifiedAt,
+                             String departuresName, GeoPoint departuresLocation, String arrivalsName, GeoPoint arrivalsLocation,
+                             Integer expectedCost, LocalDateTime expectedDuration,
+                             LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, String category,
+                             String genderRestriction, StateType state, String content,
                              Integer viewCount, Integer requestCount,
                              RoleType role, List<PartyMemberDTO> participants, List<PartyMemberDTO> guests) {
+
         this.id = id;
         this.title = title;
+        this.createAt = createAt;
+        this.modifiedAt = modifiedAt;
         this.departuresName = departuresName;
         this.departuresLocation = departuresLocation;
         this.arrivalsName = arrivalsName;
@@ -90,8 +101,9 @@ public class PartyResponseDTO {
         this.expectedDuration = expectedDuration;
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
+        this.currentParticipants = currentParticipants;
         this.category = category;
-        this.gender = gender;
+        this.genderRestriction = genderRestriction;
         this.state = state;
         this.content = content;
         this.viewCount = viewCount;
@@ -109,6 +121,8 @@ public class PartyResponseDTO {
 
         return PartyResponseDTO.builder()
                 .id(party.getId())
+                .createAt(party.getCreatedAt())
+                .modifiedAt(party.getModifiedAt())
                 .title(party.getTitle())
                 .departuresName(party.getDeparturesName())
                 .departuresLocation(departuresLocation)
@@ -118,8 +132,9 @@ public class PartyResponseDTO {
                 .expectedDuration(party.getExpectedDuration())
                 .departuresDate(party.getDeparturesDate())
                 .maxParticipants(party.getMaxParticipants())
+                .maxParticipants(participants.size())
                 .category(party.getCategory())
-                .gender(party.getGender())
+                .genderRestriction(party.getGenderRestriction())
                 .state(party.getState())
                 .content(party.getContent())
                 .viewCount(partyBoardStats.getViewCount())

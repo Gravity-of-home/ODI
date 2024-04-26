@@ -32,7 +32,7 @@ public class PartyService {
     @Transactional
     public Long createParty(PartyRequestDTO partyRequestDTO, Member member) {
 
-        Party party = partyRepository.save(Party.from(partyRequestDTO));
+        Party party = partyRepository.save(Party.of(partyRequestDTO, member.getGender()));
 
         PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0); // 생성시 조회수 초기화
         partyMemberRepository.save(PartyMember.of(RoleType.ORGANIZER, false, party, member));
