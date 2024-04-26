@@ -61,6 +61,7 @@ public class Party extends BaseBy {
     @Column(name = "gender")
     private Boolean gender;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "state")
     private StateType state;
 
