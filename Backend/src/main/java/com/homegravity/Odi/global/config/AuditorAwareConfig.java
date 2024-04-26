@@ -1,6 +1,6 @@
-package com.baekopa.backend.global.config;
+package com.homegravity.Odi.global.config;
 
-import com.baekopa.backend.domain.member.entity.Member;
+import com.homegravity.Odi.domain.member.entity.Member;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
