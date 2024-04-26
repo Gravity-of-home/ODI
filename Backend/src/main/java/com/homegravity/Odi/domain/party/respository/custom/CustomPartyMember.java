@@ -15,6 +15,6 @@ public interface CustomPartyMember {
 
     List<PartyMemberDTO> findAllPartyGuests(Party party);
 
-    List<PartyMemberDTO> findAllPartyParticipants(Party part);
+    List<PartyMemberDTO> findAllPartyParticipants(Party party);
 
 }
