@@ -1,5 +1,7 @@
 package com.homegravity.Odi.domain.party.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.global.entity.BaseBy;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
@@ -40,6 +44,11 @@ public class Party extends BaseBy {
     @Column(name = "expected_cost")
     private Integer expectedCost;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @Column(name = "expected_duration")
+    private LocalDateTime expectedDuration;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "departures_date")
     private LocalDateTime departuresDate;
 
@@ -53,37 +62,41 @@ public class Party extends BaseBy {
     private Boolean gender;
 
     @Column(name = "state")
-    private String state;
+    private StateType state;
 
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @OneToOne(mappedBy = "party", cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartyBoardStats partyBoardStats;
 
     @Builder
     private Party(String title, String departuresName, Point departuresLocation,
                   String arrivalsName, Point arrivalsLocation,
-                  Integer expectedCost, LocalDateTime departuresDate, Integer maxParticipants,
-                  String category, Boolean gender, String state, String content) {
+                  Integer expectedCost, LocalDateTime expectedDuration,
+                  LocalDateTime departuresDate, Integer maxParticipants,
+                  String category, Boolean gender, String content) {
+
         this.title = title;
         this.departuresName = departuresName;
         this.departuresLocation = departuresLocation;
         this.arrivalsName = arrivalsName;
         this.arrivalsLocation = arrivalsLocation;
         this.expectedCost = expectedCost;
+        this.expectedDuration = expectedDuration;
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
         this.category = category;
         this.gender = gender;
-        this.state = state;
+        this.state = StateType.GATHERING;
         this.content = content;
     }
 
-    public static Party of(String title, String departuresName, Point departuresLocation,
-                           String arrivalsName, Point arrivalsLocation,
-                           Integer expectedCost, LocalDateTime departuresDate, Integer maxParticipants,
-                           String category, Boolean gender, String state, String content) {
+    public static Party from(String title, String departuresName, Point departuresLocation,
+                             String arrivalsName, Point arrivalsLocation,
+                             Integer expectedCost, LocalDateTime expectedDuration,
+                             LocalDateTime departuresDate, Integer maxParticipants,
+                             String category, Boolean gender, String content) {
 
         return Party.builder()
                 .title(title)
@@ -92,14 +105,36 @@ public class Party extends BaseBy {
                 .arrivalsName(arrivalsName)
                 .arrivalsLocation(arrivalsLocation)
                 .expectedCost(expectedCost)
+                .expectedDuration(expectedDuration)
                 .departuresDate(departuresDate)
                 .maxParticipants(maxParticipants)
                 .category(category)
                 .gender(gender)
-                .state(state)
                 .content(content)
                 .build();
 
+    }
+
+    public static Party from(PartyRequestDTO partyRequestDTO) {
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point departuresLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getDeparturesLocation().getX(), partyRequestDTO.getDeparturesLocation().getY()));
+        Point arrivalsLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getArrivalsLocation().getX(), partyRequestDTO.getArrivalsLocation().getY()));
+
+        return Party.builder()
+                .title(partyRequestDTO.getTitle())
+                .departuresName(partyRequestDTO.getDeparturesName())
+                .departuresLocation(departuresLocation)
+                .arrivalsName(partyRequestDTO.getArrivalsName())
+                .arrivalsLocation(arrivalsLocation)
+                .expectedCost(partyRequestDTO.getExpectedCost())
+                .expectedDuration(partyRequestDTO.getExpectedDuration())
+                .departuresDate(partyRequestDTO.getDeparturesDate())
+                .maxParticipants(partyRequestDTO.getMaxParticipants())
+                .category(partyRequestDTO.getCategory())
+                .gender(partyRequestDTO.getGender())
+                .content(partyRequestDTO.getContent())
+                .build();
     }
 
     public void updatePartyBoardStats(PartyBoardStats partyBoardStats) {
@@ -120,6 +155,10 @@ public class Party extends BaseBy {
 
     public void updateArrivalsLocation(Point arrivalsLocation) {
         this.arrivalsLocation = arrivalsLocation;
+    }
+
+    public void updateState(StateType state) {
+        this.state = state;
     }
 
 }

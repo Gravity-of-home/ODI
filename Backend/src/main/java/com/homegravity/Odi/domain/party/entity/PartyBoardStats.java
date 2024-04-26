@@ -42,8 +42,8 @@ public class PartyBoardStats extends BaseBy {
                 .build();
     }
 
-    public void updateViewCount(Integer viewCount) {
-        this.viewCount = viewCount;
+    public void addViewCount() {
+        this.viewCount++;
     }
 
     public void updateRequestCount(Integer requestCount) {
