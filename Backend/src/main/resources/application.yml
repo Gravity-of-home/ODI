@@ -18,6 +18,7 @@ spring:
     hibernate:
       ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
     open-in-view: false
+    dialect: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
 
   security:
     oauth2:
@@ -49,6 +50,9 @@ springdoc:
       title: 🍇 O d! API Server
       description: <b>오디</b>까지 가세유~? 🚕
       version: 0.0.1
+    path: /api/
+
+
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
