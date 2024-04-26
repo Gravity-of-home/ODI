@@ -33,14 +33,8 @@ public class PartyService {
     public Long createParty(PartyRequestDTO partyRequestDTO, Member member) {
 
         Party party = partyRepository.save(Party.from(partyRequestDTO));
-        Long requestCount = partyMemberRepository.countAllPartyGuests(party); // 파티 참여 신청자 수
 
-        int requestCountInt = 0; // 파티 요청자 수, 요청자 수가 많을 수록 인기 있는 파티
-        if (requestCount != null) {
-            requestCountInt = requestCount.intValue();
-        }
-
-        PartyBoardStats partyBoardStats = PartyBoardStats.of(0, requestCountInt); // 생성시 조회수 초기화
+        PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0); // 생성시 조회수 초기화
         partyMemberRepository.save(PartyMember.of(RoleType.ORGANIZER, false, party, member));
         partyBoardStats.updateParty(party);
 
@@ -51,20 +45,27 @@ public class PartyService {
     public PartyResponseDTO getPartyDetail(Long partyId, Member member) {
 
         Party party = partyRepository.findParty(partyId);
-        if (party == null) {
+        if (party == null) { // 파티가 없다면 삭제되었거나 요청에 문제가 있음
             throw BusinessException.builder().errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
         }
 
+        // 조회수, 신청자 수 갱신
         PartyBoardStats partyBoardStats = partyBoardStatsRepository.findPartyBoardStats(party);
-
         partyBoardStats.addViewCount(); // 조회수 증가
 
-        RoleType role = partyMemberRepository.findParticipantRole(party, member);
+        Long requestCount = partyMemberRepository.countAllPartyGuests(party); // 파티 참여 신청자 수
+        int requestCountInt = 0; // 파티 요청자 수, 요청자 수가 많을 수록 인기 있는 파티
+        if (requestCount != null) {
+            requestCountInt = requestCount.intValue();
+        }
+        partyBoardStats.updateRequestCount(requestCountInt);
+
 
         // 파티원, 파티 참여 신정자 목록 조회
+        RoleType role = partyMemberRepository.findParticipantRole(party, member);
         List<PartyMemberDTO> guests = null;
-        // 방장이라면?
-        if (role.equals(RoleType.ORGANIZER)) {
+
+        if (role.equals(RoleType.ORGANIZER)) { // 방장이라면 신청자 목록도 조회 가능
             guests = partyMemberRepository.findAllPartyMember(party, RoleType.GUEST);
         }
 
