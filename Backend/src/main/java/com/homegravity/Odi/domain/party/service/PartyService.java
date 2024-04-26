@@ -14,11 +14,13 @@ import com.homegravity.Odi.domain.party.respository.PartyRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PartyService {
@@ -57,16 +59,16 @@ public class PartyService {
 
         partyBoardStats.addViewCount(); // 조회수 증가
 
-        RoleType role = partyMemberRepository.findParticipantRole(member);
+        RoleType role = partyMemberRepository.findParticipantRole(party, member);
 
         // 파티원, 파티 참여 신정자 목록 조회
         List<PartyMemberDTO> guests = null;
         // 방장이라면?
         if (role.equals(RoleType.ORGANIZER)) {
-            guests = partyMemberRepository.findAllPartyGuests(party);
+            guests = partyMemberRepository.findAllPartyMember(party, RoleType.GUEST);
         }
 
-        List<PartyMemberDTO> participants = partyMemberRepository.findAllPartyParticipants(party);
+        List<PartyMemberDTO> participants = partyMemberRepository.findAllPartyMember(party, RoleType.PARTICIPANT);
 
         return PartyResponseDTO.of(party, partyBoardStats, role, participants, guests);
     }
