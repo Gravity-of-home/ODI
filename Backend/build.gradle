@@ -55,6 +55,9 @@ dependencies {
 	// 공간 데이터 타입
 	implementation 'org.hibernate:hibernate-spatial:6.4.4.Final'
 
+	// elasticsearch
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
 }
 
 tasks.named('test') {
