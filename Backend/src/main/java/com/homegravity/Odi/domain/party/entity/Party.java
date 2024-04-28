@@ -58,8 +58,9 @@ public class Party extends BaseBy {
     @Column(name = "category")
     private String category;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender_restriction")
-    private String genderRestriction;
+    private GenderType genderRestriction;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state")
@@ -76,7 +77,7 @@ public class Party extends BaseBy {
                   String arrivalsName, Point arrivalsLocation,
                   Integer expectedCost, LocalDateTime expectedDuration,
                   LocalDateTime departuresDate, Integer maxParticipants,
-                  String category, String genderRestriction, String content) {
+                  String category, GenderType genderRestriction, String content) {
 
         this.title = title;
         this.departuresName = departuresName;
@@ -97,7 +98,7 @@ public class Party extends BaseBy {
                            String arrivalsName, Point arrivalsLocation,
                            Integer expectedCost, LocalDateTime expectedDuration,
                            LocalDateTime departuresDate, Integer maxParticipants,
-                           String category, String genderRestriction, String content) {
+                           String category, GenderType genderRestriction, String content) {
 
         return Party.builder()
                 .title(title)
@@ -122,9 +123,15 @@ public class Party extends BaseBy {
         Point departuresLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getDeparturesLocation().getX(), partyRequestDTO.getDeparturesLocation().getY()));
         Point arrivalsLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getArrivalsLocation().getX(), partyRequestDTO.getArrivalsLocation().getY()));
 
-        String genderRestriction = "ANY";
+        GenderType genderRestriction = GenderType.ANY;
         if (partyRequestDTO.getGenderRestriction()) { // 성별 제한이 있다면
-            genderRestriction = gender;
+
+            if (gender.equals(GenderType.M.toString())) {
+                genderRestriction = GenderType.M;
+            } else if (gender.equals(GenderType.F.toString())) {
+                genderRestriction = GenderType.F;
+            }
+
         }
 
         return Party.builder()

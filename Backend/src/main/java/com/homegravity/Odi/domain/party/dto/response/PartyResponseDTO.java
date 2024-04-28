@@ -3,10 +3,7 @@ package com.homegravity.Odi.domain.party.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.homegravity.Odi.domain.party.dto.GeoPoint;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
-import com.homegravity.Odi.domain.party.entity.Party;
-import com.homegravity.Odi.domain.party.entity.PartyBoardStats;
-import com.homegravity.Odi.domain.party.entity.RoleType;
-import com.homegravity.Odi.domain.party.entity.StateType;
+import com.homegravity.Odi.domain.party.entity.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -61,7 +58,7 @@ public class PartyResponseDTO {
 
     private String category;
 
-    private String genderRestriction; // M, F, ANY
+    private GenderType genderRestriction; // M, F, ANY
 
     @NotNull
     private StateType state;
@@ -85,7 +82,7 @@ public class PartyResponseDTO {
                              String departuresName, GeoPoint departuresLocation, String arrivalsName, GeoPoint arrivalsLocation,
                              Integer expectedCost, LocalDateTime expectedDuration,
                              LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, String category,
-                             String genderRestriction, StateType state, String content,
+                             GenderType genderRestriction, StateType state, String content,
                              Integer viewCount, Integer requestCount,
                              RoleType role, List<PartyMemberDTO> participants, List<PartyMemberDTO> guests) {
 
