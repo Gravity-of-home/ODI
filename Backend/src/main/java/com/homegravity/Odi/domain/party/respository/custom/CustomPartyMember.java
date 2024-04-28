@@ -11,10 +11,8 @@ public interface CustomPartyMember {
 
     Long countAllPartyGuests(Party party);
 
-    RoleType findParticipantRole(Member member);
+    RoleType findParticipantRole(Party party, Member member);
 
-    List<PartyMemberDTO> findAllPartyGuests(Party party);
-
-    List<PartyMemberDTO> findAllPartyParticipants(Party party);
+    List<PartyMemberDTO> findAllPartyMember(Party party, RoleType role);
 
 }

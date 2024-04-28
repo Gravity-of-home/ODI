@@ -40,7 +40,8 @@ public class PartyRequestDTO {
 
     private String category;
 
-    private Boolean gender;
+    @NotNull
+    private Boolean genderRestriction;
 
     private String content;
 
