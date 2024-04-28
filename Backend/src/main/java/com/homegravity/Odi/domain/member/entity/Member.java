@@ -45,6 +45,9 @@ public class Member extends BaseTime implements UserDetails {
     @Column(name = "birth")
     private LocalDate birth; //생년월일
 
+    @Column(name = "age_group")
+    private String ageGroup; // 나이대
+
     @Column(name = "nickname")
     private String nickname;   //  닉네임
 
@@ -64,13 +67,14 @@ public class Member extends BaseTime implements UserDetails {
     private Double brix;    //매너온도
 
     @Builder
-    private Member(String name, String gender, String providerCode, OAuthProvider provider, String email, LocalDate birth, String nickname, int point, String image, String role, boolean isVerifired, double brix) {
+    private Member(String name, String gender, String providerCode, OAuthProvider provider, String email, LocalDate birth, String ageGroup, String nickname, int point, String image, String role, boolean isVerifired, double brix) {
         this.name = name;
         this.gender = gender;
         this.providerCode = providerCode;
         this.provider = provider;
         this.email = email;
         this.birth = birth;
+        this.ageGroup = ageGroup;
         this.nickname = nickname;
         this.point = point;
         this.image = image;
@@ -81,6 +85,8 @@ public class Member extends BaseTime implements UserDetails {
 
     //사용자 정보 저장 시 사용
     public static Member of(String name, String gender, String providerCode, OAuthProvider provider, String email, String birthyear, String birthday, String nickname, String image, String role) {
+
+        int age = ((LocalDate.now().getYear() - Integer.parseInt(birthyear)) / 10) * 10;
 
         return builder()
                 .name(name)
@@ -93,6 +99,7 @@ public class Member extends BaseTime implements UserDetails {
                 .isVerifired(false)
                 .nickname(nickname)
                 .birth(LocalDate.parse(birthyear + "-" + birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .ageGroup(age + "대")
                 .build();
     }
 

@@ -20,6 +20,7 @@ public class PartyMember extends BaseBy {
     @Column(name = "party_member_id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private RoleType role;
 

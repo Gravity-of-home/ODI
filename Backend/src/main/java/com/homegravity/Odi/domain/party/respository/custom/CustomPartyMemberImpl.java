@@ -5,6 +5,7 @@ import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.QPartyMember;
 import com.homegravity.Odi.domain.party.entity.RoleType;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -29,30 +30,33 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
     }
 
     @Override
-    public RoleType findParticipantRole(Member member) {
+    public RoleType findParticipantRole(Party party, Member member) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
         return jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.member.eq(member)
+                        .and(qPartyMember.party.eq(party))
                         .and(qPartyMember.deletedAt.isNull()))
                 .fetchOne().getRole();
     }
 
     @Override
-    public List<PartyMemberDTO> findAllPartyGuests(Party party) {
+    public List<PartyMemberDTO> findAllPartyMember(Party party, RoleType role) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
-        return jpaQueryFactory.selectFrom(qPartyMember)
-                .where(qPartyMember.role.eq(RoleType.GUEST)
-                        .and(qPartyMember.deletedAt.isNull()))
-                .fetch().stream().map(PartyMemberDTO::from).toList();
-    }
 
-    @Override
-    public List<PartyMemberDTO> findAllPartyParticipants(Party party) {
-        QPartyMember qPartyMember = QPartyMember.partyMember;
-        return jpaQueryFactory.select(qPartyMember)
-                .from(qPartyMember)
+        BooleanBuilder builder = new BooleanBuilder();
+        
+        if(role != RoleType.GUEST) { // 파티원 + 파티장 목록
+            builder.and(qPartyMember.role.eq(RoleType.ORGANIZER))
+                    .or(qPartyMember.role.eq(RoleType.PARTICIPANT));
+        }
+        else { // 신청자 목록
+            builder.and(qPartyMember.role.eq(RoleType.GUEST));
+        }
+
+        return jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.party.eq(party)
+                        .and(builder)
                         .and(qPartyMember.deletedAt.isNull()))
-                .fetch().stream().map(PartyMemberDTO::from).toList();
+                .fetch().stream().map(pm -> PartyMemberDTO.of(pm, pm.getMember())).toList();
     }
 }
