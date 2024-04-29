@@ -7,8 +7,6 @@ spring:
     include:
       - db
       - security
-      - oauth
-      - jwt
   datasource:
     driver-class-name: ${DATABASE_DRIVER}
     url: ${DATABASE_URL}

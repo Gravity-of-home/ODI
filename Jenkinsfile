@@ -38,19 +38,6 @@ pipeline {
                         sh 'cp -rf $securityConfigFile ./Backend/src/main/resources/application-security.yml'
                     }
                 }
-
-                withCredentials([file(credentialsId: 'secret-jwt', variable: 'jwtConfigFile')]) {
-                    script {
-                        sh 'cp -rf $jwtConfigFile ./Backend/src/main/resources/application-jwt.yml'
-                    }
-                }
-
-                withCredentials([file(credentialsId: 'secret-oauth', variable: 'oauthConfigFile')]) {
-                    script {
-                        sh 'cp -rf $oauthConfigFile ./Backend/src/main/resources/application-oauth.yml'
-                    }
-                }
-
             }
         }
 
