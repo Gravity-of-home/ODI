@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.party.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +9,9 @@ import lombok.Setter;
 @Setter
 public class GeoPoint {
 
+    @Schema(description = "위도 / latitude")
     private double x;
+    @Schema(description = "경도 / longitude")
     private double y;
 
     @Builder
