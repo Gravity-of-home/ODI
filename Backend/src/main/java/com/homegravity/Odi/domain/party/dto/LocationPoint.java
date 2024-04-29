@@ -9,19 +9,21 @@ import lombok.Setter;
 @Setter
 public class LocationPoint {
 
-    @Schema(description = "위도 / latitude")
-    private double latitude;
     @Schema(description = "경도 / longitude")
     private double longitude;
 
+    @Schema(description = "위도 / latitude")
+    private double latitude;
+
+
     @Builder
-    private LocationPoint(double latitude, double longitude) {
-        this.latitude = latitude;
+    private LocationPoint(double longitude, double latitude) {
         this.longitude = longitude;
+        this.latitude = latitude;
     }
 
-    public static LocationPoint of(double latitude, double longitude) {
-        return builder().latitude(latitude).longitude(longitude).build();
+    public static LocationPoint of(double longitude, double latitude) {
+        return builder().longitude(longitude).latitude(latitude).build();
     }
 
 }

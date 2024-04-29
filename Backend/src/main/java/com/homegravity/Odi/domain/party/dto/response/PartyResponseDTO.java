@@ -107,7 +107,7 @@ public class PartyResponseDTO {
                                       List<PartyMemberDTO> participants, List<PartyMemberDTO> guests, String pathInfo) {
 
         LocationPoint departuresLocation = LocationPoint.of(party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY());
-        LocationPoint arrivalsLocation = LocationPoint.of(party.getArrivalsLocation().getX(), party.getDeparturesLocation().getY());
+        LocationPoint arrivalsLocation = LocationPoint.of(party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
 
         return PartyResponseDTO.builder()
                 .id(party.getId())
