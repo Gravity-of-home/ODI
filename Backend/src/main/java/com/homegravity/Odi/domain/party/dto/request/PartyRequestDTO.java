@@ -27,12 +27,6 @@ public class PartyRequestDTO {
     private LocationPoint arrivalsLocation;
 
     @NotNull
-    private Integer expectedCost;
-
-    @NotNull
-    private LocalDateTime expectedDuration;
-
-    @NotNull
     private LocalDateTime departuresDate;
 
     @NotNull

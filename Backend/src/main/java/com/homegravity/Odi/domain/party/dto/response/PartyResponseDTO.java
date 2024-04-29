@@ -42,13 +42,6 @@ public class PartyResponseDTO {
     private LocationPoint arrivalsLocation;
 
     @NotNull
-    private Integer expectedCost;
-
-    @NotNull
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime expectedDuration;
-
-    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime departuresDate;
 
@@ -77,14 +70,15 @@ public class PartyResponseDTO {
 
     private List<PartyMemberDTO> guests;
 
+    private String pathInfo;
+
     @Builder
     private PartyResponseDTO(Long id, String title, LocalDateTime createAt, LocalDateTime modifiedAt,
                              String departuresName, LocationPoint departuresLocation, String arrivalsName, LocationPoint arrivalsLocation,
-                             Integer expectedCost, LocalDateTime expectedDuration,
                              LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, String category,
                              GenderType genderRestriction, StateType state, String content,
                              Integer viewCount, Integer requestCount,
-                             RoleType role, List<PartyMemberDTO> participants, List<PartyMemberDTO> guests) {
+                             RoleType role, List<PartyMemberDTO> participants, List<PartyMemberDTO> guests, String pathInfo) {
 
         this.id = id;
         this.title = title;
@@ -94,8 +88,6 @@ public class PartyResponseDTO {
         this.departuresLocation = departuresLocation;
         this.arrivalsName = arrivalsName;
         this.arrivalsLocation = arrivalsLocation;
-        this.expectedCost = expectedCost;
-        this.expectedDuration = expectedDuration;
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
         this.currentParticipants = currentParticipants;
@@ -108,13 +100,14 @@ public class PartyResponseDTO {
         this.role = role;
         this.participants = participants;
         this.guests = guests;
+        this.pathInfo = pathInfo;
     }
 
     public static PartyResponseDTO of(Party party, PartyBoardStats partyBoardStats, RoleType role,
-                                      List<PartyMemberDTO> participants, List<PartyMemberDTO> guests) {
+                                      List<PartyMemberDTO> participants, List<PartyMemberDTO> guests, String pathInfo) {
 
         LocationPoint departuresLocation = LocationPoint.of(party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY());
-        LocationPoint arrivalsLocation = LocationPoint.of(party.getArrivalsLocation().getX(), party.getDeparturesLocation().getY());
+        LocationPoint arrivalsLocation = LocationPoint.of(party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
 
         return PartyResponseDTO.builder()
                 .id(party.getId())
@@ -125,8 +118,6 @@ public class PartyResponseDTO {
                 .departuresLocation(departuresLocation)
                 .arrivalsName(party.getArrivalsName())
                 .arrivalsLocation(arrivalsLocation)
-                .expectedCost(party.getExpectedCost())
-                .expectedDuration(party.getExpectedDuration())
                 .departuresDate(party.getDeparturesDate())
                 .maxParticipants(party.getMaxParticipants())
                 .maxParticipants(participants.size())
@@ -139,6 +130,7 @@ public class PartyResponseDTO {
                 .role(role)
                 .participants(participants)
                 .guests(guests)
+                .pathInfo(pathInfo)
                 .build();
     }
 
