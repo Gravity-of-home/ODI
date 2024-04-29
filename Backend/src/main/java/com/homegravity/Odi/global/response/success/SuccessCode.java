@@ -44,6 +44,9 @@ public enum SuccessCode {
     PARTY_GET_SUCCESS(200, "택시 파티 조회에 성공했습니다."),
 
 
+    // Map
+    PATH_INFO_GET_SUCCESS(200, "경로 정보 조회에 성공했습니다."),
+
     ;
 
     /**
