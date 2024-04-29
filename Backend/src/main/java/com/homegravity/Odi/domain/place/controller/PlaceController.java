@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.place.controller;
 
+import com.homegravity.Odi.domain.party.dto.LocationPoint;
 import com.homegravity.Odi.domain.place.dto.PlaceDocumentDto;
 import com.homegravity.Odi.domain.place.dto.request.PlaceSearchDto;
 import com.homegravity.Odi.domain.place.service.PlaceService;
@@ -26,5 +27,11 @@ public class PlaceController {
     @GetMapping()
     public ApiResponse<Page<PlaceDocumentDto>> getPlaces(PlaceSearchDto requestDto, Pageable pageable) {
         return ApiResponse.of(SuccessCode.PLACE_LIST_GET_SUCCESS, placeService.searchPlacesByPlaceName(requestDto, pageable));
+    }
+
+    @Operation(summary = "가장 가까운 장소 조회", description = "위경도 기반으로 가장 가까운 장소를 조회합니다.")
+    @GetMapping("/place")
+    public ApiResponse<PlaceDocumentDto> getPlaces(LocationPoint geopoint) {
+        return ApiResponse.of(SuccessCode.PLACE_LIST_GET_SUCCESS, placeService.getNearestPlace(geopoint.getLatitude(), geopoint.getLongitude()));
     }
 }

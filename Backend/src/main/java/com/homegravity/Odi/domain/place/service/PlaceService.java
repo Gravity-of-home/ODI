@@ -24,5 +24,10 @@ public class PlaceService {
                 .stream().map(PlaceDocumentDto::from).toList());
     }
 
+    // 가장 가까운 장소 조회
+    public PlaceDocumentDto getNearestPlace(Double latitude, Double longitude) {
+
+        return PlaceDocumentDto.from(placeDocumentNativeQueryRepository.getNearestPlace(new GeoPoint(latitude, longitude)));
+    }
 
 }
