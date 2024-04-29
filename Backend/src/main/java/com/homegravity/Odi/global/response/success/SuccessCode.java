@@ -46,6 +46,9 @@ public enum SuccessCode {
     // Place
     PLACE_LIST_GET_SUCCESS(200, "장소 검색에 성공했습니다."),
 
+    // Map
+    PATH_INFO_GET_SUCCESS(200, "경로 정보 조회에 성공했습니다."),
+
     ;
 
     /**
