@@ -70,13 +70,15 @@ public class PartyResponseDTO {
 
     private List<PartyMemberDTO> guests;
 
+    private String pathInfo;
+
     @Builder
     private PartyResponseDTO(Long id, String title, LocalDateTime createAt, LocalDateTime modifiedAt,
                              String departuresName, GeoPoint departuresLocation, String arrivalsName, GeoPoint arrivalsLocation,
                              LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, String category,
                              GenderType genderRestriction, StateType state, String content,
                              Integer viewCount, Integer requestCount,
-                             RoleType role, List<PartyMemberDTO> participants, List<PartyMemberDTO> guests) {
+                             RoleType role, List<PartyMemberDTO> participants, List<PartyMemberDTO> guests, String pathInfo) {
 
         this.id = id;
         this.title = title;
@@ -98,10 +100,11 @@ public class PartyResponseDTO {
         this.role = role;
         this.participants = participants;
         this.guests = guests;
+        this.pathInfo = pathInfo;
     }
 
     public static PartyResponseDTO of(Party party, PartyBoardStats partyBoardStats, RoleType role,
-                                      List<PartyMemberDTO> participants, List<PartyMemberDTO> guests) {
+                                      List<PartyMemberDTO> participants, List<PartyMemberDTO> guests, String pathInfo) {
 
         GeoPoint departuresLocation = GeoPoint.of(party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY());
         GeoPoint arrivalsLocation = GeoPoint.of(party.getArrivalsLocation().getX(), party.getDeparturesLocation().getY());
@@ -127,6 +130,7 @@ public class PartyResponseDTO {
                 .role(role)
                 .participants(participants)
                 .guests(guests)
+                .pathInfo(pathInfo)
                 .build();
     }
 

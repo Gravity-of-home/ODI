@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.party.service;
 
+import com.homegravity.Odi.domain.map.service.MapService;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
@@ -28,6 +29,7 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final PartyBoardStatsRepository partyBoardStatsRepository;
     private final PartyMemberRepository partyMemberRepository;
+    private final MapService mapService;
 
     @Transactional
     public Long createParty(PartyRequestDTO partyRequestDTO, Member member) {
@@ -71,6 +73,9 @@ public class PartyService {
 
         List<PartyMemberDTO> participants = partyMemberRepository.findAllPartyMember(party, RoleType.PARTICIPANT);
 
-        return PartyResponseDTO.of(party, partyBoardStats, role, participants, guests);
+        // Naver Map API 호출
+        String pathInfo = mapService.getNaverPathInfo(party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY(), party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
+
+        return PartyResponseDTO.of(party, partyBoardStats, role, participants, guests, pathInfo);
     }
 }
