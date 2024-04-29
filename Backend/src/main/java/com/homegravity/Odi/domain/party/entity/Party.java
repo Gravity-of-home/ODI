@@ -41,13 +41,6 @@ public class Party extends BaseBy {
     @Column(name = "arrivals_location", columnDefinition = "Point")
     private Point arrivalsLocation;
 
-    @Column(name = "expected_cost")
-    private Integer expectedCost;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    @Column(name = "expected_duration")
-    private LocalDateTime expectedDuration;
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "departures_date")
     private LocalDateTime departuresDate;
@@ -75,7 +68,6 @@ public class Party extends BaseBy {
     @Builder
     private Party(String title, String departuresName, Point departuresLocation,
                   String arrivalsName, Point arrivalsLocation,
-                  Integer expectedCost, LocalDateTime expectedDuration,
                   LocalDateTime departuresDate, Integer maxParticipants,
                   String category, GenderType genderRestriction, String content) {
 
@@ -84,37 +76,12 @@ public class Party extends BaseBy {
         this.departuresLocation = departuresLocation;
         this.arrivalsName = arrivalsName;
         this.arrivalsLocation = arrivalsLocation;
-        this.expectedCost = expectedCost;
-        this.expectedDuration = expectedDuration;
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
         this.category = category;
         this.genderRestriction = genderRestriction;
         this.state = StateType.GATHERING;
         this.content = content;
-    }
-
-    public static Party of(String title, String departuresName, Point departuresLocation,
-                           String arrivalsName, Point arrivalsLocation,
-                           Integer expectedCost, LocalDateTime expectedDuration,
-                           LocalDateTime departuresDate, Integer maxParticipants,
-                           String category, GenderType genderRestriction, String content) {
-
-        return Party.builder()
-                .title(title)
-                .departuresName(departuresName)
-                .departuresLocation(departuresLocation)
-                .arrivalsName(arrivalsName)
-                .arrivalsLocation(arrivalsLocation)
-                .expectedCost(expectedCost)
-                .expectedDuration(expectedDuration)
-                .departuresDate(departuresDate)
-                .maxParticipants(maxParticipants)
-                .category(category)
-                .genderRestriction(genderRestriction)
-                .content(content)
-                .build();
-
     }
 
     public static Party of(PartyRequestDTO partyRequestDTO, String gender) {
@@ -140,8 +107,6 @@ public class Party extends BaseBy {
                 .departuresLocation(departuresLocation)
                 .arrivalsName(partyRequestDTO.getArrivalsName())
                 .arrivalsLocation(arrivalsLocation)
-                .expectedCost(partyRequestDTO.getExpectedCost())
-                .expectedDuration(partyRequestDTO.getExpectedDuration())
                 .departuresDate(partyRequestDTO.getDeparturesDate())
                 .maxParticipants(partyRequestDTO.getMaxParticipants())
                 .category(partyRequestDTO.getCategory())

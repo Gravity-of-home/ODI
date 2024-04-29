@@ -42,13 +42,6 @@ public class PartyResponseDTO {
     private GeoPoint arrivalsLocation;
 
     @NotNull
-    private Integer expectedCost;
-
-    @NotNull
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime expectedDuration;
-
-    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime departuresDate;
 
@@ -80,7 +73,6 @@ public class PartyResponseDTO {
     @Builder
     private PartyResponseDTO(Long id, String title, LocalDateTime createAt, LocalDateTime modifiedAt,
                              String departuresName, GeoPoint departuresLocation, String arrivalsName, GeoPoint arrivalsLocation,
-                             Integer expectedCost, LocalDateTime expectedDuration,
                              LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, String category,
                              GenderType genderRestriction, StateType state, String content,
                              Integer viewCount, Integer requestCount,
@@ -94,8 +86,6 @@ public class PartyResponseDTO {
         this.departuresLocation = departuresLocation;
         this.arrivalsName = arrivalsName;
         this.arrivalsLocation = arrivalsLocation;
-        this.expectedCost = expectedCost;
-        this.expectedDuration = expectedDuration;
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
         this.currentParticipants = currentParticipants;
@@ -125,8 +115,6 @@ public class PartyResponseDTO {
                 .departuresLocation(departuresLocation)
                 .arrivalsName(party.getArrivalsName())
                 .arrivalsLocation(arrivalsLocation)
-                .expectedCost(party.getExpectedCost())
-                .expectedDuration(party.getExpectedDuration())
                 .departuresDate(party.getDeparturesDate())
                 .maxParticipants(party.getMaxParticipants())
                 .maxParticipants(participants.size())
