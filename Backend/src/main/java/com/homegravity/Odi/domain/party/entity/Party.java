@@ -120,8 +120,8 @@ public class Party extends BaseBy {
     public static Party of(PartyRequestDTO partyRequestDTO, String gender) {
 
         GeometryFactory geometryFactory = new GeometryFactory();
-        Point departuresLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getDeparturesLocation().getX(), partyRequestDTO.getDeparturesLocation().getY()));
-        Point arrivalsLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getArrivalsLocation().getX(), partyRequestDTO.getArrivalsLocation().getY()));
+        Point departuresLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getDeparturesLocation().getLatitude(), partyRequestDTO.getDeparturesLocation().getLongitude()));
+        Point arrivalsLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getArrivalsLocation().getLongitude(), partyRequestDTO.getArrivalsLocation().getLongitude()));
 
         GenderType genderRestriction = GenderType.ANY;
         if (partyRequestDTO.getGenderRestriction()) { // 성별 제한이 있다면

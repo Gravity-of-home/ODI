@@ -1,6 +1,6 @@
 package com.homegravity.Odi.domain.party.dto.request;
 
-import com.homegravity.Odi.domain.party.dto.GeoPoint;
+import com.homegravity.Odi.domain.party.dto.LocationPoint;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,13 +18,13 @@ public class PartyRequestDTO {
     private String departuresName;
 
     @NotNull
-    private GeoPoint departuresLocation;
+    private LocationPoint departuresLocation;
 
     @NotNull
     private String arrivalsName;
 
     @NotNull
-    private GeoPoint arrivalsLocation;
+    private LocationPoint arrivalsLocation;
 
     @NotNull
     private Integer expectedCost;

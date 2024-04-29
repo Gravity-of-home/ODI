@@ -1,6 +1,6 @@
 package com.homegravity.Odi.domain.place.dto;
 
-import com.homegravity.Odi.domain.party.dto.GeoPoint;
+import com.homegravity.Odi.domain.party.dto.LocationPoint;
 import com.homegravity.Odi.domain.place.entity.PlaceDocument;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -34,10 +34,10 @@ public class PlaceDocumentDto {
     private String sido;
 
     @Schema(description = "장소 위치 (위경도)")
-    private GeoPoint geoPoint;
+    private LocationPoint geoPoint;
 
     @Builder
-    private PlaceDocumentDto(String id, String placeName, String buildingName, String jibunAddress, String roadNameAddress, Integer postalCode, String sido, GeoPoint geoPoint) {
+    private PlaceDocumentDto(String id, String placeName, String buildingName, String jibunAddress, String roadNameAddress, Integer postalCode, String sido, LocationPoint geoPoint) {
         this.id = id;
         this.placeName = placeName;
         this.buildingName = buildingName;
@@ -58,7 +58,7 @@ public class PlaceDocumentDto {
                 .roadNameAddress(placeDocument.getRoadNameAddress())
                 .postalCode(placeDocument.getPostalCode())
                 .sido(placeDocument.getSido())
-                .geoPoint(GeoPoint.of(placeDocument.getLatitude(), placeDocument.getLongitude()))
+                .geoPoint(LocationPoint.of(placeDocument.getLatitude(), placeDocument.getLongitude()))
                 .build();
     }
 }

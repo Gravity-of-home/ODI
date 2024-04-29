@@ -1,7 +1,7 @@
 package com.homegravity.Odi.domain.party.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.homegravity.Odi.domain.party.dto.GeoPoint;
+import com.homegravity.Odi.domain.party.dto.LocationPoint;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.entity.*;
 import jakarta.validation.constraints.NotNull;
@@ -33,13 +33,13 @@ public class PartyResponseDTO {
     private String departuresName;
 
     @NotNull
-    private GeoPoint departuresLocation;
+    private LocationPoint departuresLocation;
 
     @NotNull
     private String arrivalsName;
 
     @NotNull
-    private GeoPoint arrivalsLocation;
+    private LocationPoint arrivalsLocation;
 
     @NotNull
     private Integer expectedCost;
@@ -79,7 +79,7 @@ public class PartyResponseDTO {
 
     @Builder
     private PartyResponseDTO(Long id, String title, LocalDateTime createAt, LocalDateTime modifiedAt,
-                             String departuresName, GeoPoint departuresLocation, String arrivalsName, GeoPoint arrivalsLocation,
+                             String departuresName, LocationPoint departuresLocation, String arrivalsName, LocationPoint arrivalsLocation,
                              Integer expectedCost, LocalDateTime expectedDuration,
                              LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, String category,
                              GenderType genderRestriction, StateType state, String content,
@@ -113,8 +113,8 @@ public class PartyResponseDTO {
     public static PartyResponseDTO of(Party party, PartyBoardStats partyBoardStats, RoleType role,
                                       List<PartyMemberDTO> participants, List<PartyMemberDTO> guests) {
 
-        GeoPoint departuresLocation = GeoPoint.of(party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY());
-        GeoPoint arrivalsLocation = GeoPoint.of(party.getArrivalsLocation().getX(), party.getDeparturesLocation().getY());
+        LocationPoint departuresLocation = LocationPoint.of(party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY());
+        LocationPoint arrivalsLocation = LocationPoint.of(party.getArrivalsLocation().getX(), party.getDeparturesLocation().getY());
 
         return PartyResponseDTO.builder()
                 .id(party.getId())
