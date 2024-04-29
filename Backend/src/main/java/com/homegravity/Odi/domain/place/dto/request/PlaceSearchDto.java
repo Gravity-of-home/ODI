@@ -2,11 +2,13 @@ package com.homegravity.Odi.domain.place.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Schema(description = "장소 검색 DTO")
 @Getter
 @Setter
+@NoArgsConstructor
 public class PlaceSearchDto {
 
     @Schema(description = "장소명")
