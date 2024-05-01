@@ -19,6 +19,6 @@ public class AuditorAwareConfig implements AuditorAware<String> {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(((Member) authentication.getPrincipal()).getName());
+        return Optional.ofNullable(((Member) authentication.getPrincipal()).getId().toString());
     }
 }

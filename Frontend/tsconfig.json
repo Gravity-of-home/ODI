@@ -17,8 +17,9 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    // TODO: 사용하지 않은 로컬 변수와 파라미터 체크 해제 -> PR 시에만 사용! 개발 중에는 주석 풀기
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {

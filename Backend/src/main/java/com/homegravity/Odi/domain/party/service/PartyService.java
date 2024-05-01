@@ -65,10 +65,10 @@ public class PartyService {
 
         // 파티원, 파티 참여 신정자 목록 조회
         RoleType role = partyMemberRepository.findParticipantRole(party, member);
-        List<PartyMemberDTO> guests = null;
 
-        if (role.equals(RoleType.ORGANIZER)) { // 방장이라면 신청자 목록도 조회 가능
-            guests = partyMemberRepository.findAllPartyMember(party, RoleType.GUEST);
+        List<PartyMemberDTO> guests = null;
+        if (role != null && role.equals(RoleType.ORGANIZER)) { // 방장이라면 신청자 목록도 조회 가능
+            guests = partyMemberRepository.findAllPartyMember(party, RoleType.REQUESTER);
         }
 
         List<PartyMemberDTO> participants = partyMemberRepository.findAllPartyMember(party, RoleType.PARTICIPANT);

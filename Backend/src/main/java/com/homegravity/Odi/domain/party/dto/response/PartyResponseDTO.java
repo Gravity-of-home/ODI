@@ -20,10 +20,10 @@ public class PartyResponseDTO {
 
     private Long id;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH-mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createAt;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH-mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime modifiedAt;
 
     @NotNull
@@ -120,7 +120,7 @@ public class PartyResponseDTO {
                 .arrivalsLocation(arrivalsLocation)
                 .departuresDate(party.getDeparturesDate())
                 .maxParticipants(party.getMaxParticipants())
-                .maxParticipants(participants.size())
+                .currentParticipants(participants.size())
                 .category(party.getCategory())
                 .genderRestriction(party.getGenderRestriction())
                 .state(party.getState())
