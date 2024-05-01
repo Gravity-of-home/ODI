@@ -24,7 +24,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
         QPartyMember qPartyMember = QPartyMember.partyMember;
         return jpaQueryFactory.select(qPartyMember.count())
                 .from(qPartyMember)
-                .where(qPartyMember.role.eq(RoleType.GUEST)
+                .where(qPartyMember.role.eq(RoleType.REQUESTER)
                         .and(qPartyMember.party.eq(party))
                         .and(qPartyMember.deletedAt.isNull()))
                 .fetchOne();
@@ -55,8 +55,8 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
         BooleanBuilder builder = new BooleanBuilder();
         
-        if(role == RoleType.GUEST) { // 신청자 목록은 파티장만
-            builder.and(qPartyMember.role.eq(RoleType.GUEST));
+        if(role == RoleType.REQUESTER) { // 신청자 목록은 파티장만
+            builder.and(qPartyMember.role.eq(RoleType.REQUESTER));
         }
         // 파티장, 파티원 목록
         else if(role == RoleType.PARTICIPANT) {
