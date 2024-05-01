@@ -3,6 +3,7 @@ package com.homegravity.Odi.domain.party.respository.custom;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.entity.Party;
+import com.homegravity.Odi.domain.party.entity.PartyMember;
 import com.homegravity.Odi.domain.party.entity.QPartyMember;
 import com.homegravity.Odi.domain.party.entity.RoleType;
 import com.querydsl.core.BooleanBuilder;
@@ -32,11 +33,20 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
     @Override
     public RoleType findParticipantRole(Party party, Member member) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
-        return jpaQueryFactory.selectFrom(qPartyMember)
+
+        PartyMember partyMember =  jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.member.eq(member)
                         .and(qPartyMember.party.eq(party))
                         .and(qPartyMember.deletedAt.isNull()))
-                .fetchOne().getRole();
+                .fetchOne();
+
+        RoleType role = null;
+
+        if(partyMember != null) {
+            role = partyMember.getRole();
+        }
+
+        return role;
     }
 
     @Override
@@ -45,13 +55,15 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
         BooleanBuilder builder = new BooleanBuilder();
         
-        if(role != RoleType.GUEST) { // 파티원 + 파티장 목록
+        if(role == RoleType.GUEST) { // 신청자 목록은 파티장만
+            builder.and(qPartyMember.role.eq(RoleType.GUEST));
+        }
+        // 파티장, 파티원 목록
+        else if(role == RoleType.PARTICIPANT) {
             builder.and(qPartyMember.role.eq(RoleType.ORGANIZER))
                     .or(qPartyMember.role.eq(RoleType.PARTICIPANT));
         }
-        else { // 신청자 목록
-            builder.and(qPartyMember.role.eq(RoleType.GUEST));
-        }
+
 
         return jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.party.eq(party)
