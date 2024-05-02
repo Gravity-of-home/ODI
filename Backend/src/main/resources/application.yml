@@ -16,6 +16,7 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
@@ -47,6 +48,8 @@ spring:
     uris: ${ELASTIC_URL}:${ELASTIC_PORT}
 
 springdoc:
+  api-docs:
+    path: /api/api-docs
   swagger-ui:
     doc-expansion: none
     tags-sorter: alpha
