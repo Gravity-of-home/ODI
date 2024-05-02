@@ -56,6 +56,8 @@ public enum ErrorCode {
     JWT_INVALID(401, "유효하지 않은 토큰입니다."),
     JWT_EXPIRED(403, "만료된 토큰입니다."),
 
+    //redis
+    FAILED_TO_GET_LOCK(100, "락 권한 획득에 실패했습니다."),
     // Place
     NEAR_PLACE_NOT_EXIST(400, "인근 장소를 찾을 수 없습니다."),
     ;
