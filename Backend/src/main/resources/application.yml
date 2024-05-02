@@ -7,13 +7,15 @@ spring:
     include:
       - db
       - security
-      - oauth
-      - jwt
   datasource:
     driver-class-name: ${DATABASE_DRIVER}
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
   jpa:
     hibernate:
       ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
@@ -57,7 +59,6 @@ springdoc:
       version: 0.0.1
     path: /api/
 
-
-
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
