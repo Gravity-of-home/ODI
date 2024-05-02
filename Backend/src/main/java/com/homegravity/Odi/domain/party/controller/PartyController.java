@@ -2,15 +2,21 @@ package com.homegravity.Odi.domain.party.controller;
 
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
+import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.response.PartyResponseDTO;
 import com.homegravity.Odi.domain.party.service.PartyService;
 import com.homegravity.Odi.global.response.success.ApiResponse;
 import com.homegravity.Odi.global.response.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "동승자 구인글 CRUD", description = "생성, 상세조회, 목록 조회(인기순, 실시간, 조건별")
+@Slf4j
 @RestController
 @RequestMapping("/api/party-boards")
 @RequiredArgsConstructor
@@ -31,5 +37,14 @@ public class PartyController {
 
         return ApiResponse.of(SuccessCode.PARTY_GET_SUCCESS, partyService.getPartyDetail(partyId, member));
     }
+
+
+    @Operation(summary = "동승자 구인 글 목록 조회", description = "")
+    @GetMapping("")
+    public ApiResponse<?> getAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
+        log.info("조건 : {}, {}", pageable, requestDTO.toString());
+        return ApiResponse.of(SuccessCode.PARTY_GET_SUCCESS, partyService.getAllParties(pageable, requestDTO));
+    }
+
 
 }
