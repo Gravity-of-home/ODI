@@ -47,11 +47,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access",  role, memberId, 3000000L);
-        String refresh = jwtUtil.createJwt("refresh",  role, memberId, 86400000L);
+        String access = jwtUtil.createJwt("access",  role, memberId, 86400000L);// 1 일
+        String refresh = jwtUtil.createJwt("refresh",  role, memberId, 345600000L); // 4 일
 
         //Refresh 토큰 저장
-        addRefreshEntity(username, refresh, 86400000L);
+        addRefreshEntity(username, refresh, 345600000L);
 
         //응답 설정
         // response.setHeader(HttpHeaders.AUTHORIZATION, access);
@@ -63,7 +63,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         response.sendRedirect(baseUrl + "/auth");
 
-        //super.onAuthenticationSuccess(request, response, authentication);
     }
 
     private void addRefreshEntity(String username, String refresh, Long expiredMs) {
@@ -81,7 +80,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private Cookie createAccessTokenCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60);
+        cookie.setMaxAge(4 * 24 * 60 * 60);
         //cookie.setSecure(true);
         cookie.setPath("/");
         //cookie.setHttpOnly(true);
@@ -92,7 +91,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private Cookie createRefreshTokenCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60);
+        cookie.setMaxAge(4 * 24 * 60 * 60);
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
