@@ -65,7 +65,10 @@ springdoc:
       version: 0.0.1
     path: /api/
 
-
-
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+payment:
+  toss:
+    test_client_api_key: ${TOSS_CLIENT_API_KEY}
+    test_secret_api_key: ${TOSS_SECRET_API_KEY}

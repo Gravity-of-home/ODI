@@ -49,6 +49,8 @@ public enum SuccessCode {
     // Map
     PATH_INFO_GET_SUCCESS(200, "경로 정보 조회에 성공했습니다."),
 
+    // Payment
+    PAYMENT_REQUEST_SUCCESS(201, "결제 요청에 성공했습니다."),
     ;
 
     /**
