@@ -11,4 +11,5 @@ const useLoadingStore = create<Spinner>(set => ({
   setIsLoading: () => set({ isLoading: true }),
   unSetIsLoading: () => set({ isLoading: false }),
 }));
+
 export default useLoadingStore;
