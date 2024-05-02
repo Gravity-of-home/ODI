@@ -51,6 +51,7 @@ public enum SuccessCode {
 
     // Payment
     PAYMENT_REQUEST_SUCCESS(201, "결제 요청에 성공했습니다."),
+    PAYMENT_CONFIRM_SUCCESS(201, "결제 승인에 성공했습니다."),
     ;
 
     /**
