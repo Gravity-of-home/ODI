@@ -77,4 +77,11 @@ public class Payment extends BaseTime {
                 .customer(member)
                 .build();
     }
+
+    public void updatePaymentSuccessInfo(String paymentKey) {
+
+        this.paymentKey = paymentKey;
+        this.paymentSuccessful = true;
+    }
+
 }

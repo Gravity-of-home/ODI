@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class PaymentSuccessResponseDto {
 
-    private String mid;
+    String mid;
     String version;
     String paymentKey;
     String orderId;
