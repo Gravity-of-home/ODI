@@ -1,17 +1,18 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
+import SplashPage from './pages/Splash/SplashPage';
 import userStore from './stores/useUserStore';
 import loadingStore from './stores/useLoadingStore';
-import HomePage from './pages/Home/HomePage';
-import SplashPage from './pages/Splash/SplashPage';
 import NaverLogin from './pages/Login/components/NaverLogin';
 import NaverLoginRedirect from './pages/Login/components/NaverLoginRedirect';
+import HomePage from './pages/Home/HomePage';
+import ProfilePage from './pages/Profile/ProfilePage';
 
 type AuthWrapperProps = {
   children: React.ReactNode;
 };
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  const isLogin = userStore(state => state.isLogin);
+  const { isLogin } = userStore();
 
   if (!isLogin) {
     return <Navigate to='/login' replace={true} />;
@@ -62,6 +63,14 @@ const router = createBrowserRouter([
     element: (
       <AuthWrapper>
         <HomePage />
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: '/profile',
+    element: (
+      <AuthWrapper>
+        <ProfilePage />
       </AuthWrapper>
     ),
   },
