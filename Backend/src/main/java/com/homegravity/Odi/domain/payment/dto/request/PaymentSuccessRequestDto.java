@@ -23,5 +23,5 @@ public class PaymentSuccessRequestDto {
 
     @Schema(description = "결제 금액")
     @NotNull
-    private Long amount;
+    private Integer amount;
 }

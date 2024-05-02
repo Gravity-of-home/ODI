@@ -27,7 +27,7 @@ public class Payment extends BaseTime {
     private PayType payType;
 
     @Column(name = "amount", nullable = false)
-    private Long amount;
+    private Integer amount;
 
     @Column(name = "order_name", nullable = false)
     private String orderName;
@@ -55,7 +55,7 @@ public class Payment extends BaseTime {
     private String cancelReason;
 
     @Builder
-    private Payment(PayType payType, Long amount, String orderName, String orderId, Boolean paymentSuccessful, Member customer, String paymentKey, String failReason, Boolean isCanceled, String cancelReason) {
+    private Payment(PayType payType, Integer amount, String orderName, String orderId, Boolean paymentSuccessful, Member customer, String paymentKey, String failReason, Boolean isCanceled, String cancelReason) {
         this.payType = payType;
         this.amount = amount;
         this.orderName = orderName;
@@ -68,7 +68,7 @@ public class Payment extends BaseTime {
         this.cancelReason = cancelReason;
     }
 
-    public static Payment createNewPayment(PayType payType, Long amount, String orderName, Member member) {
+    public static Payment createNewPayment(PayType payType, Integer amount, String orderName, Member member) {
         return Payment.builder()
                 .payType(payType)
                 .amount(amount)
