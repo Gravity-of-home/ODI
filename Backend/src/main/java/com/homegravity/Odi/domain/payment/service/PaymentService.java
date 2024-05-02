@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.payment.service;
 
 import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.payment.dto.PaymentFailDto;
 import com.homegravity.Odi.domain.payment.dto.request.PaymentRequestDto;
 import com.homegravity.Odi.domain.payment.dto.request.PaymentSuccessRequestDto;
 import com.homegravity.Odi.domain.payment.dto.response.PaymentResponseDto;
@@ -61,4 +62,13 @@ public class PaymentService {
                 .block();
     }
 
+    // 결제 실패 정보 업데이트
+    public PaymentFailDto failTossPayment(PaymentFailDto requestDto) {
+
+        // 존재하는 결제 요청이었는지 확인
+        Payment payment = verifyPayment(requestDto.getOrderId());
+        payment.updatePaymentFailInfo(requestDto.getMessage());
+
+        return requestDto;
+    }
 }

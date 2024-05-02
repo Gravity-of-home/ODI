@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.payment.controller;
 
 import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.payment.dto.PaymentFailDto;
 import com.homegravity.Odi.domain.payment.dto.request.PaymentRequestDto;
 import com.homegravity.Odi.domain.payment.dto.request.PaymentSuccessRequestDto;
 import com.homegravity.Odi.domain.payment.dto.response.PaymentResponseDto;
@@ -40,5 +41,12 @@ public class PaymentController {
     public ApiResponse<PaymentSuccessResponseDto> successTossPayment(@RequestBody @Valid PaymentSuccessRequestDto requestDto) {
 
         return ApiResponse.of(SuccessCode.PAYMENT_CONFIRM_SUCCESS, paymentService.successTossPayment(requestDto));
+    }
+
+    @Operation(summary = "구매자 PSP 결제 실패", description = "구매자의 PSP 결제 실패에 대해 결제 정보를 업데이트 합니다.")
+    @PostMapping("/fail")
+    public ApiResponse<PaymentFailDto> failTossPayment(@RequestBody @Valid PaymentFailDto requestDto) {
+
+        return ApiResponse.of(SuccessCode.PAYMENT_FAIL_UPDATE_SUCCESS, paymentService.failTossPayment(requestDto));
     }
 }

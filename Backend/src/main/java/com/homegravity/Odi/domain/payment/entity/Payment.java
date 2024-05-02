@@ -84,4 +84,10 @@ public class Payment extends BaseTime {
         this.paymentSuccessful = true;
     }
 
+    public void updatePaymentFailInfo(String failReason) {
+
+        this.failReason = failReason;
+        this.paymentSuccessful = false;
+    }
+
 }
