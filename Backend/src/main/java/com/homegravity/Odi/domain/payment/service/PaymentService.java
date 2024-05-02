@@ -41,6 +41,7 @@ public class PaymentService {
 
         // 결제정보 업데이트
         payment.updatePaymentSuccessInfo(payment.getPaymentKey());
+        payment.getCustomer().chargePoint(payment.getAmount());
 
         return responseDto;
     }
