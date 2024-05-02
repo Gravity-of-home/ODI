@@ -1,5 +1,7 @@
 package com.homegravity.Odi.domain.party.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.global.entity.BaseBy;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
@@ -37,9 +41,7 @@ public class Party extends BaseBy {
     @Column(name = "arrivals_location", columnDefinition = "Point")
     private Point arrivalsLocation;
 
-    @Column(name = "expected_cost")
-    private Integer expectedCost;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "departures_date")
     private LocalDateTime departuresDate;
 
@@ -49,57 +51,68 @@ public class Party extends BaseBy {
     @Column(name = "category")
     private String category;
 
-    @Column(name = "gender")
-    private Boolean gender;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender_restriction")
+    private GenderType genderRestriction;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "state")
-    private String state;
+    private StateType state;
 
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @OneToOne(mappedBy = "party", cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartyBoardStats partyBoardStats;
 
     @Builder
     private Party(String title, String departuresName, Point departuresLocation,
                   String arrivalsName, Point arrivalsLocation,
-                  Integer expectedCost, LocalDateTime departuresDate, Integer maxParticipants,
-                  String category, Boolean gender, String state, String content) {
+                  LocalDateTime departuresDate, Integer maxParticipants,
+                  String category, GenderType genderRestriction, String content) {
+
         this.title = title;
         this.departuresName = departuresName;
         this.departuresLocation = departuresLocation;
         this.arrivalsName = arrivalsName;
         this.arrivalsLocation = arrivalsLocation;
-        this.expectedCost = expectedCost;
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
         this.category = category;
-        this.gender = gender;
-        this.state = state;
+        this.genderRestriction = genderRestriction;
+        this.state = StateType.GATHERING;
         this.content = content;
     }
 
-    public static Party of(String title, String departuresName, Point departuresLocation,
-                           String arrivalsName, Point arrivalsLocation,
-                           Integer expectedCost, LocalDateTime departuresDate, Integer maxParticipants,
-                           String category, Boolean gender, String state, String content) {
+    public static Party of(PartyRequestDTO partyRequestDTO, String gender) {
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point departuresLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getDeparturesLocation().getLongitude(), partyRequestDTO.getDeparturesLocation().getLatitude()));
+        Point arrivalsLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getArrivalsLocation().getLongitude(), partyRequestDTO.getArrivalsLocation().getLatitude()));
+
+        GenderType genderRestriction = GenderType.ANY;
+        if (partyRequestDTO.getGenderRestriction()) { // 성별 제한이 있다면
+
+            if (gender.equals(GenderType.M.toString())) {
+                genderRestriction = GenderType.M;
+            } else if (gender.equals(GenderType.F.toString())) {
+                genderRestriction = GenderType.F;
+            }
+
+        }
 
         return Party.builder()
-                .title(title)
-                .departuresName(departuresName)
+                .title(partyRequestDTO.getTitle())
+                .departuresName(partyRequestDTO.getDeparturesName())
                 .departuresLocation(departuresLocation)
-                .arrivalsName(arrivalsName)
+                .arrivalsName(partyRequestDTO.getArrivalsName())
                 .arrivalsLocation(arrivalsLocation)
-                .expectedCost(expectedCost)
-                .departuresDate(departuresDate)
-                .maxParticipants(maxParticipants)
-                .category(category)
-                .gender(gender)
-                .state(state)
-                .content(content)
+                .departuresDate(partyRequestDTO.getDeparturesDate())
+                .maxParticipants(partyRequestDTO.getMaxParticipants())
+                .category(partyRequestDTO.getCategory())
+                .genderRestriction(genderRestriction)
+                .content(partyRequestDTO.getContent())
                 .build();
-
     }
 
     public void updatePartyBoardStats(PartyBoardStats partyBoardStats) {
@@ -120,6 +133,10 @@ public class Party extends BaseBy {
 
     public void updateArrivalsLocation(Point arrivalsLocation) {
         this.arrivalsLocation = arrivalsLocation;
+    }
+
+    public void updateState(StateType state) {
+        this.state = state;
     }
 
 }

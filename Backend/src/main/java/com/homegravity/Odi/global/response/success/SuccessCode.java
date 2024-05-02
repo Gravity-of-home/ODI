@@ -39,6 +39,16 @@ public enum SuccessCode {
     MEMBER_DELETE_SUCCESS(200, "회원 탈퇴에 성공하였습니다."),
     CHECK_MEMBER_OF_JWT(200, "JWT토큰의 멤버 정보조회에 성공했습니다."),
 
+    // Party
+    PARTY_CREATE_SUCCESS(201, "택시 파티 생성에 성공했습니다."),
+    PARTY_GET_SUCCESS(200, "택시 파티 조회에 성공했습니다."),
+
+    // Place
+    PLACE_LIST_GET_SUCCESS(200, "장소 검색에 성공했습니다."),
+
+    // Map
+    PATH_INFO_GET_SUCCESS(200, "경로 정보 조회에 성공했습니다."),
+
     ;
 
     /**
