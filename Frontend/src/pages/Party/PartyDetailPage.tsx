@@ -6,6 +6,7 @@ import PathMap from './components/PathMap';
 
 import { useEffect, useState } from 'react';
 import BottomButton from './components/BottomButton';
+import jwtAxios from '@/utils/JWTUtil';
 
 interface IInfo {
   id: number;
@@ -141,12 +142,13 @@ const PartyDetailPage = () => {
   // 상세 페이지 데이터 불러오고 각 컴포넌트로 전달 합시다
   const fetchData = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/party-boards/${partyId}`, {
-        headers: {
-          AUTHORIZATION:
-            'Bearer eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInJvbGUiOiJST0xFX1VTRVIiLCJpZCI6IjEiLCJpYXQiOjE3MTQ1NDUzNjUsImV4cCI6MTcxNDU0ODM2NX0.Y5JCvTIcMF6eF3VoHXnOgniu4J-xTmNOSAjfvCp9GJ0',
-        },
-      });
+      // const response = await axios.get(`http://localhost:8080/api/party-boards/${partyId}`, {
+      //   headers: {
+      //     AUTHORIZATION:
+      //       'Bearer eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInJvbGUiOiJST0xFX1VTRVIiLCJpZCI6IjEiLCJpYXQiOjE3MTQ1NDUzNjUsImV4cCI6MTcxNDU0ODM2NX0.Y5JCvTIcMF6eF3VoHXnOgniu4J-xTmNOSAjfvCp9GJ0',
+      //   },
+      // });
+      const response = await jwtAxios.get(`http://localhost:8080/api/party-boards/${partyId}`);
       console.log(response);
       setIsLoading(false);
       setInfo(response.data.data);

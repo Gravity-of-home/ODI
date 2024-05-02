@@ -3,6 +3,8 @@ package com.homegravity.Odi.global.jwt.controller;
 import com.homegravity.Odi.global.jwt.entity.RefreshToken;
 import com.homegravity.Odi.global.jwt.repository.RefreshRepository;
 import com.homegravity.Odi.global.jwt.util.JWTUtil;
+import com.homegravity.Odi.global.response.error.ErrorCode;
+import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,13 +75,13 @@ public class ReissueController {
         String id = jwtUtil.getId(refresh);
 
         //make new JWT
-        String newAccess = jwtUtil.createJwt("access",  role, id, 60000000L);
-        String newRefresh = jwtUtil.createJwt("refresh",  role, id, 86400000L);
+        String newAccess = jwtUtil.createJwt("access", role, id, 86400000L);
+        String newRefresh = jwtUtil.createJwt("refresh", role, id, 345600000L);
 
         //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
         //todo access token들을 기억한 뒤 블랙리스트 처리를 진행하는 로직 작성해야 함
         refreshRepository.deleteByRefresh(refresh);
-        addRefreshEntity(username, newRefresh, 86400000L);
+        addRefreshEntity(username, newRefresh, 345600000L);
 
         //response
         //response.setHeader(HttpHeaders.AUTHORIZATION, newAccess);
@@ -104,7 +106,7 @@ public class ReissueController {
     private Cookie createAccessTokenCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60);
+        cookie.setMaxAge(4 * 24 * 60 * 60);
         //cookie.setSecure(true);
         cookie.setPath("/");
         //cookie.setHttpOnly(true);
@@ -115,7 +117,7 @@ public class ReissueController {
     private Cookie createRefreshTokenCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60);
+        cookie.setMaxAge(4 * 24 * 60 * 60);
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setHttpOnly(true);

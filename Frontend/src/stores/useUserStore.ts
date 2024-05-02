@@ -1,37 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-interface IUserState {
+import { IUser } from '../types/User.ts';
+interface IUserState extends IUser {
   isLogin: boolean;
-  id: number;
-  name?: string;
-  email?: string;
-  phone?: string;
-  accessToken: string;
-  refreshToken: string;
-  profile?: string;
-  manager?: string;
-  address?: string;
-  registrationNumber?: string;
-  registrationFile?: string;
-  setTokens: (accessToken: string) => void;
-  loginUser: ({
-    id,
-    name,
-    email,
-    phone,
-    profile,
-    accessToken,
-    refreshToken,
-  }: {
-    id: number;
-    name?: string;
-    email?: string;
-    phone?: string;
-    profile?: string;
-    accessToken: string;
-    refreshToken: string;
-  }) => void;
+  Login: () => void;
+  Logout: () => void;
+  loginUser: (user: IUser) => void;
   logoutUser: () => void;
 }
 
@@ -39,50 +13,59 @@ const useUserStore = create(
   persist<IUserState>(
     set => ({
       isLogin: false,
-      id: 0,
+      memberId: '',
       name: '',
+      gender: false,
       email: '',
-      phone: '',
-      accessToken: '',
-      refreshToken: '',
-      profile: undefined,
-      manager: undefined,
-      address: undefined,
-      registrationNumber: undefined,
-      registrationFile: undefined,
-      setTokens: accessToken => set(() => ({ accessToken })),
-      loginUser: ({ id, name, email, phone, profile, accessToken, refreshToken }) =>
+      birth: new Date(),
+      nickname: '',
+      point: 0,
+      profileImg: '',
+      isVerified: false,
+      brix: 0,
+      Login: () => set({ isLogin: true }),
+      Logout: () => set({ isLogin: false }),
+      loginUser: ({
+        memberId,
+        name,
+        gender,
+        email,
+        birth,
+        nickname,
+        point,
+        profileImg,
+        isVerified,
+        brix,
+      }) =>
         set({
-          id: id,
+          memberId: memberId,
           name: name,
+          gender: gender,
           email: email,
-          phone: phone,
-          profile: profile,
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-          isLogin: true,
+          birth: birth,
+          nickname: nickname,
+          point: point,
+          profileImg: profileImg,
+          isVerified: isVerified,
+          brix: brix,
         }),
       logoutUser: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         set({
-          isLogin: false,
-          id: 0,
+          memberId: '',
           name: '',
+          gender: false,
           email: '',
-          phone: '',
-          accessToken: '',
-          refreshToken: '',
-          profile: undefined,
-          manager: undefined,
-          address: undefined,
-          registrationNumber: undefined,
-          registrationFile: undefined,
+          birth: new Date(),
+          nickname: '',
+          point: 0,
+          profileImg: '',
+          isVerified: false,
+          brix: 0,
         });
       },
     }),
     {
-      name: 'user-store',
+      name: 'User',
     },
   ),
 );
