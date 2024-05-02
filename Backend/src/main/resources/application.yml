@@ -51,6 +51,8 @@ spring:
     uris: ${ELASTIC_URL}:${ELASTIC_PORT}
 
 springdoc:
+  api-docs:
+    path: /api/api-docs
   swagger-ui:
     doc-expansion: none
     tags-sorter: alpha
