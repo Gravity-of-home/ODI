@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,33 +21,29 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Long countAllPartyGuests(Party party) {
+    public int countAllPartyGuests(Party party) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
-        return jpaQueryFactory.select(qPartyMember.count())
+        Optional<Long> count = Optional.ofNullable(jpaQueryFactory.select(qPartyMember.count())
                 .from(qPartyMember)
                 .where(qPartyMember.role.eq(RoleType.REQUESTER)
                         .and(qPartyMember.party.eq(party))
                         .and(qPartyMember.deletedAt.isNull()))
-                .fetchOne();
+                .fetchOne());
+
+        return count.map(Long::intValue).orElse(0);
     }
 
     @Override
     public RoleType findParticipantRole(Party party, Member member) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
 
-        PartyMember partyMember =  jpaQueryFactory.selectFrom(qPartyMember)
+        Optional<PartyMember> partyMember = Optional.ofNullable(jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.member.eq(member)
                         .and(qPartyMember.party.eq(party))
                         .and(qPartyMember.deletedAt.isNull()))
-                .fetchOne();
+                .fetchOne());
 
-        RoleType role = null;
-
-        if(partyMember != null) {
-            role = partyMember.getRole();
-        }
-
-        return role;
+        return partyMember.map(PartyMember::getRole).orElse(null);
     }
 
     @Override
@@ -55,7 +52,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
         BooleanBuilder builder = new BooleanBuilder();
         
-        if(role == RoleType.REQUESTER) { // 신청자 목록은 파티장만
+        if(role == RoleType.REQUESTER) { // 신청자 목록
             builder.and(qPartyMember.role.eq(RoleType.REQUESTER));
         }
         // 파티장, 파티원 목록

@@ -54,14 +54,9 @@ public class PartyService {
         // 조회수, 신청자 수 갱신
         PartyBoardStats partyBoardStats = partyBoardStatsRepository.findPartyBoardStats(party);
         partyBoardStats.addViewCount(); // 조회수 증가
-
-        Long requestCount = partyMemberRepository.countAllPartyGuests(party); // 파티 참여 신청자 수
-        int requestCountInt = 0; // 파티 요청자 수, 요청자 수가 많을 수록 인기 있는 파티
-        if (requestCount != null) {
-            requestCountInt = requestCount.intValue();
-        }
-        partyBoardStats.updateRequestCount(requestCountInt);
-
+        
+        // 파티 참여 신청자 수 조회
+        partyBoardStats.updateRequestCount(partyMemberRepository.countAllPartyGuests(party));
 
         // 파티원, 파티 참여 신정자 목록 조회
         RoleType role = partyMemberRepository.findParticipantRole(party, member);

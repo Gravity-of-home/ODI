@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface CustomPartyMember {
 
-    Long countAllPartyGuests(Party party);
+    int countAllPartyGuests(Party party);
 
     RoleType findParticipantRole(Party party, Member member);
 
