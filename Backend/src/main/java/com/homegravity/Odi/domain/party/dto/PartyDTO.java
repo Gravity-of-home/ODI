@@ -93,7 +93,7 @@ public class PartyDTO {
                 .currentParticipants(party.getCurrentParticipants())
                 .state(party.getState())
                 .viewCount(party.getPartyBoardStats().getViewCount())
-                .viewCount(party.getPartyBoardStats().getRequestCount())
+                .requestCount(party.getPartyBoardStats().getRequestCount())
                 .organizer(PartyMemberDTO.of(partyMember, partyMember.getMember()))
                 .build();
     }
