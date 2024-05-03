@@ -11,9 +11,11 @@ const NaverLogin = () => {
 
   return (
     <>
-      <button className='flex items-center gap-3 border border-[#E4E4E4] p-2 px-BID_P rounded-xl'>
-        <img src={NAVER_DARK}></img>
-        <div onClick={loginHandler} className='absolute translate-x-1/2 pl-1'>
+      <button className='flex items-center gap-3 border border-[#E4E4E4] p-2 rounded-xl'>
+        <div className='w-[10%]'>
+          <img src={NAVER_DARK}></img>
+        </div>
+        <div className='font-bold' onClick={loginHandler}>
           네이버로 시작하기
         </div>
       </button>

@@ -2,10 +2,10 @@ import { Navigate, createBrowserRouter } from 'react-router-dom';
 import SplashPage from './pages/Splash/SplashPage';
 import userStore from './stores/useUserStore';
 import loadingStore from './stores/useLoadingStore';
-import NaverLogin from './pages/Login/components/NaverLogin';
 import NaverLoginRedirect from './pages/Login/components/NaverLoginRedirect';
 import HomePage from './pages/Home/HomePage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import LoginPage from './pages/Login/LoginPage';
 
 type AuthWrapperProps = {
   children: React.ReactNode;
@@ -52,7 +52,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <NaverLogin />,
+    element: <LoginPage />,
   },
   {
     path: '/auth',
@@ -61,17 +61,17 @@ const router = createBrowserRouter([
   {
     path: '/home',
     element: (
-      <AuthWrapper>
-        <HomePage />
-      </AuthWrapper>
+      // <AuthWrapper>
+      <HomePage />
+      // </AuthWrapper>
     ),
   },
   {
     path: '/profile',
     element: (
-      <AuthWrapper>
-        <ProfilePage />
-      </AuthWrapper>
+      // <AuthWrapper>
+      <ProfilePage />
+      // </AuthWrapper>
     ),
   },
 ]);
