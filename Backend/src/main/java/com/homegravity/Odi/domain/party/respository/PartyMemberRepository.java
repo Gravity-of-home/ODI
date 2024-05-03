@@ -7,5 +7,4 @@ import com.homegravity.Odi.domain.party.respository.custom.CustomPartyMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PartyMemberRepository extends JpaRepository<PartyMember, Long>, CustomPartyMember {
-    boolean existsByPartyAndMemberAndDeletedAtIsNull(Party party, Member member);
 }

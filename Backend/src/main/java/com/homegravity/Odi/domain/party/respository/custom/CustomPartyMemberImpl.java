@@ -81,4 +81,16 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
     }
 
+    // 해당 파티에 신청한 사용자가 존재하는지 boolean 확인
+    @Override
+    public boolean existPartyMember(Party party, Member member) {
+        QPartyMember qPartyMember = QPartyMember.partyMember;
+
+        return jpaQueryFactory.selectFrom(qPartyMember)
+                .where(qPartyMember.party.eq(party)
+                        .and(qPartyMember.member.eq(member))
+                        .and(qPartyMember.deletedAt.isNull()))
+                .fetchFirst() != null;
+    }
+
 }

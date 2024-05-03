@@ -119,7 +119,7 @@ public class PartyService {
                     .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
         }
 
-        boolean isPartyMember = partyMemberRepository.existsByPartyAndMemberAndDeletedAtIsNull(party, member);
+        boolean isPartyMember = partyMemberRepository.existPartyMember(party, member);
 
         // 해당 파티에 이미 신청하려는 사용자가 있다면 중복 신청 불가
         if (isPartyMember) {
