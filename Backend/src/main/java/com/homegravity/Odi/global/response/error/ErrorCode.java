@@ -67,6 +67,9 @@ public enum ErrorCode {
     // Payment
     ORDER_ID_NOT_EXIST(400, "존재하지 않는 결제 정보입니다."),
 
+    //party
+    PARTY_MEMBER_ALREADY_JOIN_EXIST(400, "이미 파티에 해당 유저가 신청했습니다."),
+
     ;
     /**
      * ******************************* Error Code Field ***************************************
