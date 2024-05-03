@@ -16,7 +16,7 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+#      password: ${REDIS_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
@@ -57,7 +57,7 @@ springdoc:
     disable-swagger-default-url: true
     display-request-duration: true
     info:
-      title: 🍇 O d! API Server
+      title: 🍇 OD! API Server
       description: <b>오디</b>까지 가세유~? 🚕
       version: 0.0.1
     path: /api/
@@ -65,3 +65,7 @@ springdoc:
 jwt:
   secret-key: ${JWT_SECRET_KEY}
 
+payment:
+  toss:
+    test_client_api_key: ${TOSS_CLIENT_API_KEY}
+    test_secret_api_key: ${TOSS_SECRET_API_KEY}
