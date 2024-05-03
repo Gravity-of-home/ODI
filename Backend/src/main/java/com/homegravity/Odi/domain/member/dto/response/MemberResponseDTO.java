@@ -2,15 +2,12 @@ package com.homegravity.Odi.domain.member.dto.response;
 
 import com.homegravity.Odi.domain.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Schema(description = "사용자 DTO")
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberResponseDTO {
     @Schema(description = "사용자 아이디(pk)")
     private Long id;
