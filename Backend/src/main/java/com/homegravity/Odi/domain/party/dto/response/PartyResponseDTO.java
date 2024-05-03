@@ -49,7 +49,7 @@ public class PartyResponseDTO {
 
     private Integer currentParticipants;
 
-    private String category;
+    private CategoryType category;
 
     private GenderType genderRestriction; // M, F, ANY
 
@@ -75,7 +75,7 @@ public class PartyResponseDTO {
     @Builder
     private PartyResponseDTO(Long id, String title, LocalDateTime createAt, LocalDateTime modifiedAt,
                              String departuresName, LocationPoint departuresLocation, String arrivalsName, LocationPoint arrivalsLocation,
-                             LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, String category,
+                             LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, CategoryType category,
                              GenderType genderRestriction, StateType state, String content,
                              Integer viewCount, Integer requestCount,
                              RoleType role, List<PartyMemberDTO> participants, List<PartyMemberDTO> guests, String pathInfo) {

@@ -51,12 +51,12 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
         QPartyMember qPartyMember = QPartyMember.partyMember;
 
         BooleanBuilder builder = new BooleanBuilder();
-        
-        if(role == RoleType.REQUESTER) { // 신청자 목록
+
+        if (role == RoleType.REQUESTER) { // 신청자 목록
             builder.and(qPartyMember.role.eq(RoleType.REQUESTER));
         }
         // 파티장, 파티원 목록
-        else if(role == RoleType.PARTICIPANT) {
+        else if (role == RoleType.PARTICIPANT) {
             builder.and(qPartyMember.role.eq(RoleType.ORGANIZER))
                     .or(qPartyMember.role.eq(RoleType.PARTICIPANT));
         }
@@ -68,4 +68,17 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                         .and(qPartyMember.deletedAt.isNull()))
                 .fetch().stream().map(pm -> PartyMemberDTO.of(pm, pm.getMember())).toList();
     }
+
+    @Override
+    public Optional<PartyMember> findOrganizer(Party party) {
+        QPartyMember qPartyMember = QPartyMember.partyMember;
+
+        return Optional.ofNullable(jpaQueryFactory.selectFrom(qPartyMember)
+                .where(qPartyMember.party.eq(party)
+                        .and(qPartyMember.role.eq(RoleType.ORGANIZER))
+                        .and(qPartyMember.deletedAt.isNull()))
+                .fetchOne());
+
+    }
+
 }
