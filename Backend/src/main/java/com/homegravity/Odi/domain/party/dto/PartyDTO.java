@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.party.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.homegravity.Odi.domain.party.entity.CategoryType;
 import com.homegravity.Odi.domain.party.entity.GenderType;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.StateType;
@@ -18,7 +19,7 @@ public class PartyDTO {
 
     private Long id;
 
-    private String category;
+    private CategoryType category;
 
     private GenderType genderRestriction; // M, F, ANY
 
@@ -54,7 +55,7 @@ public class PartyDTO {
     private PartyMemberDTO organizer;
 
     @Builder
-    private PartyDTO(Long id, String category, GenderType genderRestriction, LocalDateTime createAt, LocalDateTime modifiedAt, String title, String departuresName, LocationPoint departuresLocation, String arrivalsName, LocationPoint arrivalsLocation, LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, StateType state, Integer viewCount, Integer requestCount, PartyMemberDTO organizer) {
+    private PartyDTO(Long id, CategoryType category, GenderType genderRestriction, LocalDateTime createAt, LocalDateTime modifiedAt, String title, String departuresName, LocationPoint departuresLocation, String arrivalsName, LocationPoint arrivalsLocation, LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, StateType state, Integer viewCount, Integer requestCount, PartyMemberDTO organizer) {
         this.id = id;
         this.category = category;
         this.genderRestriction = genderRestriction;

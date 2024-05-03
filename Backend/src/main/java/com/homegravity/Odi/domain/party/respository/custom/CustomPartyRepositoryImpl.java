@@ -6,6 +6,8 @@ import com.homegravity.Odi.domain.party.entity.QParty;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,52 +47,89 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
     public List<Party> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
         QParty qparty = QParty.party;
 
-        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(pageable, qparty);
+        OrderSpecifier orderSpecifier = getOrderSpecifier(pageable, qparty);
 
         // 지역범위: 전체
-        return jpaQueryFactory.selectFrom(qparty)
-                .where(qparty.deletedAt.isNull(), eqToday(requestDTO, qparty), eqGender(requestDTO, qparty), eqDepartureDate(requestDTO, qparty), eqCategory(requestDTO, qparty))
+        List<Party> query = jpaQueryFactory.selectFrom(qparty)
+                .where(qparty.deletedAt.isNull(), qparty.departuresDate.goe(LocalDateTime.now())
+                        , eqToday(requestDTO, qparty)
+                        , eqGender(requestDTO, qparty)
+                        , eqDepartureDate(requestDTO, qparty)
+                        , eqCategory(requestDTO, qparty)
+                )
                 .orderBy(orderSpecifier)
                 .fetch();
+
+        log.info("Number of parties fetched: {}", query.size());
+
+        return query;
     }
 
-    private OrderSpecifier<?> getOrderSpecifier(Pageable pageable, QParty qparty) {
-        OrderSpecifier<?> orderSpecifier = null;
+    private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qparty) {
+        OrderSpecifier orderSpecifier = null;
         for (Sort.Order order : pageable.getSort()) {
 
-            if (order.getProperty().equals("departuresDate")) {
-                orderSpecifier = new OrderSpecifier<>(Order.DESC, qparty.departuresDate);
+            if (order.getProperty().equals("departuresDate")) { // 출발 시간 가까운 순
+
+                // 현재 시간과의 시간 차이를 계산하는 표현식
+                NumberExpression<Integer> timeDifference = Expressions.numberTemplate(
+                        Integer.class,
+                        "TIMESTAMPDIFF(SECOND, NOW(), {0})",
+                        qparty.departuresDate
+                );
+
+                orderSpecifier = new OrderSpecifier(Order.ASC, timeDifference);
+
+
             } else if (order.getProperty().equals("distance")) {
                 /* TODO: 거리순 정렬 로직 작성*/
             } else { // 정렬 기준이 없다면 최신순
-                orderSpecifier = new OrderSpecifier<>(Order.DESC, qparty.createdAt);
+                orderSpecifier = new OrderSpecifier(Order.DESC, qparty.createdAt);
             }
         }
         return orderSpecifier;
     }
 
     private BooleanExpression eqDepartureDate(SelectPartyRequestDTO requestDTO, QParty qparty) {
-        LocalDate targetDate = requestDTO.getDeparturesDate();
-        LocalDateTime from = LocalDateTime.of(targetDate, LocalTime.MIN);
-        LocalDateTime to = LocalDateTime.of(targetDate, LocalTime.MAX);
 
-        return requestDTO.getDeparturesDate() != null ? qparty.departuresDate.between(from, to) : null;
+        BooleanExpression condition = null;
+
+        if (requestDTO.getDeparturesDate() != null) {
+
+            LocalDate targetDate = requestDTO.getDeparturesDate();
+            LocalDateTime from = LocalDateTime.of(targetDate, LocalTime.MIN);
+            LocalDateTime to = LocalDateTime.of(targetDate, LocalTime.MAX);
+
+            condition = qparty.departuresDate.between(from, to);
+
+            log.info("출발 날짜 조건 {} 출발이요 : {}", targetDate, condition);
+        }
+
+
+        return condition;
     }
 
     private BooleanExpression eqGender(SelectPartyRequestDTO requestDTO, QParty qparty) {
-        return requestDTO.getGender() != null ? qparty.genderRestriction.eq(requestDTO.getGender()) : null;
+        BooleanExpression condition = requestDTO.getGender() != null ? qparty.genderRestriction.eq(requestDTO.getGender()) : null;
+        log.info("성별 조건 == {}", condition);
+        return condition;
     }
 
     private BooleanExpression eqToday(SelectPartyRequestDTO requestDTO, QParty qparty) {
         LocalDate today = LocalDate.now();
         LocalDateTime from = LocalDateTime.of(today, LocalTime.MIN);
         LocalDateTime to = LocalDateTime.of(today, LocalTime.MAX);
-        return requestDTO.getIsToday() == true ? qparty.departuresDate.between(from, to) : null;
+        BooleanExpression condition = requestDTO.getIsToday() == true ? qparty.departuresDate.between(from, to) : null;
+
+        log.info("오늘 출발 조건 : {}", condition);
+        return condition;
     }
 
     private BooleanExpression eqCategory(SelectPartyRequestDTO requestDTO, QParty qparty) {
-        BooleanExpression eqCategory = requestDTO.getCategory() != null ? qparty.category.eq(requestDTO.getCategory()) : null;
-        return eqCategory;
+        BooleanExpression condition = requestDTO.getCategory() != null ? qparty.category.eq(requestDTO.getCategory()) : null;
+
+        log.info("카테고리 조건 : {}", condition);
+        return condition;
     }
 
 }

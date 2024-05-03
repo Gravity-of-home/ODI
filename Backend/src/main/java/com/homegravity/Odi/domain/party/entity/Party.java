@@ -48,8 +48,9 @@ public class Party extends BaseBy {
     @Column(name = "max_participants")
     private Integer maxParticipants;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "category")
-    private String category;
+    private CategoryType category;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender_restriction")
@@ -69,7 +70,7 @@ public class Party extends BaseBy {
     private Party(String title, String departuresName, Point departuresLocation,
                   String arrivalsName, Point arrivalsLocation,
                   LocalDateTime departuresDate, Integer maxParticipants,
-                  String category, GenderType genderRestriction, String content) {
+                  CategoryType category, GenderType genderRestriction, String content) {
 
         this.title = title;
         this.departuresName = departuresName;

@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.party.dto.request;
 
 import com.homegravity.Odi.domain.party.dto.LocationPoint;
+import com.homegravity.Odi.domain.party.entity.CategoryType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +33,7 @@ public class PartyRequestDTO {
     @NotNull
     private Integer maxParticipants;
 
-    private String category;
+    private CategoryType category;
 
     @NotNull
     private Boolean genderRestriction;
