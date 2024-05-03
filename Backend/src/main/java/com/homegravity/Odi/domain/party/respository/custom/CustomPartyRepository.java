@@ -12,6 +12,4 @@ public interface CustomPartyRepository {
 
     List<Party> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO);
 
-    List<Party> findPopularParties();
-
 }
