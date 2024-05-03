@@ -12,6 +12,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
@@ -44,13 +46,13 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
      * @return
      */
     @Override
-    public List<Party> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
+    public Slice<Party> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
         QParty qparty = QParty.party;
 
         OrderSpecifier orderSpecifier = getOrderSpecifier(pageable, qparty);
 
         // 지역범위: 전체
-        List<Party> query = jpaQueryFactory.selectFrom(qparty)
+        List<Party> results = jpaQueryFactory.selectFrom(qparty)
                 .where(qparty.deletedAt.isNull(), qparty.departuresDate.goe(LocalDateTime.now())
                         , eqToday(requestDTO, qparty)
                         , eqGender(requestDTO, qparty)
@@ -58,16 +60,26 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
                         , eqCategory(requestDTO, qparty)
                 )
                 .orderBy(orderSpecifier)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
 
-        log.info("Number of parties fetched: {}", query.size());
+        // Slice 생성
+        boolean hasNext = results.size() > pageable.getPageSize();
+        if (hasNext) {
+            results.remove(results.size() - 1);
+        }
 
-        return query;
+        log.info("Number of parties fetched: {}", results.size());
+
+        return new SliceImpl<>(results, pageable, hasNext);
     }
 
     private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qparty) {
         OrderSpecifier orderSpecifier = null;
         for (Sort.Order order : pageable.getSort()) {
+
+            Order direction = order.getDirection().isAscending() ? Order.ASC : Order.DESC;
 
             if (order.getProperty().equals("departuresDate")) { // 출발 시간 가까운 순
 
@@ -78,7 +90,7 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
                         qparty.departuresDate
                 );
 
-                orderSpecifier = new OrderSpecifier(Order.ASC, timeDifference);
+                orderSpecifier = new OrderSpecifier(direction, timeDifference);
 
 
             } else if (order.getProperty().equals("distance")) {

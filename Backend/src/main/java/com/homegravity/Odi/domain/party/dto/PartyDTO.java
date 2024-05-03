@@ -1,10 +1,7 @@
 package com.homegravity.Odi.domain.party.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.homegravity.Odi.domain.party.entity.CategoryType;
-import com.homegravity.Odi.domain.party.entity.GenderType;
-import com.homegravity.Odi.domain.party.entity.Party;
-import com.homegravity.Odi.domain.party.entity.StateType;
+import com.homegravity.Odi.domain.party.entity.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -75,7 +72,7 @@ public class PartyDTO {
         this.organizer = organizer;
     }
 
-    public static PartyDTO of(Party party, PartyMemberDTO organizer, int participantsCount) {
+    public static PartyDTO of(Party party, PartyMember partyMember) {
 
         LocationPoint departuresLocation = LocationPoint.of(party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY());
         LocationPoint arrivalsLocation = LocationPoint.of(party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
@@ -93,12 +90,11 @@ public class PartyDTO {
                 .arrivalsLocation(arrivalsLocation)
                 .departuresDate(party.getDeparturesDate())
                 .maxParticipants(party.getMaxParticipants())
-                .currentParticipants(participantsCount)
+                .currentParticipants(party.getCurrentParticipants())
                 .state(party.getState())
                 .viewCount(party.getPartyBoardStats().getViewCount())
                 .viewCount(party.getPartyBoardStats().getRequestCount())
-                .organizer(organizer)
+                .organizer(PartyMemberDTO.of(partyMember, partyMember.getMember()))
                 .build();
     }
-
 }

@@ -20,6 +20,7 @@ import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,12 +82,16 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public List<PartyDTO> getAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
+    public Slice<PartyDTO> getAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
 
-        return partyRepository.findAllParties(pageable, requestDTO).stream().map(party ->
-                PartyDTO.of(party,
-                        PartyMemberDTO.of(partyMemberRepository.findOrganizer(party).get(),
-                                partyMemberRepository.findOrganizer(party).get().getMember()), partyMemberRepository.countAllPartyParticipant(party))).toList();
+        Slice<Party> partySlice = partyRepository.findAllParties(pageable, requestDTO);
+
+        return partySlice.map(party ->
+                PartyDTO.of(party, partyMemberRepository.findOrganizer(party)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()))));
+
+//
+//        return new SliceImpl<>(results, pageable, partySlice.hasNext());
 
     }
 }
