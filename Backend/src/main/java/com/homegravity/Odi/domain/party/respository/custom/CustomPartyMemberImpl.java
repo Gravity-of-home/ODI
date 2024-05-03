@@ -34,19 +34,6 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
     }
 
     @Override
-    public int countAllPartyParticipant(Party party) {
-        QPartyMember qPartyMember = QPartyMember.partyMember;
-        Optional<Long> count = Optional.ofNullable(jpaQueryFactory.select(qPartyMember.count())
-                .from(qPartyMember)
-                .where(qPartyMember.party.eq(party)
-                        .and(qPartyMember.role.eq(RoleType.PARTICIPANT))
-                        .and(qPartyMember.deletedAt.isNull()))
-                .fetchOne());
-
-        return count.map(Long::intValue).orElse(0) + 1; // 파티장
-    }
-
-    @Override
     public RoleType findParticipantRole(Party party, Member member) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
 

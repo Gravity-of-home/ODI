@@ -13,8 +13,6 @@ public interface CustomPartyMember {
 
     int countAllPartyGuests(Party party);
 
-    int countAllPartyParticipant(Party party);
-
     RoleType findParticipantRole(Party party, Member member);
 
     List<PartyMemberDTO> findAllPartyMember(Party party, RoleType role);

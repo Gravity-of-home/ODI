@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.party.controller;
 
 import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.response.PartyResponseDTO;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +43,7 @@ public class PartyController {
 
     @Operation(summary = "동승자 구인 글 목록 조회", description = "필터링 기준, 정렬 기준에 따른 동승자 구인 글 목록을 조회합니다.")
     @GetMapping("")
-    public ApiResponse<?> getAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
+    public ApiResponse<Slice<PartyDTO>> getAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
         log.info("조건 : {}, {}", pageable, requestDTO.toString());
         return ApiResponse.of(SuccessCode.PARTY_GET_SUCCESS, partyService.getAllParties(pageable, requestDTO));
     }
