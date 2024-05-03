@@ -63,6 +63,10 @@ public enum ErrorCode {
 
     // Place
     NEAR_PLACE_NOT_EXIST(400, "인근 장소를 찾을 수 없습니다."),
+
+    // Payment
+    ORDER_ID_NOT_EXIST(400, "존재하지 않는 결제 정보입니다."),
+
     ;
     /**
      * ******************************* Error Code Field ***************************************
