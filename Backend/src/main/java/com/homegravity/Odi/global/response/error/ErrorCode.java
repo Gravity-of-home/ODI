@@ -59,6 +59,8 @@ public enum ErrorCode {
 
     //redis
     FAILED_TO_GET_LOCK(100, "락 권한 획득에 실패했습니다."),
+    CONTENT_IS_NULL(400, "컨텐츠가 존재하지 않습니다."),
+
     // Place
     NEAR_PLACE_NOT_EXIST(400, "인근 장소를 찾을 수 없습니다."),
     ;
