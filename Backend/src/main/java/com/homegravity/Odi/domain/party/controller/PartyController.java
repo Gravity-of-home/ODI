@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "동승자 구인글 CRUD", description = "생성, 상세조회, 목록 조회(인기순, 실시간, 조건별")
+@Tag(name = "동승자 구인글 CRUD", description = "생성, 상세조회, 목록 조회(거리순, 출발시간 가까운 순)")
 @Slf4j
 @RestController
 @RequestMapping("/api/party-boards")
@@ -39,7 +39,7 @@ public class PartyController {
     }
 
 
-    @Operation(summary = "동승자 구인 글 목록 조회", description = "")
+    @Operation(summary = "동승자 구인 글 목록 조회", description = "필터링 기준, 정렬 기준에 따른 동승자 구인 글 목록을 조회합니다.")
     @GetMapping("")
     public ApiResponse<?> getAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
         log.info("조건 : {}, {}", pageable, requestDTO.toString());
