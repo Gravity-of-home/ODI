@@ -9,7 +9,9 @@ import axios, {
 import { getCookie } from './CookieUtil.ts';
 import { ViteConfig } from '@/apis/ViteConfig.ts';
 
-const jwtAxios: AxiosInstance = axios.create();
+const jwtAxios: AxiosInstance = axios.create({
+  baseURL: ViteConfig.VITE_BASE_URL,
+});
 
 const isLogin = JSON.parse(localStorage.getItem('User') as string)!.state.isLogin;
 
@@ -20,7 +22,7 @@ export const refreshJWT = async () => {
 
   // NOTE : 리프레쉬 토큰을 이용하여 새로운 ACCESS TOKEN, REFRESH TOKEN을 발급받는다.
 
-  const res = await axios.post(`${host}/reissue`, {}, { withCredentials: true });
+  const res = await axios.post(`${host}/api/reissue`, {}, { withCredentials: true });
   const Authorization = getCookie('Authorization');
 
   // NOTE : 결과값은 OK가 오면 정상이다!
