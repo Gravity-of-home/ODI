@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @EnableJpaAuditing
 @SpringBootApplication
-@Tag(name="오디", description = "odi server api")
+@Tag(name="z오디", description = "오디 API 호출 테스트")
 public class OdiApplication {
 
     // 연결 테스트

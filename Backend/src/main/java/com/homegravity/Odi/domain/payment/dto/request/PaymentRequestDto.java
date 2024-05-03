@@ -20,7 +20,7 @@ public class PaymentRequestDto {
 
     @Schema(description = "결제 금액")
     @NotNull
-    private Long amount;
+    private Integer amount;
 
     @Schema(description = "주문 내용(구매상품)")
     @NotNull
