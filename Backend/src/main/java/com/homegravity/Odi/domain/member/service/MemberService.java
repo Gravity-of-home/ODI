@@ -23,7 +23,7 @@ public class MemberService {
 
     //사용자 정보 수정
     public MemberResponseDTO updateMemberInfo(MemberUpdateRequestDTO memberUpdateRequestDTO, Member member){
-        boolean IsExistNickname = memberRepository.existsByNicknameAndIdNotAndDeletedAtIsNull(memberUpdateRequestDTO.getNewNickname(), member.getId());
+        boolean IsExistNickname = memberRepository.existsByNicknameAndDeletedAtIsNull(memberUpdateRequestDTO.getNewNickname());
 
         if(IsExistNickname) {//이미 존재하는 닉네임이면 변경 불가
             throw BusinessException.builder().errorCode(ErrorCode.NICKNAME_ALREAD_EXIST).message(ErrorCode.NICKNAME_ALREAD_EXIST.getMessage()).build();
