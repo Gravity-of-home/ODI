@@ -111,8 +111,7 @@ public class PartyService {
     }
 
     public Long joinPartyLogic(Long partyId, Member member) {
-        Party party = partyRepository.findByIdAndDeletedAtIsNull(partyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
+        Party party = partyRepository.findParty(partyId);
 
         if (party == null) {//party가 없을 경우 예외 처리
             throw BusinessException.builder()
