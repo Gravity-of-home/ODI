@@ -4,6 +4,7 @@ import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.payment.dto.PaymentFailDto;
 import com.homegravity.Odi.domain.payment.dto.request.PaymentRequestDto;
 import com.homegravity.Odi.domain.payment.dto.request.PaymentSuccessRequestDto;
+import com.homegravity.Odi.domain.payment.dto.response.PaymentHistoryResponseDto;
 import com.homegravity.Odi.domain.payment.dto.response.PaymentResponseDto;
 import com.homegravity.Odi.domain.payment.dto.response.PaymentSuccessResponseDto;
 import com.homegravity.Odi.domain.payment.entity.Payment;
@@ -11,6 +12,10 @@ import com.homegravity.Odi.domain.payment.repository.PaymentRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -70,5 +75,12 @@ public class PaymentService {
         payment.updatePaymentFailInfo(requestDto.getMessage());
 
         return requestDto;
+    }
+
+    // 결제 내역 조회 - 최신순
+    public Slice<PaymentHistoryResponseDto> getPaymentHistory(Member member, Pageable pageable) {
+
+        Pageable sortPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Order.desc("modifiedAt")));
+        return paymentRepository.findAllByCustomer(member, sortPageable).map(PaymentHistoryResponseDto::from);
     }
 }
