@@ -3,6 +3,7 @@ export const ViteConfig = {
   VITE_BASE_URL: import.meta.env.VITE_BASE_URL,
 
   /* AUTH */
+  VITE_EXPIRED_TIME: import.meta.env.VITE_EXPIRED_TIME,
   VITE_NAVER_CLIENT_ID: import.meta.env.VITE_NAVER_CLIENT_ID,
   VITE_NAVER_SECRET: import.meta.env.VITE_NAVER_SECRET,
   VITE_NAVER_REDIRECT_URI: import.meta.env.VITE_NAVER_REDIRECT_URI,
