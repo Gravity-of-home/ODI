@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -149,7 +150,7 @@ public class PartyService {
                     .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
         }
 
-        PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, member)
+        PartyMember partyMember = partyMemberRepository.findPartyMemberByMember(party, member)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
         partyMemberRepository.delete(partyMember);
@@ -192,6 +193,13 @@ public class PartyService {
         partyMember.updatePartyRole(RoleType.PARTICIPANT);
 
         return true;
+    }
+
+    // 파티 조회
+    @Transactional(readOnly = true)
+    public Party getParty(Long partyId) {
+        return Optional.ofNullable(partyRepository.findParty(partyId))
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
     }
 
     //신청자 및 참여자 거절/내보내기
