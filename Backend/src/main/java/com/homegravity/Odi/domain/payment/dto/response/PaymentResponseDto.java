@@ -17,7 +17,7 @@ public class PaymentResponseDto {
     private String payType;
 
     @Schema(description = "결제 금액")
-    private Long amount;
+    private Integer amount;
 
     @Schema(description = "주문 아이디")
     private String orderId;
@@ -36,7 +36,7 @@ public class PaymentResponseDto {
     private LocalDateTime createdAt;
 
     @Builder
-    private PaymentResponseDto(String payType, Long amount, String orderId, String orderName, String customerEmail, String customerName, LocalDateTime createdAt) {
+    private PaymentResponseDto(String payType, Integer amount, String orderId, String orderName, String customerEmail, String customerName, LocalDateTime createdAt) {
         this.payType = payType;
         this.amount = amount;
         this.orderId = orderId;

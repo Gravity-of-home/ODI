@@ -115,6 +115,11 @@ public class Member extends BaseTime implements UserDetails {
         this.image = image;
     }
 
+    public void updateNickname(String nickname) { this.nickname = nickname; }
+
+    public void chargePoint(int amount) {
+        this.point += amount;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

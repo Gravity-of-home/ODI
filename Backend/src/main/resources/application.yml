@@ -7,14 +7,11 @@ spring:
     include:
       - db
       - security
-      - oauth
-      - jwt
   datasource:
     driver-class-name: ${DATABASE_DRIVER}
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
-
   data:
     redis:
       host: ${REDIS_HOST}
@@ -60,7 +57,7 @@ springdoc:
     disable-swagger-default-url: true
     display-request-duration: true
     info:
-      title: 🍇 O d! API Server
+      title: 🍇 OD! API Server
       description: <b>오디</b>까지 가세유~? 🚕
       version: 0.0.1
     path: /api/
