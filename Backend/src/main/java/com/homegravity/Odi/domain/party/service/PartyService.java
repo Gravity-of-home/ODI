@@ -8,10 +8,7 @@ import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.response.PartyResponseDTO;
-import com.homegravity.Odi.domain.party.entity.Party;
-import com.homegravity.Odi.domain.party.entity.PartyBoardStats;
-import com.homegravity.Odi.domain.party.entity.PartyMember;
-import com.homegravity.Odi.domain.party.entity.RoleType;
+import com.homegravity.Odi.domain.party.entity.*;
 import com.homegravity.Odi.domain.party.respository.PartyBoardStatsRepository;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartyRepository;
@@ -27,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -114,6 +112,18 @@ public class PartyService {
     public Long joinPartyLogic(Long partyId, Member member) {
         Party party = getParty(partyId);
 
+        //파티 정원이 다 찼을 경우
+        if (Objects.equals(party.getCurrentParticipants(), party.getMaxParticipants())) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.PARTY_MEMBER_CNT_MAX).message(ErrorCode.PARTY_MEMBER_CNT_MAX.getMessage()).build();
+        }
+
+        //파티가 모집중이 아닐 경우
+        if(!party.getState().equals(StateType.GATHERING)){
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.PARTY_NOT_GATHERING_NOW).message(ErrorCode.PARTY_NOT_GATHERING_NOW.getMessage()).build();
+        }
+
         boolean isPartyMember = partyMemberRepository.existPartyMember(party, member);
 
         // 해당 파티에 이미 신청하려는 사용자가 있다면 중복 신청 불가
@@ -183,7 +193,7 @@ public class PartyService {
 
     //파티장의 파티 참여자 및 신청자 거절하기
     @Transactional
-    public String refuseJoinParty(Long partyId, Long memberId, Member member){
+    public String refuseJoinParty(Long partyId, Long memberId, Member member) {
         Party party = getParty(partyId);
 
         RoleType role = partyMemberRepository.findParticipantRole(party, member);
