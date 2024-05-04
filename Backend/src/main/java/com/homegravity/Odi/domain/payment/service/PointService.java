@@ -31,4 +31,12 @@ public class PointService {
         String detailContent = String.format(POINT_HISTORY_DETAIL_CONTENT, party.getDeparturesName(), party.getArrivalsName(), wholeCost, party.getCurrentParticipants());
         pointHistoryRepository.save(PointHistory.createSettleHistory(member, party.getId(), party.getTitle(), detailContent, PointHistoryType.PREPAYMENT, memberCost));
     }
+
+    // 정산 요청자 - 선불 금액 돌려받기
+    public void getBackPrePaidCost(Member member, Party party, int cost) {
+        member.updatePoint(cost);
+        memberRepository.save(member);
+
+        pointHistoryRepository.save(PointHistory.createSettleHistory(member, party.getId(), party.getTitle(), "선불 금액 반환", PointHistoryType.SETTLEMENT, cost));
+    }
 }
