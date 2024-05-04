@@ -2,6 +2,7 @@ package com.homegravity.Odi.domain.party.service;
 
 import com.homegravity.Odi.domain.map.service.MapService;
 import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.member.repository.MemberRepository;
 import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,6 +34,7 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final PartyBoardStatsRepository partyBoardStatsRepository;
     private final PartyMemberRepository partyMemberRepository;
+    private final MemberRepository memberRepository;
 
     private final MapService mapService;
     private final RedisLockRepository redisLockRepository;
@@ -201,5 +204,11 @@ public class PartyService {
         }
 
         return party.getId();
+    }
+
+    // 파티 조회
+    @Transactional(readOnly = true)
+    public Party getParty(Long partyId) {
+        return partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
     }
 }
