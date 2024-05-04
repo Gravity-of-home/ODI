@@ -19,4 +19,11 @@ public interface CustomPartyMember {
 
     Optional<PartyMember> findOrganizer(Party party);
 
+    boolean existPartyMember(Party party, Member member);
+
+    Optional<PartyMember> findPartyMemberByMember(Party party, Member member);
+
+    List<PartyMember> findAllPartyMember(Party party);
+
+
 }

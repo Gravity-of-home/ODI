@@ -14,7 +14,8 @@ import java.util.function.Supplier;
 @Component
 @RequiredArgsConstructor
 public class RedisLockRepository {
-    private RedisTemplate<String, String> redisTemplate;
+
+    private final RedisTemplate<String, String> redisTemplate;
 
     public Boolean lock(String key) {
         return redisTemplate
