@@ -2,8 +2,11 @@ package com.homegravity.Odi.domain.party.service;
 
 import com.homegravity.Odi.domain.map.service.MapService;
 import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.member.repository.MemberRepository;
+import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
+import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.response.PartyResponseDTO;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.PartyBoardStats;
@@ -16,6 +19,8 @@ import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +34,8 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final PartyBoardStatsRepository partyBoardStatsRepository;
     private final PartyMemberRepository partyMemberRepository;
+    private final MemberRepository memberRepository;
+
     private final MapService mapService;
 
     @Transactional
@@ -54,7 +61,7 @@ public class PartyService {
         // 조회수, 신청자 수 갱신
         PartyBoardStats partyBoardStats = partyBoardStatsRepository.findPartyBoardStats(party);
         partyBoardStats.addViewCount(); // 조회수 증가
-        
+
         // 파티 참여 신청자 수 조회
         partyBoardStats.updateRequestCount(partyMemberRepository.countAllPartyGuests(party));
 
@@ -72,5 +79,19 @@ public class PartyService {
         String pathInfo = mapService.getNaverPathInfo(party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY(), party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
 
         return PartyResponseDTO.of(party, partyBoardStats, role, participants, guests, pathInfo);
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<PartyDTO> getAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
+
+        Slice<Party> partySlice = partyRepository.findAllParties(pageable, requestDTO);
+
+        return partySlice.map(party ->
+                PartyDTO.of(party, partyMemberRepository.findOrganizer(party)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()))));
+
+//
+//        return new SliceImpl<>(results, pageable, partySlice.hasNext());
+
     }
 }
