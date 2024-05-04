@@ -66,6 +66,9 @@ public class Party extends BaseBy {
     @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartyBoardStats partyBoardStats;
 
+    @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
+    private PartySettlement partySettlement;
+
     @Builder
     private Party(String title, String departuresName, Point departuresLocation,
                   String arrivalsName, Point arrivalsLocation,
@@ -120,6 +123,10 @@ public class Party extends BaseBy {
 
     public void updatePartyBoardStats(PartyBoardStats partyBoardStats) {
         this.partyBoardStats = partyBoardStats;
+    }
+
+    public void updatePartySettlement(PartySettlement partySettlement) {
+        this.partySettlement = partySettlement;
     }
 
     public void updateDeparturesName(String departuresName) {
