@@ -7,10 +7,7 @@ import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.response.PartyResponseDTO;
-import com.homegravity.Odi.domain.party.entity.Party;
-import com.homegravity.Odi.domain.party.entity.PartyBoardStats;
-import com.homegravity.Odi.domain.party.entity.PartyMember;
-import com.homegravity.Odi.domain.party.entity.RoleType;
+import com.homegravity.Odi.domain.party.entity.*;
 import com.homegravity.Odi.domain.party.respository.PartyBoardStatsRepository;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartyRepository;
@@ -140,5 +137,69 @@ public class PartyService {
 
         partyMemberRepository.delete(partyMember);
         return true;
+    }
+
+    @Transactional
+    public Long updateParty(Long partyId, PartyRequestDTO partyRequestDTO, Member member) {
+
+        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
+
+        // 요청자와 작성자가 동일인인지 확인
+        if (member.getId() != Long.parseLong(party.getCreatedBy())) {
+            throw new BusinessException(ErrorCode.PARTY_MEMBER_ACCESS_DENIED, ErrorCode.PARTY_MEMBER_ACCESS_DENIED.getMessage());
+        }
+
+        if (!partyRequestDTO.getTitle().equals("")) {
+            party.updateTitle(partyRequestDTO.getTitle());
+        }
+
+        if (!partyRequestDTO.getDeparturesName().equals("")) {
+            party.updateDeparturesName(partyRequestDTO.getDeparturesName());
+        }
+
+        if (partyRequestDTO.getDeparturesLocation() != null) {
+            party.updateDeparturesLocation(partyRequestDTO.getDeparturesLocation());
+        }
+
+        if (!partyRequestDTO.getArrivalsName().equals("")) {
+            party.updateArrivalsName(partyRequestDTO.getArrivalsName());
+        }
+
+        if (partyRequestDTO.getArrivalsLocation() != null) {
+            party.updateArrivalsLocation(partyRequestDTO.getArrivalsLocation());
+        }
+
+        if (partyRequestDTO.getDeparturesDate() != null) {
+            party.updateDeparturesDate(partyRequestDTO.getDeparturesDate());
+        }
+
+        if (partyRequestDTO.getMaxParticipants() != null) {
+
+            if (partyRequestDTO.getMaxParticipants() < party.getCurrentParticipants()) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST_ERROR, "현재 인원 수가 참여 가능한 인원 수보다 많습니다.");
+            }
+            party.updateMaxParticipants(partyRequestDTO.getMaxParticipants());
+        }
+
+        if (partyRequestDTO.getCategory() != null) {
+            party.updateCategory(partyRequestDTO.getCategory());
+        }
+
+        if (partyRequestDTO.getGenderRestriction() != null) {
+
+            GenderType gender = GenderType.ANY;
+
+            if (partyRequestDTO.getGenderRestriction().booleanValue()) { // 성별 제한이 있다면
+                gender = GenderType.valueOf(member.getGender().toUpperCase());
+            }
+
+            party.updateGenderRestriction(gender);
+        }
+
+        if (!partyRequestDTO.getContent().equals("")) {
+            party.updateContent(partyRequestDTO.getContent());
+        }
+
+        return party.getId();
     }
 }

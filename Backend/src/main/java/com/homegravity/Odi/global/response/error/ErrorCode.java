@@ -72,6 +72,7 @@ public enum ErrorCode {
 
     //party
     PARTY_MEMBER_ALREADY_JOIN_EXIST(400, "이미 파티에 해당 유저가 신청했습니다."),
+    PARTY_MEMBER_ACCESS_DENIED(403, "수정할 권한이 없는 유저입니다."),
 
     ;
     /**
