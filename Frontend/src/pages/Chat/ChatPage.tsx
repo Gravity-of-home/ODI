@@ -26,7 +26,7 @@ const ChatPage = () => {
   }
 
   return (
-    <WebSocketProvider partyId={partyId}>
+    <WebSocketProvider>
       <div className='chat-page'>
         <div className='nav'>
           <NavBar />

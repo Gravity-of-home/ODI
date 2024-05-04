@@ -14,7 +14,7 @@ const NaverLoginRedirect = () => {
     nav('/home', { replace: true });
   }, []);
 
-  removeCookie('Authorization');
+  removeCookie('Authorizatio');
 
   return (
     <div className='w-full h-screen flex flex-col justify-center items-center relative'>

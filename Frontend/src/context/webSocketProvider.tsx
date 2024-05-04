@@ -1,32 +1,39 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import { getCookie } from '@/utils/CookieUtil';
 
-const WebSocketContext = createContext<Client | null>(null);
+interface WebSocketContextType {
+  client: Client | null;
+}
+
+const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 interface WebSocketProviderProps {
   children: React.ReactNode;
-  partyId: string | undefined; // partyId를 props로 추가
 }
 
-export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, partyId }) => {
+export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [stompClient, setStompClient] = useState<Client | null>(null);
 
   useEffect(() => {
-    console.log('provider attached');
-    const sockJS = new SockJS(`http://localhost:8080/ws-stomp/${partyId}`); // partyId를 사용하는 WebSocket URL
     const client = new Client({
-      webSocketFactory: () => new SockJS(`http://localhost:8080/ws-stomp/${partyId}`),
+      brokerURL: 'ws://localhost:8080/ws-stomp',
+      // connectHeaders: {
+      //   AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+      // },
       reconnectDelay: 5000,
+      heartbeatIncoming: 20000, // 20 seconds
+      heartbeatOutgoing: 20000, // 20 seconds
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws-stomp'),
       debug: str => {
         console.log('STOMP Debug:', str);
       },
       onConnect: () => {
-        console.log(`WebSocket Connected for party ${partyId}`);
-        setStompClient(client);
+        console.log(`WebSocket Connected`);
       },
       onDisconnect: () => {
-        console.log(`WebSocket Disconnected for party ${partyId}`);
+        console.log(`WebSocket Disconnected`);
       },
       onStompError: frame => {
         console.error('Stomp Error:', frame.headers['message']);
@@ -37,13 +44,20 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
     });
 
     client.activate();
-    return () => {
-      console.log('client deactivate');
-      client.deactivate();
-    };
-  }, []); // partyId에 의존하는 useEffect
+    setStompClient(client);
+  }, []);
 
-  return <WebSocketContext.Provider value={stompClient}>{children}</WebSocketContext.Provider>;
+  return (
+    <WebSocketContext.Provider value={{ client: stompClient }}>
+      {children}
+    </WebSocketContext.Provider>
+  );
 };
 
-export const useWebSocket = () => useContext(WebSocketContext);
+export const useWebSocket = () => {
+  const context = useContext(WebSocketContext);
+  if (!context) {
+    throw new Error('useWebSocket must be used within a WebSocketProvider');
+  }
+  return context.client;
+};
