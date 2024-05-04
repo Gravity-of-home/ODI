@@ -101,7 +101,7 @@ public class PartyService {
 
     public Long joinParty(Long partyId, Member member) {
 
-        String key = "joinParty_"+partyId.toString() +"_" +member.getId();
+        String key = "joinParty_" + partyId.toString() + "_" + member.getId();
 
         //lettuce를 활용한 스핀락 활용
         return redisLockRepository.runOnLettuceLock(
@@ -133,16 +133,16 @@ public class PartyService {
         return partyMember.getId();
     }
 
-    public boolean deleteJoinParty(Long partyId, Member member){
-        String key = "deleteJoinParty"+partyId.toString() +"_" +member.getId();
+    public boolean deleteJoinParty(Long partyId, Member member) {
+        String key = "deleteJoinParty" + partyId.toString() + "_" + member.getId();
 
         return redisLockRepository.runOnLettuceLock(
                 key, () -> transactionHandler.runOnWriteTransaction(
                         () -> deleteJoinPartyLogic(partyId, member)));
     }
 
-    public boolean deleteJoinPartyLogic(Long partyId, Member member){
-        Party party =partyRepository.findParty(partyId);
+    public boolean deleteJoinPartyLogic(Long partyId, Member member) {
+        Party party = partyRepository.findParty(partyId);
 
         if (party == null) {//party가 없을 경우 예외 처리
             throw BusinessException.builder()
@@ -153,6 +153,39 @@ public class PartyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
         partyMemberRepository.delete(partyMember);
+
+        return true;
+    }
+
+    //동승 신청 수락
+    @Transactional
+    public boolean acceptJoinParty(Long partyId, Long memberId, Member member) {
+        Party party = partyRepository.findParty(partyId);
+
+        if (party == null) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
+        }
+
+        RoleType role = partyMemberRepository.findParticipantRole(party, member);
+
+        //역할이 방장이 아니라면 권한 없음
+        if (role != RoleType.ORGANIZER) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.FORBIDDEN_ERROR).message("파티장만 수락 요청 할 수 있습니다.").build();
+        }
+
+        //신청자 member 정보
+        Member requester = memberRepository.findByIdAndDeletedAtIsNull(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+
+        //신청자 partyMember 정보
+        PartyMember partyMember = partyMemberRepository.findPartyMemberByMember(party, requester)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
+
+        //파티 신청자를 참여자로 update
+        partyMember.updatePartyRole(RoleType.PARTICIPANT);
+
         return true;
     }
 }

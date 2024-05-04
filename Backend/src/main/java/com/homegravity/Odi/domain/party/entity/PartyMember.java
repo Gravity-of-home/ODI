@@ -56,5 +56,8 @@ public class PartyMember extends BaseBy {
         this.isPaid = isPaid;
     }
 
+    public void updatePartyRole(RoleType roleType) {
+        this.role = roleType;
+    }
 
 }
