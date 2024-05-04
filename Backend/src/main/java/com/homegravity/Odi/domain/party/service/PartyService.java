@@ -90,8 +90,5 @@ public class PartyService {
                 PartyDTO.of(party, partyMemberRepository.findOrganizer(party)
                         .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()))));
 
-//
-//        return new SliceImpl<>(results, pageable, partySlice.hasNext());
-
     }
 }
