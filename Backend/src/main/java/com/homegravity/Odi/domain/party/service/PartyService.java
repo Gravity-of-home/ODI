@@ -112,12 +112,7 @@ public class PartyService {
     }
 
     public Long joinPartyLogic(Long partyId, Member member) {
-        Party party = partyRepository.findParty(partyId);
-
-        if (party == null) {//party가 없을 경우 예외 처리
-            throw BusinessException.builder()
-                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
-        }
+        Party party = getParty(partyId);
 
         boolean isPartyMember = partyMemberRepository.existPartyMember(party, member);
 
@@ -143,14 +138,10 @@ public class PartyService {
     }
 
     public boolean deleteJoinPartyLogic(Long partyId, Member member) {
-        Party party = partyRepository.findParty(partyId);
+        Party party = getParty(partyId);
 
-        if (party == null) {//party가 없을 경우 예외 처리
-            throw BusinessException.builder()
-                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
-        }
 
-        PartyMember partyMember = partyMemberRepository.findPartyMemberByMember(party, member)
+        PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, member)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
         partyMemberRepository.delete(partyMember);
@@ -161,12 +152,7 @@ public class PartyService {
     //동승 신청 수락
     @Transactional
     public boolean acceptJoinParty(Long partyId, Long memberId, Member member) {
-        Party party = partyRepository.findParty(partyId);
-
-        if (party == null) {
-            throw BusinessException.builder()
-                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
-        }
+        Party party = getParty(partyId);
 
         RoleType role = partyMemberRepository.findParticipantRole(party, member);
 
@@ -195,22 +181,10 @@ public class PartyService {
         return true;
     }
 
-    // 파티 조회
-    @Transactional(readOnly = true)
-    public Party getParty(Long partyId) {
-        return Optional.ofNullable(partyRepository.findParty(partyId))
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
-    }
-
-    //신청자 및 참여자 거절/내보내기
+    //파티장의 파티 참여자 및 신청자 거절하기
     @Transactional
-    public String refuseJoinParty(Long partyId, Long memberId, Member member) {
-        Party party = partyRepository.findParty(partyId);
-
-        if (party == null) {
-            throw BusinessException.builder()
-                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
-        }
+    public String refuseJoinParty(Long partyId, Long memberId, Member member){
+        Party party = getParty(partyId);
 
         RoleType role = partyMemberRepository.findParticipantRole(party, member);
 
@@ -224,16 +198,23 @@ public class PartyService {
         Member requester = memberRepository.findByIdAndDeletedAtIsNull(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
 
-        //신청자 partyMember 정보
+        //partyMember 정보
         PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, requester)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
-        //role이 신청자인지 참여자 인지 확인
+        //반환을 위한 roleTyle 받기
         String roleType = partyMember.getRole().toString();
 
-        //partyMember정보를 삭제
+        //삭제
         partyMemberRepository.delete(partyMember);
 
         return roleType;
+    }
+
+    // 파티 조회
+    @Transactional(readOnly = true)
+    public Party getParty(Long partyId) {
+        return Optional.ofNullable(partyRepository.findParty(partyId))
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
     }
 }
