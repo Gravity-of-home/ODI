@@ -42,6 +42,8 @@ public enum SuccessCode {
     // Party
     PARTY_CREATE_SUCCESS(201, "택시 파티 생성에 성공했습니다."),
     PARTY_GET_SUCCESS(200, "택시 파티 조회에 성공했습니다."),
+    PARTY_SUBSCRIBE_SUCCESS(201, "택시 파티 참여 신청에 성공했습니다."),
+    PARTY_DELETE_SUBSCRIBE_SUCCESS(204, "택시 파티 참여 신청 취소에 성공했습니다."),
 
     // Place
     PLACE_LIST_GET_SUCCESS(200, "장소 검색에 성공했습니다."),

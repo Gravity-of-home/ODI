@@ -1,5 +1,7 @@
 package com.homegravity.Odi.domain.party.respository;
 
+import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.PartyMember;
 import com.homegravity.Odi.domain.party.respository.custom.CustomPartyMember;
 import org.springframework.data.jpa.repository.JpaRepository;
