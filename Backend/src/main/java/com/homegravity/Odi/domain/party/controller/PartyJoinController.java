@@ -31,7 +31,13 @@ public class PartyJoinController {
 
     @Operation(summary = "동승자 구인 파티 신청자 수락하기 (방장만)", description = "방장이 동승자 구인 파티 신청자를 수락합니다.")
     @PutMapping("/{member-id}")
-    public ApiResponse<?> acceptJoinParty(@PathVariable(value = "party-id") Long partyId, @PathVariable(value = "member-id") Long memberId, @AuthenticationPrincipal Member member) {
+    public ApiResponse<Boolean> acceptJoinParty(@PathVariable(value = "party-id") Long partyId, @PathVariable(value = "member-id") Long memberId, @AuthenticationPrincipal Member member) {
         return ApiResponse.of(SuccessCode.PARTY_ACCEPT_SUBSCRIBE_SUCCESS, partyService.acceptJoinParty(partyId, memberId, member));
+    }
+
+    @Operation(summary = "동승자 구인 파티 신청 거절", description = "방장이 동승자 구인 파티 신청자를 거절합니다.")
+    @DeleteMapping("/{member-id}")
+    public ApiResponse<String> refuseJoinParty(@PathVariable(value = "party-id") Long partyId, @PathVariable(value = "member-id") Long memberId, @AuthenticationPrincipal Member member){
+        return ApiResponse.of(SuccessCode.PARTY_REFUSE_SUCCESS, partyService.refuseJoinParty(partyId, memberId, member));
     }
 }

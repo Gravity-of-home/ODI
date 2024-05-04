@@ -72,6 +72,7 @@ public enum ErrorCode {
 
     //party
     PARTY_MEMBER_ALREADY_JOIN_EXIST(400, "이미 파티에 해당 유저가 신청했습니다."),
+    PARTY_MEMBER_ALREADY_EXIST(400, "이미 해당 파티에 존재하는 참여자 입니다."),
 
     ;
     /**
