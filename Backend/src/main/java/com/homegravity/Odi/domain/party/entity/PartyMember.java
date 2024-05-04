@@ -66,8 +66,12 @@ public class PartyMember extends BaseBy {
         this.isPaid = isPaid;
     }
 
-    public void updateSettlementInfo(Integer paidAmount) {
+    public void updatePaidInfo(Integer paidAmount) {
         this.paidAmount = paidAmount;
+    }
+
+    public void updateSettleAmount(Integer settleAmount) {
+        this.settleAmount = settleAmount;
     }
 
 
