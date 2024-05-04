@@ -31,7 +31,10 @@ public class SelectPartyRequestDTO {
     private CategoryType category;
 
     // TODO: 현재 위치 좌표
-    @Schema(description = "현재 위치 경도, 위도")
-    private LocationPoint currentPoint;
+    @Schema(description = "현재 위치 위도")
+    private Double latitude;
+
+    @Schema(description = "현재 위치 경도")
+    private Double longitude;
 
 }

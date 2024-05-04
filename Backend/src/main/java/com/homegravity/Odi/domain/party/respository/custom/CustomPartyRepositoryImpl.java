@@ -49,11 +49,62 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
     public Slice<Party> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
         QParty qparty = QParty.party;
 
-        OrderSpecifier orderSpecifier = getOrderSpecifier(pageable, qparty);
+        // 거리 계산 수식
+//        GeometryFactory geometryFactory = new GeometryFactory();
+//
+//        NumberExpression<Double> latitude = Expressions.asNumber(requestDTO.getLatitude());
+//        NumberExpression<Double> longitude = Expressions.asNumber(requestDTO.getLongitude());
+//
+//        NumberExpression<Double> distance = Expressions.numberTemplate(Double.class,
+//                "6371 * acos(" +
+//                        "cos(radians(ST_Y({0}))) " +
+//                        "* cos(radians(ST_Y(party.departuresLocation))) " +
+//                        "* cos(radians(ST_X(party.departuresLocation)) - radians(ST_X({0}))) " +
+//                        "+ sin(radians(ST_Y({0}))) " +
+//                        "* sin(radians(ST_Y(party.departuresLocation))))",
+//                latitude, longitude);
 
-        // 지역범위: 전체
+
+        // latitude 를 radians 로 계산
+        NumberExpression<Double> radiansLatitude =
+                Expressions.numberTemplate(Double.class, "radians({0})", requestDTO.getLatitude());
+
+        // 계산된 latitude -> 코사인 계산
+        NumberExpression<Double> cosLatitude =
+                Expressions.numberTemplate(Double.class, "cos({0})", radiansLatitude);
+        NumberExpression<Double> cosPartyLatitude =
+                Expressions.numberTemplate(Double.class, "cos(radians(ST_Y(party.departuresLocation)))");
+
+        // 계산된 latitude -> 사인 계산
+        NumberExpression<Double> sinLatitude =
+                Expressions.numberTemplate(Double.class, "sin({0})", radiansLatitude);
+        NumberExpression<Double> sinPartyLatitude =
+                Expressions.numberTemplate(Double.class, "sin(radians(ST_Y(party.departuresLocation)))");
+
+        // 사이 거리 계산
+        NumberExpression<Double> cosLongitude =
+                Expressions.numberTemplate(Double.class, "cos(radians(ST_X(party.departuresLocation)) - radians({0}))", requestDTO.getLongitude());
+
+        NumberExpression<Double> acosExpression =
+                Expressions.numberTemplate(Double.class, "acos({0})", cosLatitude
+                        .multiply(cosPartyLatitude)
+                        .multiply(cosLongitude)
+                        .add(sinLatitude.multiply(sinPartyLatitude)));
+
+        // 최종 계산 (거리)
+        NumberExpression<Double> distance =
+                Expressions.numberTemplate(Double.class, "6371 * {0}", acosExpression);
+
+
+        // 정렬 조건
+        OrderSpecifier orderSpecifier = getOrderSpecifier(pageable, qparty, distance);
+
+        // 지역범위: 현재 위치
+        Double radius = 2.0; // 검색 반경 2km == 도보 20분
         List<Party> results = jpaQueryFactory.selectFrom(qparty)
-                .where(qparty.deletedAt.isNull(), qparty.departuresDate.goe(LocalDateTime.now())
+                .where(qparty.deletedAt.isNull()
+                        , qparty.departuresDate.goe(LocalDateTime.now()) // 현재 시간 이후만 조회
+                        , distance.loe(radius) //현재 위치로 부터 반경 2km
                         , eqToday(requestDTO, qparty)
                         , eqGender(requestDTO, qparty)
                         , eqDepartureDate(requestDTO, qparty)
@@ -75,7 +126,7 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
         return new SliceImpl<>(results, pageable, hasNext);
     }
 
-    private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qparty) {
+    private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qparty, NumberExpression<Double> distance) {
         OrderSpecifier orderSpecifier = null;
         for (Sort.Order order : pageable.getSort()) {
 
@@ -93,8 +144,10 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
                 orderSpecifier = new OrderSpecifier(direction, timeDifference);
 
 
-            } else if (order.getProperty().equals("distance")) {
-                /* TODO: 거리순 정렬 로직 작성*/
+            } else if (order.getProperty().equals("distance")) { // 출발지 가까운 순
+
+                orderSpecifier = new OrderSpecifier(direction, distance);
+
             } else { // 정렬 기준이 없다면 최신순
                 orderSpecifier = new OrderSpecifier(Order.DESC, qparty.createdAt);
             }
