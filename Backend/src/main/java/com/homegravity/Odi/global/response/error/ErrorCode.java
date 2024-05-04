@@ -73,6 +73,9 @@ public enum ErrorCode {
     //party
     PARTY_MEMBER_ALREADY_JOIN_EXIST(400, "이미 파티에 해당 유저가 신청했습니다."),
 
+    // Settlement
+    PARTY_STATE_TYPE_ERROR(400, "요청에 부합하지 않는 파티 상태 입니다."),
+    POINT_LACK_ERROR(402, "포인트가 부족합니다."),
     ;
     /**
      * ******************************* Error Code Field ***************************************
