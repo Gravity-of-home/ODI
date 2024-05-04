@@ -54,5 +54,11 @@ public class PartyController {
         return ApiResponse.of(SuccessCode.PARTY_UPDATE_SUCCESS, partyService.updateParty(partyId, partyRequestDTO, member));
     }
 
+    @Operation(summary = "동승자 구인 글 삭제", description = "동승자 구인 글을 삭제합니다.")
+    @DeleteMapping("/{party-id}")
+    public ApiResponse<Void> deletePartyDetail(@PathVariable(value = "party-id") Long partyId, @AuthenticationPrincipal Member member) {
+        partyService.deleteParty(partyId, member);
+        return ApiResponse.of(SuccessCode.PARTY_DELETE_SUCCESS);
+    }
 
 }
