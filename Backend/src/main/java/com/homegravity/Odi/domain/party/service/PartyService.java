@@ -101,7 +101,7 @@ public class PartyService {
 
     public Long joinParty(Long partyId, Member member) {
 
-        String key = partyId.toString() + member.getId();
+        String key = "joinParty_"+partyId.toString() +"_" +member.getId();
 
         //lettuce를 활용한 스핀락 활용
         return redisLockRepository.runOnLettuceLock(
@@ -131,5 +131,28 @@ public class PartyService {
         partyMemberRepository.save(partyMember);
 
         return partyMember.getId();
+    }
+
+    public boolean deleteJoinParty(Long partyId, Member member){
+        String key = "deleteJoinParty"+partyId.toString() +"_" +member.getId();
+
+        return redisLockRepository.runOnLettuceLock(
+                key, () -> transactionHandler.runOnWriteTransaction(
+                        () -> deleteJoinPartyLogic(partyId, member)));
+    }
+
+    public boolean deleteJoinPartyLogic(Long partyId, Member member){
+        Party party =partyRepository.findParty(partyId);
+
+        if (party == null) {//party가 없을 경우 예외 처리
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
+        }
+
+        PartyMember partyMember = partyMemberRepository.findPartyMemberByMember(party, member)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
+
+        partyMemberRepository.delete(partyMember);
+        return true;
     }
 }
