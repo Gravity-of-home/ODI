@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
-// TODO ?
+import { useNavigate } from 'react-router-dom';
+import jwtAxios from '@/utils/JWTUtil';
 
 interface IButtonProps {
   state: string;
@@ -9,19 +8,16 @@ interface IButtonProps {
   partyId: number;
 }
 
+// 파티 상태와 조회하는 사람마다 다르게 버튼을 보여주어야 함
+// 1. 모집마감 (팟장 & 파티원, 파티신청자, 게스트)
+// 2. 모집중 ( 팟장, & 파티원, 파티신청자, 게스트)
 const Button: React.FC<IButtonProps> = ({ state, role, partyId }) => {
-  // 모집마감 (팟장 & 파티원, 게스트)
-  // 모집중 ( 팟장, & 파티원, 게스트)
+  const nav = useNavigate();
 
-  const memberId = 3;
+  // 동승 참여 요청
   function RequestMatching() {
-    axios
-      .post(`http://localhost:8080/api/parties/${partyId}/${memberId}`, {
-        headers: {
-          AUTHORIZATION:
-            'Bearer eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInJvbGUiOiJST0xFX1VTRVIiLCJpZCI6IjIiLCJpYXQiOjE3MTQ1NDE2NTMsImV4cCI6MTcxNDU0NDY1M30.hkEC5kS3epI-KE2pqhR_tUzunM3Cz2dBUzsGbD7QAhA',
-        },
-      })
+    jwtAxios
+      .post(`api/parties/${partyId}`, {})
       .then(res => {
         console.log(res.data);
       })
@@ -29,9 +25,10 @@ const Button: React.FC<IButtonProps> = ({ state, role, partyId }) => {
         console.log(err);
       });
   }
+  // 동승 참여 요청 취소
   function CancelMatching() {
-    axios
-      .post(``)
+    jwtAxios
+      .delete(`api/parties/${partyId}`)
       .then(res => {
         console.log(res);
       })
@@ -39,8 +36,9 @@ const Button: React.FC<IButtonProps> = ({ state, role, partyId }) => {
         console.log(err);
       });
   }
+  // 채팅방으로 routing
   function GoChat() {
-    // 채팅방으로 routing
+    nav(`/party/chat/${partyId}`);
   }
 
   let buttonComponent;
@@ -71,7 +69,7 @@ const Button: React.FC<IButtonProps> = ({ state, role, partyId }) => {
         <div>
           <button
             onClick={CancelMatching}
-            className='rounded-lg w-11/12 h-12 bg-blue-600 text-white'>
+            className='rounded-lg w-11/12 h-12 bg-red-600 text-white'>
             <p>신청 취소하기</p>
           </button>
         </div>

@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import axios from 'axios';
-//TODO : 상황에 따라 다른 화면을 보여줘야 합니다.
+import jwtAxios from '@/utils/JWTUtil';
 
 interface IMemberInfoProps {
   hostName: string;
@@ -31,14 +30,10 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   role,
   fetchData,
 }) => {
+  // 파티 신청 수락
   const acceptEnterParty = (memberId: number) => () => {
-    axios
-      .put(`http://localhost:8080/api/parties/1/${memberId}`, {
-        headers: {
-          AUTHORIZATION:
-            'Bearer eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInJvbGUiOiJST0xFX1VTRVIiLCJpZCI6IjEiLCJpYXQiOjE3MTQzNTIwNzEsImV4cCI6MTcxNDM1NTA3MX0.BrfMWcpzfk3nSPApcjzZm7Wce6z_3DtELt2BNlddxQE',
-        },
-      })
+    jwtAxios
+      .put(`api/parties/1/${memberId}`, {})
       .then(response => {
         console.log(response.data);
         fetchData();
@@ -47,14 +42,11 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.error(err);
       });
   };
+
+  // 파티 신청 거절
   const rejectEnterParty = (memberId: number) => () => {
-    axios
-      .delete(`http://localhost:8080/api/parties/1/${memberId}`, {
-        headers: {
-          AUTHORIZATION:
-            'Bearer eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInJvbGUiOiJST0xFX1VTRVIiLCJpZCI6IjEiLCJpYXQiOjE3MTQzNTIwNzEsImV4cCI6MTcxNDM1NTA3MX0.BrfMWcpzfk3nSPApcjzZm7Wce6z_3DtELt2BNlddxQE',
-        },
-      })
+    jwtAxios
+      .delete(`api/parties/1/${memberId}`, {})
       .then(response => {
         console.log(response.data);
         fetchData();
@@ -63,15 +55,11 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.error(err);
       });
   };
+
   // TODO 참여 요청 거절이랑 URI, Method 같음 수정 해야함
   const banParticipant = (memberId: number) => () => {
-    axios
-      .delete(`http://localhost:8080/api/parties/1/${memberId}`, {
-        headers: {
-          AUTHORIZATION:
-            'Bearer eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInJvbGUiOiJST0xFX1VTRVIiLCJpZCI6IjEiLCJpYXQiOjE3MTQzNTIwNzEsImV4cCI6MTcxNDM1NTA3MX0.BrfMWcpzfk3nSPApcjzZm7Wce6z_3DtELt2BNlddxQE',
-        },
-      })
+    jwtAxios
+      .delete(`api/parties/1/${memberId}`, {})
       .then(response => {
         console.log(response.data);
         fetchData();
@@ -81,9 +69,8 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
       });
   };
 
-  const participantsList = participants.map((person: IParticipant) => <li>{person.nickname}</li>);
-
-  const participantsListForOrganizer = participants
+  // 파티원 목록
+  const participantsList = participants
     .filter((person: IParticipant) => person.role !== 'ORGANIZER')
     .map((person: IParticipant) => (
       <li className='flex justify-between ' key={person.id}>
@@ -105,6 +92,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
       </li>
     ));
 
+  // 팟장에게 보일 파티 신청자 목록
   const applicantList = guests?.map((applicant: IParticipant) => (
     <li className='flex justify-between content-center' key={applicant.id}>
       <div className='user-profile flex gap-x-2 items-center'>
@@ -149,8 +137,8 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
       <div className='members'>
         <div className='mb-4 font-bold text-xl'>파티원</div>
         <div>
-          {participantsListForOrganizer.length != 0 && <ul>{participantsListForOrganizer}</ul>}
-          {participantsListForOrganizer.length == 0 && (
+          {participantsList.length != 0 && <ul>{participantsList}</ul>}
+          {participantsList.length == 0 && (
             <div className='h-56 flex justify-center '>
               <p className='content-center'>아직 파티원이 없어요</p>
             </div>

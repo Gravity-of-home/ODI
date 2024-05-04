@@ -1,11 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import MemberInfo from './components/MemberInfo';
 import PartyInfo from './components/PartyInfo';
 import PathMap from './components/PathMap';
-
 import { useEffect, useState } from 'react';
 import BottomButton from './components/BottomButton';
+import { ViteConfig } from '@/apis/ViteConfig';
 import jwtAxios from '@/utils/JWTUtil';
 
 interface IInfo {
@@ -58,8 +57,7 @@ interface IInfo {
 }
 
 const PartyDetailPage = () => {
-  // const { partyId } = useParams();
-  const [partyId, setPartyId] = useState(1);
+  const { partyId } = useParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState<IInfo>({
@@ -141,14 +139,9 @@ const PartyDetailPage = () => {
 
   // 상세 페이지 데이터 불러오고 각 컴포넌트로 전달 합시다
   const fetchData = async () => {
+    const BASE_URI = ViteConfig.VITE_BASE_URL;
     try {
-      // const response = await axios.get(`http://localhost:8080/api/party-boards/${partyId}`, {
-      //   headers: {
-      //     AUTHORIZATION:
-      //       'Bearer eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInJvbGUiOiJST0xFX1VTRVIiLCJpZCI6IjEiLCJpYXQiOjE3MTQ1NDUzNjUsImV4cCI6MTcxNDU0ODM2NX0.Y5JCvTIcMF6eF3VoHXnOgniu4J-xTmNOSAjfvCp9GJ0',
-      //   },
-      // });
-      const response = await jwtAxios.get(`http://localhost:8080/api/party-boards/${partyId}`);
+      const response = await jwtAxios.get(`${BASE_URI}/api/party-boards/${partyId}`);
       console.log(response);
       setIsLoading(false);
       setInfo(response.data.data);
@@ -178,7 +171,7 @@ const PartyDetailPage = () => {
   };
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [partyId]);
 
   function formatTimeDifference(createdAt: string) {
     const now: Date = new Date();
