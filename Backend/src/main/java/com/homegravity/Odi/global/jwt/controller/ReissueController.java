@@ -28,7 +28,7 @@ public class ReissueController {
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
 
-    @PostMapping("/api/reissue")
+    @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         //todo: service단으로 나누기
         //get refresh token
