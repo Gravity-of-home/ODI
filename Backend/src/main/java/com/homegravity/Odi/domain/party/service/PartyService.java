@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -154,5 +155,12 @@ public class PartyService {
 
         partyMemberRepository.delete(partyMember);
         return true;
+    }
+
+    // 파티 조회
+    @Transactional(readOnly = true)
+    public Party getParty(Long partyId) {
+        return Optional.ofNullable(partyRepository.findParty(partyId))
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
     }
 }
