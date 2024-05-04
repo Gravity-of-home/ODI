@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "동승 구인 참여 신청", description = "동승 구인 파티 참여 신청/취소/수락/거절 합니다.")
 @RestController
@@ -24,5 +21,11 @@ public class PartyJoinController {
     @PostMapping("/{party-id}")
     public ApiResponse<Long> joinParty(@PathVariable(value = "party-id") Long partyId, @AuthenticationPrincipal Member member) {
         return ApiResponse.of(SuccessCode.PARTY_SUBSCRIBE_SUCCESS, partyService.joinParty(partyId, member));
+    }
+
+    @Operation(summary = "동승자 구인 파티 참여 신청 취소", description = "동승자 구인 파티 참여에 신청한것 및 참여에 대해 취소를 합니다.")
+    @DeleteMapping("/{party-id}")
+    public ApiResponse<Boolean> deleteJoinParty(@PathVariable(value = "party-id") Long partyId, @AuthenticationPrincipal Member member){
+        return ApiResponse.of(SuccessCode.PARTY_DELETE_SUBSCRIBE_SUCCESS, partyService.deleteJoinParty(partyId, member));
     }
 }
