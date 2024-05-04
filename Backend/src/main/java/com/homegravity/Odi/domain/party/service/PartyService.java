@@ -2,7 +2,6 @@ package com.homegravity.Odi.domain.party.service;
 
 import com.homegravity.Odi.domain.map.service.MapService;
 import com.homegravity.Odi.domain.member.entity.Member;
-import com.homegravity.Odi.domain.member.repository.MemberRepository;
 import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
@@ -36,7 +35,6 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final PartyBoardStatsRepository partyBoardStatsRepository;
     private final PartyMemberRepository partyMemberRepository;
-    private final MemberRepository memberRepository;
 
     private final MapService mapService;
     private final RedisLockRepository redisLockRepository;
@@ -57,10 +55,7 @@ public class PartyService {
     @Transactional
     public PartyResponseDTO getPartyDetail(Long partyId, Member member) {
 
-        Party party = partyRepository.findParty(partyId);
-        if (party == null) { // 파티가 없다면 삭제되었거나 요청에 문제가 있음
-            throw BusinessException.builder().errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
-        }
+        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
 
         // 조회수, 신청자 수 갱신
         PartyBoardStats partyBoardStats = partyBoardStatsRepository.findPartyBoardStats(party);
@@ -101,7 +96,7 @@ public class PartyService {
 
     public Long joinParty(Long partyId, Member member) {
 
-        String key = "joinParty_"+partyId.toString() +"_" +member.getId();
+        String key = "joinParty_" + partyId.toString() + "_" + member.getId();
 
         //lettuce를 활용한 스핀락 활용
         return redisLockRepository.runOnLettuceLock(
@@ -111,12 +106,8 @@ public class PartyService {
     }
 
     public Long joinPartyLogic(Long partyId, Member member) {
-        Party party = partyRepository.findParty(partyId);
 
-        if (party == null) {//party가 없을 경우 예외 처리
-            throw BusinessException.builder()
-                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
-        }
+        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
 
         boolean isPartyMember = partyMemberRepository.existPartyMember(party, member);
 
@@ -133,21 +124,16 @@ public class PartyService {
         return partyMember.getId();
     }
 
-    public boolean deleteJoinParty(Long partyId, Member member){
-        String key = "deleteJoinParty"+partyId.toString() +"_" +member.getId();
+    public boolean deleteJoinParty(Long partyId, Member member) {
+        String key = "deleteJoinParty" + partyId.toString() + "_" + member.getId();
 
         return redisLockRepository.runOnLettuceLock(
                 key, () -> transactionHandler.runOnWriteTransaction(
                         () -> deleteJoinPartyLogic(partyId, member)));
     }
 
-    public boolean deleteJoinPartyLogic(Long partyId, Member member){
-        Party party =partyRepository.findParty(partyId);
-
-        if (party == null) {//party가 없을 경우 예외 처리
-            throw BusinessException.builder()
-                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
-        }
+    public boolean deleteJoinPartyLogic(Long partyId, Member member) {
+        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
 
         PartyMember partyMember = partyMemberRepository.findPartyMemberByMember(party, member)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
