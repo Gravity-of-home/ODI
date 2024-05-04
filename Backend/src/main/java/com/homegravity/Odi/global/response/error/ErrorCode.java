@@ -70,6 +70,9 @@ public enum ErrorCode {
     // Party Member
     PARTY_MEMBER_NOT_EXIST(400, "존재하지 않는 파티 참여자입니다."),
 
+    //party
+    PARTY_MEMBER_ALREADY_JOIN_EXIST(400, "이미 파티에 해당 유저가 신청했습니다."),
+
     ;
     /**
      * ******************************* Error Code Field ***************************************

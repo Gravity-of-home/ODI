@@ -15,6 +15,8 @@ import com.homegravity.Odi.domain.party.entity.RoleType;
 import com.homegravity.Odi.domain.party.respository.PartyBoardStatsRepository;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartyRepository;
+import com.homegravity.Odi.global.redis.handler.TransactionHandler;
+import com.homegravity.Odi.global.redis.repository.RedisLockRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,8 @@ public class PartyService {
     private final MemberRepository memberRepository;
 
     private final MapService mapService;
+    private final RedisLockRepository redisLockRepository;
+    private final TransactionHandler transactionHandler;
 
     @Transactional
     public Long createParty(PartyRequestDTO partyRequestDTO, Member member) {
@@ -93,5 +97,39 @@ public class PartyService {
 //
 //        return new SliceImpl<>(results, pageable, partySlice.hasNext());
 
+    }
+
+    public Long joinParty(Long partyId, Member member) {
+
+        String key = partyId.toString() + member.getId();
+
+        //lettuce를 활용한 스핀락 활용
+        return redisLockRepository.runOnLettuceLock(
+                key, () -> transactionHandler.runOnWriteTransaction(
+                        () -> joinPartyLogic(partyId, member)
+                ));
+    }
+
+    public Long joinPartyLogic(Long partyId, Member member) {
+        Party party = partyRepository.findParty(partyId);
+
+        if (party == null) {//party가 없을 경우 예외 처리
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
+        }
+
+        boolean isPartyMember = partyMemberRepository.existPartyMember(party, member);
+
+        // 해당 파티에 이미 신청하려는 사용자가 있다면 중복 신청 불가
+        if (isPartyMember) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.PARTY_MEMBER_ALREADY_JOIN_EXIST).message(ErrorCode.PARTY_MEMBER_ALREADY_JOIN_EXIST.getMessage()).build();
+        }
+
+        PartyMember partyMember = PartyMember.of(RoleType.REQUESTER, false, party, member);
+
+        partyMemberRepository.save(partyMember);
+
+        return partyMember.getId();
     }
 }
