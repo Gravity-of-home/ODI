@@ -20,11 +20,14 @@ public class PartySettlement {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "party_id")
+    @JoinColumn(name = "party_id", nullable = false)
     private Party party;
 
     @Column(name = "receipt_img")
     private String image;
+
+    @Column(name = "prepaid_cost")
+    private Integer prepaidCost;
 
     @Column(name = "cost")
     private Integer cost;
@@ -33,16 +36,18 @@ public class PartySettlement {
     private Long memberId;
 
     @Builder
-    private PartySettlement(String image, Integer cost, Long memberId) {
+    private PartySettlement(Party party, String image, Integer prepaidCost, Integer cost, Long memberId) {
+        this.party = party;
         this.image = image;
+        this.prepaidCost = prepaidCost;
         this.cost = cost;
         this.memberId = memberId;
     }
 
-    public static PartySettlement of(String image, Integer cost, Long memberId) {
+    public static PartySettlement of(Party party, Integer prepaidCost, Long memberId) {
         return builder()
-                .image(image)
-                .cost(cost)
+                .party(party)
+                .prepaidCost(prepaidCost)
                 .memberId(memberId)
                 .build();
     }
@@ -54,6 +59,12 @@ public class PartySettlement {
         if (party.getPartySettlement() != this) {
             party.updatePartySettlement(this);
         }
+    }
+
+    public void updateSettlementInfo(String image, Integer cost, Long memberId) {
+        this.image = image;
+        this.cost = cost;
+        this.memberId = memberId;
     }
 
 }
