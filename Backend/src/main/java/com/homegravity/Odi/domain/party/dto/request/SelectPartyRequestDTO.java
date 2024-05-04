@@ -1,7 +1,6 @@
 package com.homegravity.Odi.domain.party.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.homegravity.Odi.domain.party.dto.LocationPoint;
 import com.homegravity.Odi.domain.party.entity.CategoryType;
 import com.homegravity.Odi.domain.party.entity.GenderType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,11 +29,10 @@ public class SelectPartyRequestDTO {
     @Schema(description = "카테고리")
     private CategoryType category;
 
-    // TODO: 현재 위치 좌표
     @Schema(description = "현재 위치 위도")
-    private Double latitude;
+    private double latitude;
 
     @Schema(description = "현재 위치 경도")
-    private Double longitude;
+    private double longitude;
 
 }

@@ -1,12 +1,16 @@
 package com.homegravity.Odi.domain.party.respository.custom;
 
+import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.QParty;
+import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
+import com.homegravity.Odi.global.response.error.ErrorCode;
+import com.homegravity.Odi.global.response.error.exception.BusinessException;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +24,10 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 
 @Slf4j
 @Repository
@@ -28,6 +35,7 @@ import java.util.List;
 public class CustomPartyRepositoryImpl implements CustomPartyRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
+    private final PartyMemberRepository partyMemberRepository;
 
     @Override
     public Party findParty(Long partyId) {
@@ -46,62 +54,21 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
      * @return
      */
     @Override
-    public Slice<Party> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
+    public Slice<PartyDTO> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
         QParty qparty = QParty.party;
 
         // 거리 계산 수식
-//        GeometryFactory geometryFactory = new GeometryFactory();
-//
-//        NumberExpression<Double> latitude = Expressions.asNumber(requestDTO.getLatitude());
-//        NumberExpression<Double> longitude = Expressions.asNumber(requestDTO.getLongitude());
-//
-//        NumberExpression<Double> distance = Expressions.numberTemplate(Double.class,
-//                "6371 * acos(" +
-//                        "cos(radians(ST_Y({0}))) " +
-//                        "* cos(radians(ST_Y(party.departuresLocation))) " +
-//                        "* cos(radians(ST_X(party.departuresLocation)) - radians(ST_X({0}))) " +
-//                        "+ sin(radians(ST_Y({0}))) " +
-//                        "* sin(radians(ST_Y(party.departuresLocation))))",
-//                latitude, longitude);
-
-
-        // latitude 를 radians 로 계산
-        NumberExpression<Double> radiansLatitude =
-                Expressions.numberTemplate(Double.class, "radians({0})", requestDTO.getLatitude());
-
-        // 계산된 latitude -> 코사인 계산
-        NumberExpression<Double> cosLatitude =
-                Expressions.numberTemplate(Double.class, "cos({0})", radiansLatitude);
-        NumberExpression<Double> cosPartyLatitude =
-                Expressions.numberTemplate(Double.class, "cos(radians(ST_Y(party.departuresLocation)))");
-
-        // 계산된 latitude -> 사인 계산
-        NumberExpression<Double> sinLatitude =
-                Expressions.numberTemplate(Double.class, "sin({0})", radiansLatitude);
-        NumberExpression<Double> sinPartyLatitude =
-                Expressions.numberTemplate(Double.class, "sin(radians(ST_Y(party.departuresLocation)))");
-
-        // 사이 거리 계산
-        NumberExpression<Double> cosLongitude =
-                Expressions.numberTemplate(Double.class, "cos(radians(ST_X(party.departuresLocation)) - radians({0}))", requestDTO.getLongitude());
-
-        NumberExpression<Double> acosExpression =
-                Expressions.numberTemplate(Double.class, "acos({0})", cosLatitude
-                        .multiply(cosPartyLatitude)
-                        .multiply(cosLongitude)
-                        .add(sinLatitude.multiply(sinPartyLatitude)));
-
-        // 최종 계산 (거리)
-        NumberExpression<Double> distance =
-                Expressions.numberTemplate(Double.class, "6371 * {0}", acosExpression);
-
+        NumberExpression<Double> distance = numberTemplate(Double.class,
+                "calculate_distance({0}, {1}, {2})",
+                requestDTO.getLatitude(), requestDTO.getLongitude(), qparty.departuresLocation);
 
         // 정렬 조건
         OrderSpecifier orderSpecifier = getOrderSpecifier(pageable, qparty, distance);
 
         // 지역범위: 현재 위치
         Double radius = 2.0; // 검색 반경 2km == 도보 20분
-        List<Party> results = jpaQueryFactory.selectFrom(qparty)
+        List<Tuple> results = jpaQueryFactory.select(distance, qparty)
+                .from(qparty)
                 .where(qparty.deletedAt.isNull()
                         , qparty.departuresDate.goe(LocalDateTime.now()) // 현재 시간 이후만 조회
                         , distance.loe(radius) //현재 위치로 부터 반경 2km
@@ -115,15 +82,24 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        List<PartyDTO> partyList = new ArrayList<>();
+
+        for (Tuple tuple : results) {
+            Double distanceValue = tuple.get(distance);
+            Party party = tuple.get(qparty);
+            partyList.add(PartyDTO.of(party, partyMemberRepository.findOrganizer(party)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage())), distanceValue));
+        }
+
         // Slice 생성
-        boolean hasNext = results.size() > pageable.getPageSize();
+        boolean hasNext = partyList.size() > pageable.getPageSize();
         if (hasNext) {
-            results.remove(results.size() - 1);
+            partyList.remove(partyList.size() - 1);
         }
 
         log.info("Number of parties fetched: {}", results.size());
 
-        return new SliceImpl<>(results, pageable, hasNext);
+        return new SliceImpl<>(partyList, pageable, hasNext);
     }
 
     private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qparty, NumberExpression<Double> distance) {
@@ -135,7 +111,7 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
             if (order.getProperty().equals("departuresDate")) { // 출발 시간 가까운 순
 
                 // 현재 시간과의 시간 차이를 계산하는 표현식
-                NumberExpression<Integer> timeDifference = Expressions.numberTemplate(
+                NumberExpression<Integer> timeDifference = numberTemplate(
                         Integer.class,
                         "TIMESTAMPDIFF(SECOND, NOW(), {0})",
                         qparty.departuresDate
