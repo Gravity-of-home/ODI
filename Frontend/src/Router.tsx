@@ -1,6 +1,8 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import SplashPage from './pages/Splash/SplashPage';
 import userStore from './stores/useUserStore';
+import useAuth from '@/hooks/queries/useAuth';
+import { useEffect } from 'react';
 import loadingStore from './stores/useLoadingStore';
 import NaverLoginRedirect from './pages/Login/components/NaverLoginRedirect';
 import HomePage from './pages/Home/HomePage';
@@ -12,7 +14,20 @@ type AuthWrapperProps = {
 };
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  const { isLogin } = userStore();
+  const { isLogin, loginUser, logoutUser } = userStore();
+  const { refreshTokenQuery, getUserInfoQuery } = useAuth();
+  useEffect(() => {
+    if (!!isLogin) {
+      console.log('REFRESH TOKEN SUCCESS: ', refreshTokenQuery.isSuccess);
+      console.log('USER INFO: ', getUserInfoQuery.userData);
+      if (getUserInfoQuery.isSuccess) {
+        loginUser(getUserInfoQuery.userData);
+      }
+      // if (getUserInfoQuery.isError) {
+      //   logoutUser();
+      // }
+    }
+  }, []);
 
   if (!isLogin) {
     return <Navigate to='/login' replace={true} />;
@@ -61,17 +76,17 @@ const router = createBrowserRouter([
   {
     path: '/home',
     element: (
-      // <AuthWrapper>
-      <HomePage />
-      // </AuthWrapper>
+      <AuthWrapper>
+        <HomePage />
+      </AuthWrapper>
     ),
   },
   {
     path: '/profile',
     element: (
-      // <AuthWrapper>
-      <ProfilePage />
-      // </AuthWrapper>
+      <AuthWrapper>
+        <ProfilePage />
+      </AuthWrapper>
     ),
   },
 ]);

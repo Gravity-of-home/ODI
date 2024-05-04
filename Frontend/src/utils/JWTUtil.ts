@@ -1,10 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosResponse,
-  HttpStatusCode,
-  InternalAxiosRequestConfig,
-} from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 import { getCookie } from './CookieUtil.ts';
 import { ViteConfig } from '@/apis/ViteConfig.ts';
@@ -12,25 +6,25 @@ import userStore from '@/stores/useUserStore.ts';
 
 const jwtAxios: AxiosInstance = axios.create({
   baseURL: ViteConfig.VITE_BASE_URL,
-  headers: getCookie('Authorization')
-    ? { AUTHORIZATION: `Bearer ${getCookie('Authorization')}` }
-    : {},
 });
 
-// export const refreshJWT = async () => {
-//   const host = ViteConfig.VITE_BASE_URL;
+export const getLoginState = () => {
+  const { isLogin } = userStore();
+  return isLogin;
+};
 
-//   // const header = { headers: { Authorization: `Bearer ${accessToken}` } };
+export const refreshJWT = async () => {
+  const host = ViteConfig.VITE_BASE_URL;
 
-//   // NOTE : 리프레쉬 토큰을 이용하여 새로운 ACCESS TOKEN, REFRESH TOKEN을 발급받는다.
+  // NOTE : 리프레쉬 토큰을 이용하여 새로운 ACCESS TOKEN, REFRESH TOKEN을 발급받는다.
 
-//   const res = await axios.post(`${host}/reissue`, {}, { withCredentials: true });
-//   console.log('REFRESH JWT RESULT :', res);
-//   const Authorization = getCookie('Authorization');
+  const res = await axios.post(`${host}/reissue`, {}, { withCredentials: true });
+  console.log('REFRESH JWT RESULT :', res);
+  const accessToken = getCookie('Authorization');
 
-//   // NOTE : 결과값은 OK가 오면 정상이다!
-//   return Authorization;
-// };
+  // NOTE : 결과값은 OK가 오면 정상이다!
+  return accessToken;
+};
 
 // // NOTE : 요청 전 헤더 처리
 // export const beforeReq = async (
