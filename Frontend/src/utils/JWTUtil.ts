@@ -3,6 +3,7 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestCo
 import { getCookie } from './CookieUtil.ts';
 import { ViteConfig } from '@/apis/ViteConfig.ts';
 import userStore from '@/stores/useUserStore.ts';
+import { setHeader } from './HeaderUtil.ts';
 
 const jwtAxios: AxiosInstance = axios.create({
   baseURL: ViteConfig.VITE_BASE_URL,
@@ -19,8 +20,12 @@ export const refreshJWT = async () => {
   // NOTE : 리프레쉬 토큰을 이용하여 새로운 ACCESS TOKEN, REFRESH TOKEN을 발급받는다.
 
   const res = await axios.post(`${host}/reissue`, {}, { withCredentials: true });
-  console.log('REFRESH JWT RESULT :', res);
+  // console.log('REFRESH JWT RESULT :', res);
   const accessToken = getCookie('Authorization');
+  if (!res.data) {
+    console.log('REFRESH TOKEN SUCCESS');
+    setHeader('AUTHORIZATION', `Bearer ${accessToken}`);
+  }
 
   // NOTE : 결과값은 OK가 오면 정상이다!
   return accessToken;
