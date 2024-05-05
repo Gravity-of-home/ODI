@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { refreshJWT } from '@/utils/JWTUtil.ts';
 
 const SplashPage = () => {
   const nav = useNavigate();
