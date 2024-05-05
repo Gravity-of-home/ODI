@@ -70,9 +70,12 @@ public class PartyMember extends BaseBy {
         this.paidAmount = paidAmount;
     }
 
+    public void updatePartyRole(RoleType roleType) {
+        this.role = roleType;
+    }
+
     public void updateSettleAmount(Integer settleAmount) {
         this.settleAmount = settleAmount;
     }
-
 
 }
