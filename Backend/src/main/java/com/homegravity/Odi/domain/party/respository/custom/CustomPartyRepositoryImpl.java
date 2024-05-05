@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Repository
@@ -30,12 +31,12 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Party findParty(Long partyId) {
+    public Optional<Party> findParty(Long partyId) {
         QParty qParty = QParty.party;
-        return jpaQueryFactory.selectFrom(qParty)
+        return Optional.ofNullable(jpaQueryFactory.selectFrom(qParty)
                 .where(qParty.id.eq(partyId)
                         .and(qParty.deletedAt.isNull()))
-                .fetchOne();
+                .fetchOne());
     }
 
     /**

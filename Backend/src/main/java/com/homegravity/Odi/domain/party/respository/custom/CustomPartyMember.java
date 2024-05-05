@@ -27,4 +27,5 @@ public interface CustomPartyMember {
 
     Optional<PartyMember> findByPartyAndMember(Party party, Member member);
 
+    List<PartyMember> findAllPartyMemberAndRequester(Party party);
 }

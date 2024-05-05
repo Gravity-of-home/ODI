@@ -72,6 +72,7 @@ public enum ErrorCode {
 
     //party
     PARTY_MEMBER_ALREADY_JOIN_EXIST(400, "이미 파티에 해당 유저가 신청했습니다."),
+    PARTY_MEMBER_ACCESS_DENIED(403, "수정할 권한이 없는 유저입니다."),
     PARTY_MEMBER_ALREADY_EXIST(400, "이미 해당 파티에 존재하는 참여자 입니다."),
     PARTY_MEMBER_CNT_MAX(400, "해당 파티의 정원이 다 찼습니다."),
     PARTY_NOT_GATHERING_NOW(400, "해당 파티가 현재 모집중이 아닙니다."),

@@ -56,10 +56,7 @@ public class PartyService {
     @Transactional
     public PartyResponseDTO getPartyDetail(Long partyId, Member member) {
 
-        Party party = partyRepository.findParty(partyId);
-        if (party == null) { // 파티가 없다면 삭제되었거나 요청에 문제가 있음
-            throw BusinessException.builder().errorCode(ErrorCode.NOT_FOUND_ERROR).message(ErrorCode.NOT_FOUND_ERROR.getMessage()).build();
-        }
+        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
 
         // 조회수, 신청자 수 갱신
         PartyBoardStats partyBoardStats = partyBoardStatsRepository.findPartyBoardStats(party);
@@ -233,10 +230,95 @@ public class PartyService {
         return true;
     }
 
+    @Transactional
+    public Long updateParty(Long partyId, PartyRequestDTO partyRequestDTO, Member member) {
+
+        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
+
+        // 요청자와 작성자가 동일인인지 확인
+        if (member.getId() != Long.parseLong(party.getCreatedBy())) {
+            throw new BusinessException(ErrorCode.PARTY_MEMBER_ACCESS_DENIED, ErrorCode.PARTY_MEMBER_ACCESS_DENIED.getMessage());
+        }
+
+        if (!partyRequestDTO.getTitle().equals("")) {
+            party.updateTitle(partyRequestDTO.getTitle());
+        }
+
+        if (!partyRequestDTO.getDeparturesName().equals("")) {
+            party.updateDeparturesName(partyRequestDTO.getDeparturesName());
+        }
+
+        if (partyRequestDTO.getDeparturesLocation() != null) {
+            party.updateDeparturesLocation(partyRequestDTO.getDeparturesLocation());
+        }
+
+        if (!partyRequestDTO.getArrivalsName().equals("")) {
+            party.updateArrivalsName(partyRequestDTO.getArrivalsName());
+        }
+
+        if (partyRequestDTO.getArrivalsLocation() != null) {
+            party.updateArrivalsLocation(partyRequestDTO.getArrivalsLocation());
+        }
+
+        if (partyRequestDTO.getDeparturesDate() != null) {
+            party.updateDeparturesDate(partyRequestDTO.getDeparturesDate());
+        }
+
+        if (partyRequestDTO.getMaxParticipants() != null) {
+
+            if (partyRequestDTO.getMaxParticipants() < party.getCurrentParticipants()) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST_ERROR, "현재 인원 수가 참여 가능한 인원 수보다 많습니다.");
+            }
+            party.updateMaxParticipants(partyRequestDTO.getMaxParticipants());
+        }
+
+        if (partyRequestDTO.getCategory() != null) {
+            party.updateCategory(partyRequestDTO.getCategory());
+        }
+
+        if (partyRequestDTO.getGenderRestriction() != null) {
+
+            GenderType gender = GenderType.ANY;
+
+            if (partyRequestDTO.getGenderRestriction().booleanValue()) { // 성별 제한이 있다면
+                gender = GenderType.valueOf(member.getGender().toUpperCase());
+            }
+
+            party.updateGenderRestriction(gender);
+        }
+
+        if (!partyRequestDTO.getContent().equals("")) {
+            party.updateContent(partyRequestDTO.getContent());
+        }
+
+        return party.getId();
+    }
+
     // 파티 조회
     @Transactional(readOnly = true)
     public Party getParty(Long partyId) {
-        return Optional.ofNullable(partyRepository.findParty(partyId))
+        return partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public void deleteParty(Long partyId, Member member) {
+
+        Party party = partyRepository.findById(partyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
+
+        // 요청자와 작성자가 동일인인지 확인
+        if (member.getId() != Long.parseLong(party.getCreatedBy())) {
+            throw new BusinessException(ErrorCode.PARTY_MEMBER_ACCESS_DENIED, ErrorCode.PARTY_MEMBER_ACCESS_DENIED.getMessage());
+        }
+
+        // party member 및 신청자 삭제
+        List<PartyMember> partyMemberList = partyMemberRepository.findAllPartyMemberAndRequester(party);
+
+        for (PartyMember pm : partyMemberList) {
+            partyMemberRepository.delete(pm);
+        }
+
+        partyRepository.delete(party);
+
     }
 }
