@@ -21,7 +21,17 @@ const useLatLngAddStore = create(
     }),
     {
       name: 'LatLngAdd',
-      getStorage: () => sessionStorage,
+      storage: {
+        getItem: name => {
+          const item = sessionStorage.getItem(name);
+          return item ? JSON.parse(item) : null;
+        },
+        setItem: (name, value) => {
+          const stringValue = JSON.stringify(value);
+          sessionStorage.setItem(name, stringValue);
+        },
+        removeItem: name => sessionStorage.removeItem(name),
+      },
     },
   ),
 );
