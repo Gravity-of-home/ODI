@@ -21,9 +21,11 @@ public interface CustomPartyMember {
 
     boolean existPartyMember(Party party, Member member);
 
-    Optional<PartyMember> findPartyMemberByMember(Party party, Member member);
-
     List<PartyMember> findAllPartyMember(Party party);
+
+    Optional<PartyMember> findPartyPartiAndReqByMember(Party party, Member member);
+
+    Optional<PartyMember> findByPartyAndMember(Party party, Member member);
 
     List<PartyMember> findAllPartyMemberAndRequester(Party party);
 }

@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -105,8 +107,19 @@ public class PartyService {
     }
 
     public Long joinPartyLogic(Long partyId, Member member) {
+        Party party = getParty(partyId);
 
-        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
+        //파티 정원이 다 찼을 경우
+        if (Objects.equals(party.getCurrentParticipants(), party.getMaxParticipants())) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.PARTY_MEMBER_CNT_MAX).message(ErrorCode.PARTY_MEMBER_CNT_MAX.getMessage()).build();
+        }
+
+        //파티가 모집중이 아닐 경우
+        if (!party.getState().equals(StateType.GATHERING)) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.PARTY_NOT_GATHERING_NOW).message(ErrorCode.PARTY_NOT_GATHERING_NOW.getMessage()).build();
+        }
 
         boolean isPartyMember = partyMemberRepository.existPartyMember(party, member);
 
@@ -132,12 +145,88 @@ public class PartyService {
     }
 
     public boolean deleteJoinPartyLogic(Long partyId, Member member) {
-        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
+        Party party = getParty(partyId);
 
-        PartyMember partyMember = partyMemberRepository.findPartyMemberByMember(party, member)
+
+        PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, member)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
         partyMemberRepository.delete(partyMember);
+
+        //나간 사용자가 참여자였다면 현재 party 인원 감소
+        if (partyMember.getRole().equals(RoleType.PARTICIPANT)) {
+            party.updateCurrentParticipants(party.getCurrentParticipants() - 1);
+        }
+
+        return true;
+    }
+
+    //동승 신청 수락
+    @Transactional
+    public boolean acceptJoinParty(Long partyId, Long memberId, Member member) {
+        Party party = getParty(partyId);
+
+        RoleType role = partyMemberRepository.findParticipantRole(party, member);
+
+        //역할이 방장이 아니라면 권한 없음
+        if (role != RoleType.ORGANIZER) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.FORBIDDEN_ERROR).message("파티장만 수락 요청 할 수 있습니다.").build();
+        }
+
+        //신청자 member 정보
+        Member requester = memberRepository.findByIdAndDeletedAtIsNull(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+
+        //신청자 partyMember 정보
+        PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, requester)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
+
+        //신청자가 아니면 이미 파티 참여자임
+        if (partyMember.getRole() != RoleType.REQUESTER) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.PARTY_MEMBER_ALREADY_EXIST).message(ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()).build();
+        }
+        //파티 신청자를 참여자로 update
+        partyMember.updatePartyRole(RoleType.PARTICIPANT);
+
+        party.updateCurrentParticipants(party.getCurrentParticipants() + 1);
+
+        return true;
+    }
+
+    //파티장의 파티 참여자 및 신청자 거절하기
+    @Transactional
+    public boolean refuseJoinParty(Long partyId, Long memberId, Member member) {
+        Party party = getParty(partyId);
+
+        RoleType role = partyMemberRepository.findParticipantRole(party, member);
+
+        //역할이 방장이 아니라면 권한 없음
+        if (role != RoleType.ORGANIZER) {
+            throw BusinessException.builder()
+                    .errorCode(ErrorCode.FORBIDDEN_ERROR).message("파티장만 거절 요청 할 수 있습니다.").build();
+        }
+
+        //신청자 member 정보
+        Member requester = memberRepository.findByIdAndDeletedAtIsNull(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+
+        //partyMember 정보
+        PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, requester)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
+
+        //반환을 위한 roleTyle 받기
+        //String roleType = partyMember.getRole().toString();
+
+        //삭제
+        partyMemberRepository.delete(partyMember);
+
+        //참여자를 내보내기 했다면, 현재 파티 인원 감소
+        if (partyMember.getRole().equals(RoleType.PARTICIPANT)) {
+            party.updateCurrentParticipants(party.getCurrentParticipants() - 1);
+        }
+
         return true;
     }
 
