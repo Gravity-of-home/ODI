@@ -152,4 +152,6 @@ public class Party extends BaseBy {
         this.state = state;
     }
 
+    public void updateCurrentParticipants(int currentParticipants){ this.currentParticipants = currentParticipants; }
+
 }

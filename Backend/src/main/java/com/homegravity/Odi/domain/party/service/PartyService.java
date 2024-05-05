@@ -119,7 +119,7 @@ public class PartyService {
         }
 
         //파티가 모집중이 아닐 경우
-        if(!party.getState().equals(StateType.GATHERING)){
+        if (!party.getState().equals(StateType.GATHERING)) {
             throw BusinessException.builder()
                     .errorCode(ErrorCode.PARTY_NOT_GATHERING_NOW).message(ErrorCode.PARTY_NOT_GATHERING_NOW.getMessage()).build();
         }
@@ -156,6 +156,11 @@ public class PartyService {
 
         partyMemberRepository.delete(partyMember);
 
+        //나간 사용자가 참여자였다면 현재 party 인원 감소
+        if (partyMember.getRole().equals(RoleType.PARTICIPANT)) {
+            party.updateCurrentParticipants(party.getCurrentParticipants() - 1);
+        }
+
         return true;
     }
 
@@ -188,6 +193,8 @@ public class PartyService {
         //파티 신청자를 참여자로 update
         partyMember.updatePartyRole(RoleType.PARTICIPANT);
 
+        party.updateCurrentParticipants(party.getCurrentParticipants() + 1);
+
         return true;
     }
 
@@ -217,6 +224,11 @@ public class PartyService {
 
         //삭제
         partyMemberRepository.delete(partyMember);
+
+        //참여자를 내보내기 했다면, 현재 파티 인원 감소
+        if (partyMember.getRole().equals(RoleType.PARTICIPANT)) {
+            party.updateCurrentParticipants(party.getCurrentParticipants() - 1);
+        }
 
         return true;
     }
