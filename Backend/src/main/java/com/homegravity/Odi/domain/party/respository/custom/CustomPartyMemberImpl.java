@@ -66,7 +66,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                 .where(qPartyMember.party.eq(party)
                         .and(builder)
                         .and(qPartyMember.deletedAt.isNull()))
-                .fetch().stream().map(pm -> PartyMemberDTO.of(pm, pm.getMember())).toList();
+                .fetch().stream().map(pm -> PartyMemberDTO.from(pm)).toList();
     }
 
     @Override
