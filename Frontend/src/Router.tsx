@@ -1,5 +1,6 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import SplashPage from './pages/Splash/SplashPage';
+import NotFoundPage from './pages/NotFound/NotFoundPage';
 import userStore from './stores/useUserStore';
 import useAuth from '@/hooks/queries/useAuth';
 import { useEffect } from 'react';
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Navigate to={'/welcome'} replace={true} />,
+  },
+  {
+    path: '/*',
+    element: <NotFoundPage />,
   },
   {
     path: '/welcome',
