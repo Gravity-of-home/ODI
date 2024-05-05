@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class PartyDTO {
 
     private Long id;
-    
+
     @Schema(description = "현재 위치와 출발지 사이의 거리")
     private Double distance;
 
@@ -100,7 +100,7 @@ public class PartyDTO {
                 .state(party.getState())
                 .viewCount(party.getPartyBoardStats().getViewCount())
                 .requestCount(party.getPartyBoardStats().getRequestCount())
-                .organizer(PartyMemberDTO.of(partyMember, partyMember.getMember()))
+                .organizer(PartyMemberDTO.from(partyMember))
                 .build();
     }
 }
