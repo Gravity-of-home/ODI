@@ -14,16 +14,15 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
 
   useEffect(() => {
     console.log('provider attached');
-    const sockJS = new SockJS(`http://localhost:8080/ws-stomp/${partyId}`); // partyId를 사용하는 WebSocket URL
+    const sockJS = new SockJS(`http://localhost:8080/ws-stomp`); // partyId를 사용하는 WebSocket URL
     const client = new Client({
-      webSocketFactory: () => new SockJS(`http://localhost:8080/ws-stomp/${partyId}`),
+      webSocketFactory: () => new SockJS(`http://localhost:8080/ws-stomp`),
       reconnectDelay: 5000,
       debug: str => {
         console.log('STOMP Debug:', str);
       },
       onConnect: () => {
         console.log(`WebSocket Connected for party ${partyId}`);
-        setStompClient(client);
       },
       onDisconnect: () => {
         console.log(`WebSocket Disconnected for party ${partyId}`);
@@ -35,7 +34,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
         console.error('WebSocket Error:', err);
       },
     });
-
+    setStompClient(client);
     client.activate();
     return () => {
       console.log('client deactivate');

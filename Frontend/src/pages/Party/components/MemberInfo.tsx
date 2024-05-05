@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import jwtAxios from '@/utils/JWTUtil';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface IMemberInfoProps {
   hostName: string;
@@ -9,6 +11,7 @@ interface IMemberInfoProps {
   participants: any;
   guests: any;
   role: string;
+  partyId: string | undefined;
 }
 interface IParticipant {
   id: number;
@@ -28,14 +31,18 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   participants,
   guests,
   role,
+  partyId,
   fetchData,
 }) => {
   // 파티 신청 수락
   const acceptEnterParty = (memberId: number) => () => {
     jwtAxios
-      .put(`api/parties/1/${memberId}`, {})
-      .then(response => {
-        console.log(response.data);
+      .put(`api/parties/${partyId}/2`, {})
+      .then(res => {
+        console.log(res.data);
+        if (res.data.status === 201) {
+          toast.success(`${res.data.message}`, { position: 'top-center' });
+        }
         fetchData();
       })
       .catch(err => {
@@ -46,9 +53,12 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   // 파티 신청 거절
   const rejectEnterParty = (memberId: number) => () => {
     jwtAxios
-      .delete(`api/parties/1/${memberId}`, {})
-      .then(response => {
-        console.log(response.data);
+      .delete(`api/parties/${partyId}/2`, {})
+      .then(res => {
+        console.log(res.data);
+        if (res.data.status === 204) {
+          toast.success(`${res.data.message}`, { position: 'top-center' });
+        }
         fetchData();
       })
       .catch(err => {
@@ -56,12 +66,15 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
       });
   };
 
-  // TODO 참여 요청 거절이랑 URI, Method 같음 수정 해야함
+  // 파티원 추방
   const banParticipant = (memberId: number) => () => {
     jwtAxios
-      .delete(`api/parties/1/${memberId}`, {})
-      .then(response => {
-        console.log(response.data);
+      .delete(`api/parties/${partyId}/2`, {})
+      .then(res => {
+        console.log(res.data);
+        if (res.data.status === 204) {
+          toast.success(`${res.data.message}`, { position: 'top-center' });
+        }
         fetchData();
       })
       .catch(err => {
@@ -118,6 +131,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
 
   return (
     <div className='container p-2'>
+      <ToastContainer autoClose={1000} />
       <div className='host-info mb-5'>
         <p className='mb-4 font-bold text-xl'>팟장</p>
         <div className='flex justify-between content-center'>
