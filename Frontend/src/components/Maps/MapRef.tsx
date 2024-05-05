@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import LatLngAddStore from '@/stores/useLatLngAddStore';
+import { ViteConfig } from '@/apis/ViteConfig';
 
 const MapRef = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -15,6 +16,7 @@ const MapRef = () => {
           lng: currentLng,
         },
         zoom: 16,
+        mapId: ViteConfig.VITE_GOOGLE_MAP_API_KEY_ID,
       });
 
       setGoogleMap(initialMap);
