@@ -17,20 +17,15 @@ type AuthWrapperProps = {
 };
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  const { isLogin, loginUser, logoutUser } = userStore();
+  const { isLogin, id, loginUser, logoutUser } = userStore();
   const { refreshTokenQuery, getUserInfoQuery } = useAuth();
+
   useEffect(() => {
-    if (!!isLogin) {
-      console.log('REFRESH TOKEN SUCCESS: ', refreshTokenQuery.isSuccess);
-      console.log('USER INFO: ', getUserInfoQuery.userData);
-      if (getUserInfoQuery.isSuccess) {
-        loginUser(getUserInfoQuery.userData);
-      }
-      // if (getUserInfoQuery.isError) {
-      //   logoutUser();
-      // }
+    if (refreshTokenQuery.isSuccess && getUserInfoQuery.isSuccess) {
+      console.log('회원정보 조회 및 저장 완료');
+      loginUser(getUserInfoQuery.userData);
     }
-  }, []);
+  }, [getUserInfoQuery.isSuccess]);
 
   if (!isLogin) {
     return <Navigate to='/login' replace={true} />;

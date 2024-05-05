@@ -84,15 +84,7 @@ public class PartyService {
     @Transactional(readOnly = true)
     public Slice<PartyDTO> getAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
 
-        Slice<Party> partySlice = partyRepository.findAllParties(pageable, requestDTO);
-
-        return partySlice.map(party ->
-                PartyDTO.of(party, partyMemberRepository.findOrganizer(party)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()))));
-
-//
-//        return new SliceImpl<>(results, pageable, partySlice.hasNext());
-
+        return partyRepository.findAllParties(pageable, requestDTO);
     }
 
     public Long joinParty(Long partyId, Member member) {
