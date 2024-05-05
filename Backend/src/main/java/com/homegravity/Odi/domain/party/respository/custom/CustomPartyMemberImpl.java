@@ -118,5 +118,19 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                 .fetch();
     }
 
+    @Override
+    public Optional<PartyMember> findByPartyAndMember(Party party, Member member) {
+        QPartyMember qPartyMember = QPartyMember.partyMember;
+
+        return Optional.ofNullable(
+                jpaQueryFactory.selectFrom(qPartyMember)
+                        .where(qPartyMember.party.eq(party)
+                                .and(qPartyMember.member.eq(member))
+                                .and(qPartyMember.role.ne(RoleType.REQUESTER))
+                                .and(qPartyMember.deletedAt.isNull()))
+                        .fetchOne()
+        );
+    }
+
 
 }
