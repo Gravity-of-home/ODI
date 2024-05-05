@@ -42,8 +42,12 @@ public enum SuccessCode {
     // Party
     PARTY_CREATE_SUCCESS(201, "택시 파티 생성에 성공했습니다."),
     PARTY_GET_SUCCESS(200, "택시 파티 조회에 성공했습니다."),
+    PARTY_UPDATE_SUCCESS(204, "택시 파티 수정에 성공했습니다."),
+    PARTY_DELETE_SUCCESS(204, "택시 파티 삭제에 성공했습니다."),
     PARTY_SUBSCRIBE_SUCCESS(201, "택시 파티 참여 신청에 성공했습니다."),
     PARTY_DELETE_SUBSCRIBE_SUCCESS(204, "택시 파티 참여 신청 취소에 성공했습니다."),
+    PARTY_ACCEPT_SUBSCRIBE_SUCCESS(201, "택시 파티 신청자를 참여자로 수락하였습니다."),
+    PARTY_REFUSE_SUCCESS(204, "택시 파티 동승 참여 거절에 성공했습니다."),
 
     // Place
     PLACE_LIST_GET_SUCCESS(200, "장소 검색에 성공했습니다."),
@@ -58,7 +62,9 @@ public enum SuccessCode {
     PAYMENT_FAIL_UPDATE_SUCCESS(204, "결제 실패 업데이트에 성공했습니다."),
 
     // Party Settlement
-    PARTY_MATCH_STATE_UPDATE_SUCCESS(204, "동승 성사 업데이트에 성공했습니다."),
+    PARTY_MATCH_STATE_UPDATE_SUCCESS(204, "동승 성사에 성공했습니다."),
+    PARTY_STATE_UPDATE_TO_SETTLING_SUCCESS(204, "동승 정산 요청에 성공했습니다."),
+    PARTY_STATE_UPDATE_TO_SETTLEMENT_SUCCESS(204, "동승 정산 요청에 성공했습니다."),
     ;
 
     /**

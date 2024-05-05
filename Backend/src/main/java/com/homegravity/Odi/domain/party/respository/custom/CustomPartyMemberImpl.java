@@ -96,7 +96,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
     //참여자 혹은 신청자인 경우일 때
     @Override
-    public Optional<PartyMember> findPartyMemberByMember(Party party, Member member) {
+    public Optional<PartyMember> findPartyPartiAndReqByMember(Party party, Member member) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
 
         return Optional.ofNullable(jpaQueryFactory.selectFrom(qPartyMember)
@@ -114,8 +114,33 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
         return jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.role.ne(RoleType.REQUESTER)
+                        .and(qPartyMember.party.eq(party))
                         .and(qPartyMember.deletedAt.isNull()))
                 .fetch();
+    }
+
+    @Override
+    public List<PartyMember> findAllPartyMemberAndRequester(Party party) {
+        QPartyMember qPartyMember = QPartyMember.partyMember;
+
+        return jpaQueryFactory.selectFrom(qPartyMember)
+                .where(qPartyMember.party.eq(party)
+                        .and(qPartyMember.deletedAt.isNull()))
+                .fetch();
+    }
+
+    @Override
+    public Optional<PartyMember> findByPartyAndMember(Party party, Member member) {
+        QPartyMember qPartyMember = QPartyMember.partyMember;
+
+        return Optional.ofNullable(
+                jpaQueryFactory.selectFrom(qPartyMember)
+                        .where(qPartyMember.party.eq(party)
+                                .and(qPartyMember.member.eq(member))
+                                .and(qPartyMember.role.ne(RoleType.REQUESTER))
+                                .and(qPartyMember.deletedAt.isNull()))
+                        .fetchOne()
+        );
     }
 
 

@@ -1,12 +1,16 @@
 package com.homegravity.Odi.domain.party.respository.custom;
 
+import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.QParty;
+import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
+import com.homegravity.Odi.global.response.error.ErrorCode;
+import com.homegravity.Odi.global.response.error.exception.BusinessException;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +24,11 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 
 @Slf4j
 @Repository
@@ -28,14 +36,15 @@ import java.util.List;
 public class CustomPartyRepositoryImpl implements CustomPartyRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
+    private final PartyMemberRepository partyMemberRepository;
 
     @Override
-    public Party findParty(Long partyId) {
+    public Optional<Party> findParty(Long partyId) {
         QParty qParty = QParty.party;
-        return jpaQueryFactory.selectFrom(qParty)
+        return Optional.ofNullable(jpaQueryFactory.selectFrom(qParty)
                 .where(qParty.id.eq(partyId)
                         .and(qParty.deletedAt.isNull()))
-                .fetchOne();
+                .fetchOne());
     }
 
     /**
@@ -46,14 +55,24 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
      * @return
      */
     @Override
-    public Slice<Party> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
+    public Slice<PartyDTO> findAllParties(Pageable pageable, SelectPartyRequestDTO requestDTO) {
         QParty qparty = QParty.party;
 
-        OrderSpecifier orderSpecifier = getOrderSpecifier(pageable, qparty);
+        // 거리 계산 수식
+        NumberExpression<Double> distance = numberTemplate(Double.class,
+                "calculate_distance({0}, {1}, {2})",
+                requestDTO.getLatitude(), requestDTO.getLongitude(), qparty.departuresLocation);
 
-        // 지역범위: 전체
-        List<Party> results = jpaQueryFactory.selectFrom(qparty)
-                .where(qparty.deletedAt.isNull(), qparty.departuresDate.goe(LocalDateTime.now())
+        // 정렬 조건
+        OrderSpecifier orderSpecifier = getOrderSpecifier(pageable, qparty, distance);
+
+        // 지역범위: 현재 위치
+        Double radius = 2.0; // 검색 반경 2km == 도보 20분
+        List<Tuple> results = jpaQueryFactory.select(distance, qparty)
+                .from(qparty)
+                .where(qparty.deletedAt.isNull()
+                        , qparty.departuresDate.goe(LocalDateTime.now()) // 현재 시간 이후만 조회
+                        , distance.loe(radius) //현재 위치로 부터 반경 2km
                         , eqToday(requestDTO, qparty)
                         , eqGender(requestDTO, qparty)
                         , eqDepartureDate(requestDTO, qparty)
@@ -64,18 +83,27 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        List<PartyDTO> partyList = new ArrayList<>();
+
+        for (Tuple tuple : results) {
+            Double distanceValue = tuple.get(distance);
+            Party party = tuple.get(qparty);
+            partyList.add(PartyDTO.of(party, partyMemberRepository.findOrganizer(party)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage())), distanceValue));
+        }
+
         // Slice 생성
-        boolean hasNext = results.size() > pageable.getPageSize();
+        boolean hasNext = partyList.size() > pageable.getPageSize();
         if (hasNext) {
-            results.remove(results.size() - 1);
+            partyList.remove(partyList.size() - 1);
         }
 
         log.info("Number of parties fetched: {}", results.size());
 
-        return new SliceImpl<>(results, pageable, hasNext);
+        return new SliceImpl<>(partyList, pageable, hasNext);
     }
 
-    private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qparty) {
+    private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qparty, NumberExpression<Double> distance) {
         OrderSpecifier orderSpecifier = null;
         for (Sort.Order order : pageable.getSort()) {
 
@@ -84,7 +112,7 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
             if (order.getProperty().equals("departuresDate")) { // 출발 시간 가까운 순
 
                 // 현재 시간과의 시간 차이를 계산하는 표현식
-                NumberExpression<Integer> timeDifference = Expressions.numberTemplate(
+                NumberExpression<Integer> timeDifference = numberTemplate(
                         Integer.class,
                         "TIMESTAMPDIFF(SECOND, NOW(), {0})",
                         qparty.departuresDate
@@ -93,8 +121,10 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
                 orderSpecifier = new OrderSpecifier(direction, timeDifference);
 
 
-            } else if (order.getProperty().equals("distance")) {
-                /* TODO: 거리순 정렬 로직 작성*/
+            } else if (order.getProperty().equals("distance")) { // 출발지 가까운 순
+
+                orderSpecifier = new OrderSpecifier(direction, distance);
+
             } else { // 정렬 기준이 없다면 최신순
                 orderSpecifier = new OrderSpecifier(Order.DESC, qparty.createdAt);
             }
