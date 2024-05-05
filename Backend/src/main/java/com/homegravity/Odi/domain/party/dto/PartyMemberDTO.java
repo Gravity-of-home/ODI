@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class PartyMemberDTO {
 
-    private Long member_id;
+    private Long id;
     private RoleType role;
     private String nickname;
     private String gender;
@@ -19,8 +19,8 @@ public class PartyMemberDTO {
     private Boolean isPaid;
 
     @Builder
-    private PartyMemberDTO(Long member_id, RoleType role, String nickname, String gender, String ageGroup, String profileImage, Boolean isPaid) {
-        this.member_id = member_id;
+    private PartyMemberDTO(Long id, RoleType role, String nickname, String gender, String ageGroup, String profileImage, Boolean isPaid) {
+        this.id = id;
         this.role = role;
         this.nickname = nickname;
         this.gender = gender;
@@ -31,7 +31,7 @@ public class PartyMemberDTO {
 
     public static PartyMemberDTO from(PartyMember partyMember) {
         return PartyMemberDTO.builder()
-                .member_id(partyMember.getMember().getId())
+                .id(partyMember.getMember().getId())
                 .role(partyMember.getRole())
                 .nickname(partyMember.getMember().getNickname())
                 .gender(partyMember.getMember().getGender())
