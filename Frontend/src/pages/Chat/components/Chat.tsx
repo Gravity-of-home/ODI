@@ -8,42 +8,39 @@ const Chat = () => {
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    if (stompClient) {
-      // onConnect 내에서 구독 로직을 설정
-      const onConnected = () => {
-        console.log('Connected to the WebSocket');
+    // 연결 상태를 확인하고 구독을 설정하는 함수를 정의합니다.
+    const setupSubscription = () => {
+      if (stompClient && stompClient.connected) {
         const subscription = stompClient.subscribe(`/sub/chat/room/${partyId}`, message => {
           const newMessage = JSON.parse(message.body).message;
-          console.log(newMessage);
+          console.log(newMessage); // 개발 중에는 로그를 확인할 수 있지만, 프로덕션에서는 제거하는 것이 좋습니다.
           setMessages(prevMessages => [...prevMessages, newMessage]);
         });
 
-        stompClient.subscribe(`/sub`, message => {
-          console.log(message);
-        });
-
-        return () => {
-          subscription.unsubscribe(); // Clean up the subscription when the component unmounts or dependencies change
-        };
-      };
-
-      // 클라이언트 연결 및 구독
-      if (!stompClient.active) {
-        stompClient.activate();
-        stompClient.onConnect = onConnected;
+        return () => subscription.unsubscribe(); // 구독 해제
       }
-    }
-  }, [stompClient, partyId]); // stompClient 및 partyId에 의존하는 useEffect
+    };
 
+    // 클라이언트가 연결될 때 구독을 설정합니다.
+    const subscription = setupSubscription();
+    return () => {
+      // 컴포넌트 언마운트 시 구독을 해제합니다.
+      if (subscription) {
+        subscription();
+      }
+    };
+  }, [stompClient, partyId]);
+
+  // 메시지 표시 부분은 따로 컴포넌트로 분리할 수도 있습니다.
   return (
-    <div>
-      <div className='chat'>
-        {messages.map((msg, index) => (
-          <div key={index}>{msg}</div> // 메시지 출력
-        ))}
-      </div>
+    <div className='chat'>
+      {messages.map((msg, index) => (
+        <Message key={index} text={msg} />
+      ))}
     </div>
   );
 };
+
+const Message = ({ text }) => <div className='message'>{text}</div>;
 
 export default Chat;

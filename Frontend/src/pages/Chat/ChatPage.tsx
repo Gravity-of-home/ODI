@@ -34,9 +34,7 @@ const ChatPage = () => {
         <div>
           <Info />
         </div>
-        <div>
-          <Chat />
-        </div>
+        <div>{/* <Chat /> */}</div>
       </div>
     </WebSocketProvider>
   );
