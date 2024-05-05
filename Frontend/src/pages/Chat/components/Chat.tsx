@@ -32,15 +32,7 @@ const Chat = () => {
   }, [stompClient, partyId]);
 
   // 메시지 표시 부분은 따로 컴포넌트로 분리할 수도 있습니다.
-  return (
-    <div className='chat'>
-      {messages.map((msg, index) => (
-        <Message key={index} text={msg} />
-      ))}
-    </div>
-  );
+  return <div className='chat'>{messages}</div>;
 };
-
-const Message = ({ text }) => <div className='message'>{text}</div>;
 
 export default Chat;
