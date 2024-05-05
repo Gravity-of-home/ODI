@@ -1,12 +1,13 @@
 export interface IUser {
-  memberId: string;
+  id: string;
   name: string;
-  gender?: boolean;
+  gender?: string;
   email?: string;
   birth?: Date | number;
+  ageGroup?: string;
   nickname?: string;
   point?: number;
-  profileImg?: string;
+  image?: string;
   isVerified?: boolean;
   brix?: number;
   error?: IUserError;

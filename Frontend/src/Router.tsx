@@ -1,11 +1,13 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import SplashPage from './pages/Splash/SplashPage';
 import userStore from './stores/useUserStore';
+import useAuth from '@/hooks/queries/useAuth';
+import { useEffect } from 'react';
 import loadingStore from './stores/useLoadingStore';
-import NaverLogin from './pages/Login/components/NaverLogin';
 import NaverLoginRedirect from './pages/Login/components/NaverLoginRedirect';
 import HomePage from './pages/Home/HomePage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import LoginPage from './pages/Login/LoginPage';
 import PartyDetailPage from './pages/Party/PartyDetailPage';
 import ChatListPage from './pages/Chat/ChatListPage';
 import ChatPage from './pages/Chat/ChatPage';
@@ -15,7 +17,20 @@ type AuthWrapperProps = {
 };
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  const { isLogin } = userStore();
+  const { isLogin, loginUser, logoutUser } = userStore();
+  const { refreshTokenQuery, getUserInfoQuery } = useAuth();
+  useEffect(() => {
+    if (!!isLogin) {
+      console.log('REFRESH TOKEN SUCCESS: ', refreshTokenQuery.isSuccess);
+      console.log('USER INFO: ', getUserInfoQuery.userData);
+      if (getUserInfoQuery.isSuccess) {
+        loginUser(getUserInfoQuery.userData);
+      }
+      // if (getUserInfoQuery.isError) {
+      //   logoutUser();
+      // }
+    }
+  }, []);
 
   if (!isLogin) {
     return <Navigate to='/login' replace={true} />;
@@ -55,7 +70,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <NaverLogin />,
+    element: <LoginPage />,
   },
   {
     path: '/auth',

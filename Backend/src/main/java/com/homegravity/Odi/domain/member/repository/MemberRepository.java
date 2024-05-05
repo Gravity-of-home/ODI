@@ -11,5 +11,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByProviderCodeAndDeletedAtIsNull(String providerCode);
 
+    boolean existsByNicknameAndDeletedAtIsNull(String nickname);
+
 
 }

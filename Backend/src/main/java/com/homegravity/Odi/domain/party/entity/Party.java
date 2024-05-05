@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.party.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.homegravity.Odi.domain.party.dto.LocationPoint;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.global.entity.BaseBy;
 import jakarta.persistence.*;
@@ -48,8 +49,12 @@ public class Party extends BaseBy {
     @Column(name = "max_participants")
     private Integer maxParticipants;
 
+    @Column(name = "current_participants")
+    private Integer currentParticipants;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "category")
-    private String category;
+    private CategoryType category;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender_restriction")
@@ -65,11 +70,14 @@ public class Party extends BaseBy {
     @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartyBoardStats partyBoardStats;
 
+    @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
+    private PartySettlement partySettlement;
+
     @Builder
     private Party(String title, String departuresName, Point departuresLocation,
                   String arrivalsName, Point arrivalsLocation,
-                  LocalDateTime departuresDate, Integer maxParticipants,
-                  String category, GenderType genderRestriction, String content) {
+                  LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants,
+                  CategoryType category, GenderType genderRestriction, String content) {
 
         this.title = title;
         this.departuresName = departuresName;
@@ -78,6 +86,7 @@ public class Party extends BaseBy {
         this.arrivalsLocation = arrivalsLocation;
         this.departuresDate = departuresDate;
         this.maxParticipants = maxParticipants;
+        this.currentParticipants = currentParticipants;
         this.category = category;
         this.genderRestriction = genderRestriction;
         this.state = StateType.GATHERING;
@@ -109,7 +118,8 @@ public class Party extends BaseBy {
                 .arrivalsLocation(arrivalsLocation)
                 .departuresDate(partyRequestDTO.getDeparturesDate())
                 .maxParticipants(partyRequestDTO.getMaxParticipants())
-                .category(partyRequestDTO.getCategory())
+                .currentParticipants(1) // 파티장
+                .category(CategoryType.valueOf(partyRequestDTO.getCategory()))
                 .genderRestriction(genderRestriction)
                 .content(partyRequestDTO.getContent())
                 .build();
@@ -117,6 +127,14 @@ public class Party extends BaseBy {
 
     public void updatePartyBoardStats(PartyBoardStats partyBoardStats) {
         this.partyBoardStats = partyBoardStats;
+    }
+
+    public void updatePartySettlement(PartySettlement partySettlement) {
+        this.partySettlement = partySettlement;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
     }
 
     public void updateDeparturesName(String departuresName) {
@@ -127,16 +145,44 @@ public class Party extends BaseBy {
         this.arrivalsName = arrivalsName;
     }
 
-    public void updateDeparturesLocation(Point departuresLocation) {
-        this.departuresLocation = departuresLocation;
+    public void updateDeparturesLocation(LocationPoint departuresLocation) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new Coordinate(departuresLocation.getLongitude(), departuresLocation.getLatitude()));
+
+        this.departuresLocation = point;
     }
 
-    public void updateArrivalsLocation(Point arrivalsLocation) {
-        this.arrivalsLocation = arrivalsLocation;
+    public void updateArrivalsLocation(LocationPoint arrivalsLocation) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new Coordinate(arrivalsLocation.getLongitude(), arrivalsLocation.getLatitude()));
+
+        this.arrivalsLocation = point;
+    }
+
+    public void updateDeparturesDate(LocalDateTime departuresDate) {
+        this.departuresDate = departuresDate;
+    }
+
+    public void updateMaxParticipants(Integer maxParticipants) {
+        this.maxParticipants = maxParticipants;
+    }
+
+    public void updateCategory(String category) {
+        this.category = CategoryType.valueOf(category);
+    }
+
+    public void updateGenderRestriction(GenderType genderRestriction) {
+        this.genderRestriction = genderRestriction;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
     }
 
     public void updateState(StateType state) {
         this.state = state;
     }
+
+    public void updateCurrentParticipants(int currentParticipants){ this.currentParticipants = currentParticipants; }
 
 }

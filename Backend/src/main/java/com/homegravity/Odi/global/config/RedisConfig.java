@@ -1,5 +1,7 @@
 package com.homegravity.Odi.global.config;
 
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+@Slf4j
 @Configuration
 public class RedisConfig {
 
@@ -32,14 +35,21 @@ public class RedisConfig {
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
 
+
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
 
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+        // todo 레디스 설정 자세히 하기
+
+        //redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        //redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
 
         return redisTemplate;
     }
+
 }
