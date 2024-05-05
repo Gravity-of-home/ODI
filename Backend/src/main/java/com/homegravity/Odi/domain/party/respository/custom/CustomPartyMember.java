@@ -25,5 +25,5 @@ public interface CustomPartyMember {
 
     List<PartyMember> findAllPartyMember(Party party);
 
-
+    List<PartyMember> findAllPartyMemberAndRequester(Party party);
 }

@@ -222,8 +222,8 @@ public class PartyService {
             throw new BusinessException(ErrorCode.PARTY_MEMBER_ACCESS_DENIED, ErrorCode.PARTY_MEMBER_ACCESS_DENIED.getMessage());
         }
 
-        // party member 삭제
-        List<PartyMember> partyMemberList = partyMemberRepository.findAllPartyMember(party);
+        // party member 및 신청자 삭제
+        List<PartyMember> partyMemberList = partyMemberRepository.findAllPartyMemberAndRequester(party);
 
         for (PartyMember pm : partyMemberList) {
             partyMemberRepository.delete(pm);
