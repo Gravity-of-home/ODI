@@ -193,7 +193,7 @@ public class PartyService {
 
     //파티장의 파티 참여자 및 신청자 거절하기
     @Transactional
-    public String refuseJoinParty(Long partyId, Long memberId, Member member) {
+    public boolean refuseJoinParty(Long partyId, Long memberId, Member member) {
         Party party = getParty(partyId);
 
         RoleType role = partyMemberRepository.findParticipantRole(party, member);
@@ -213,12 +213,12 @@ public class PartyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
         //반환을 위한 roleTyle 받기
-        String roleType = partyMember.getRole().toString();
+        //String roleType = partyMember.getRole().toString();
 
         //삭제
         partyMemberRepository.delete(partyMember);
 
-        return roleType;
+        return true;
     }
 
     // 파티 조회

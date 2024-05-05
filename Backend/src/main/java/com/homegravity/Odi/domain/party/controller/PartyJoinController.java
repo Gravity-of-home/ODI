@@ -37,7 +37,7 @@ public class PartyJoinController {
 
     @Operation(summary = "동승자 구인 파티 신청 거절 및 내보내기(방장만)", description = "방장이 동승자 구인 파티 신청자를 거절/내보내기 합니다.")
     @DeleteMapping("/{member-id}")
-    public ApiResponse<String> refuseJoinParty(@PathVariable(value = "party-id") Long partyId, @PathVariable(value = "member-id") Long memberId, @AuthenticationPrincipal Member member){
+    public ApiResponse<Boolean> refuseJoinParty(@PathVariable(value = "party-id") Long partyId, @PathVariable(value = "member-id") Long memberId, @AuthenticationPrincipal Member member){
         return ApiResponse.of(SuccessCode.PARTY_REFUSE_SUCCESS, partyService.refuseJoinParty(partyId, memberId, member));
     }
 }
