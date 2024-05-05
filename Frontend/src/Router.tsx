@@ -20,14 +20,18 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     if (!!isLogin) {
       console.log('REFRESH TOKEN SUCCESS: ', refreshTokenQuery.isSuccess);
       console.log('USER INFO: ', getUserInfoQuery.userData);
-      if (getUserInfoQuery.isSuccess) {
-        loginUser(getUserInfoQuery.userData);
-      }
+
       // if (getUserInfoQuery.isError) {
       //   logoutUser();
       // }
     }
   }, []);
+
+  useEffect(() => {
+    if (refreshTokenQuery.isSuccess && getUserInfoQuery.isSuccess) {
+      loginUser(getUserInfoQuery.userData);
+    }
+  }, [getUserInfoQuery.isSuccess]);
 
   if (!isLogin) {
     return <Navigate to='/login' replace={true} />;
