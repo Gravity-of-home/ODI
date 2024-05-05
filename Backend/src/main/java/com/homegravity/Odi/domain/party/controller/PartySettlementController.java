@@ -36,4 +36,13 @@ public class PartySettlementController {
 
         return ApiResponse.of(SuccessCode.PARTY_STATE_UPDATE_TO_SETTLING_SUCCESS, partySettlementService.askForSettlement(member, partyId, requestDto));
     }
+
+    @Operation(summary = "동승(파티) 정산", description = "사용자가 정산합니다.")
+    @PostMapping("/{party-id}/settlement")
+    public ApiResponse<Void> settle(@AuthenticationPrincipal Member member, @PathVariable(name = "party-id") Long partyId) {
+
+        partySettlementService.settle(member, partyId);
+        return ApiResponse.of(SuccessCode.PARTY_STATE_UPDATE_TO_SETTLEMENT_SUCCESS);
+    }
+
 }
