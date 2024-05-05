@@ -7,8 +7,13 @@ const render = (status: Status) => {
     case Status.LOADING:
       return (
         <>
-          <div className='w-full h-lvh flex justify-center items-center'>
-            <span className='loading loading-dots loading-lg'></span>
+          <div className='gird grid-cols-1 gap-6 h-[100%] flex flex-col justify-center items-center animate-fadeIn'>
+            <img
+              src='https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Cyclone.png'
+              alt='Cyclone'
+              width='200'
+              height='200'
+            />
           </div>
         </>
       );
