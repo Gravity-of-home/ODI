@@ -211,7 +211,14 @@ const PartyDetailPage = () => {
   return (
     <div className='container'>
       <div className='mb-24'>
-        <TopNav role={info.role} state={info.state} partyId={partyId} fetchData={fetchData} />
+        <TopNav
+          role={info.role}
+          state={info.state}
+          partyId={partyId}
+          currentParticipants={info.currentParticipants}
+          expectedCost={info.expectedCost}
+          fetchData={fetchData}
+        />
       </div>
 
       <div className='party-info'>

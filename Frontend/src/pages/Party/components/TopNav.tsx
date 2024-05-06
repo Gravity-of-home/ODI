@@ -10,6 +10,8 @@ interface ModalProps {
   role: string;
   state: string;
   partyId: string | undefined;
+  expectedCost: number;
+  currentParticipants: number;
   onClose: () => void;
 }
 
@@ -17,6 +19,8 @@ interface INavProps {
   role: string;
   state: string;
   partyId: string | undefined;
+  expectedCost: number;
+  currentParticipants: number;
 }
 
 const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
@@ -25,10 +29,13 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
   role,
   state,
   partyId,
+  expectedCost,
+  currentParticipants,
   fetchData,
 }) => {
   if (!isVisible) return null;
 
+  const nav = useNavigate();
   // Handle outside click to close modal
   const handleOutsideClick = (e: MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLDivElement).id === 'modal-overlay') {
@@ -38,7 +45,15 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
 
   const successParty = () => {
     jwtAxios
-      .post(`api/parties/${partyId}/success`, {})
+      .post(
+        `api/parties/${partyId}/success`,
+        {},
+        {
+          params: {
+            expected_cost: expectedCost / currentParticipants,
+          },
+        },
+      )
       .then(res => {
         console.log(res.data);
         if (res.data.status === 204) {
@@ -56,6 +71,22 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
       });
   };
 
+  function deleteParty() {
+    jwtAxios
+      .delete(`api/party-boards/${partyId}`, {})
+      .then(res => {
+        console.log(res.data);
+        if (res.data.status === 204) {
+          toast.success(`${res.data.message}`, { position: 'top-center' });
+          nav('/home', { replace: true });
+        }
+        fetchData();
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
   return (
     <div
       id='modal-overlay'
@@ -70,7 +101,9 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
           </button>
         )}
         <button className='btn btn-ghost text-black'>팟 수정하기</button>
-        <button className='btn btn-ghost text-red-500'>팟 삭제하기</button>
+        <button onClick={deleteParty} className='btn btn-ghost text-red-500'>
+          팟 삭제하기
+        </button>
         <button onClick={onClose} className='btn btn-ghost text-gray-500'>
           취소
         </button>
@@ -83,10 +116,12 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
   role,
   state,
   partyId,
+  expectedCost,
+  currentParticipants,
   fetchData,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const navigate = useNavigate();
+  const nav = useNavigate();
 
   useEffect(() => {
     // Lock or unlock body scroll based on modal visibility
@@ -94,7 +129,7 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
   }, [modalVisible]);
 
   const goBack = () => {
-    navigate(-1);
+    nav(-1);
   };
 
   const toggleModal = () => {
@@ -122,27 +157,30 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
           </svg>
         </button>
       </div>
-
-      <div className='flex-none'>
-        <button onClick={toggleModal} className='btn btn-square btn-ghost'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            fill='none'
-            viewBox='0 0 24 24'
-            className='inline-block w-5 h-5 stroke-current'>
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth='2'
-              d='M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0 a1 1 0 11-2 0 1 1 0 012 0zm7 0 a1 1 0 11-2 0 1 1 0 012 0z'></path>
-          </svg>
-        </button>
-      </div>
+      {role == 'ORGANIZER' && (
+        <div className='flex-none'>
+          <button onClick={toggleModal} className='btn btn-square btn-ghost'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              fill='none'
+              viewBox='0 0 24 24'
+              className='inline-block w-5 h-5 stroke-current'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth='2'
+                d='M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0 a1 1 0 11-2 0 1 1 0 012 0zm7 0 a1 1 0 11-2 0 1 1 0 012 0z'></path>
+            </svg>
+          </button>
+        </div>
+      )}
       {modalVisible && (
         <Modal
           role={role}
           state={state}
           partyId={partyId}
+          expectedCost={expectedCost}
+          currentParticipants={currentParticipants}
           fetchData={fetchData}
           isVisible={modalVisible}
           onClose={closeModal}
