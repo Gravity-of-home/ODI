@@ -17,7 +17,7 @@ public class ChatController {
     /**
      * websocket "/pub/chat/message"로 들어오는 메시징을 처리한다.
      */
-    @MessageMapping("/api/chat/message")
+    @MessageMapping("/chat/message")
     public void message(ChatMessageDTO message, @AuthenticationPrincipal Member member) {
         String nickname = member.getNickname();
         // 로그인 회원 정보로 대화명 설정

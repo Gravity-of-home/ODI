@@ -14,7 +14,13 @@ import java.time.LocalDateTime;
 public class ChatMessageDTO {
 
     @NotNull
+    private Long senderId;
+
+    @NotNull
     private String sender; // 메시지 보낸사람
+
+    @NotNull
+    private Long messageId;
 
     @NotNull
     private String content; // 메시지 내용
@@ -29,8 +35,10 @@ public class ChatMessageDTO {
     private String roomId;
 
     @Builder
-    public ChatMessageDTO(String sender, String content, LocalDateTime sendTime, MessageType type, String roomId) {
+    public ChatMessageDTO(Long senderId, String sender, Long messageId, String content, LocalDateTime sendTime, MessageType type, String roomId) {
+        this.senderId = senderId;
         this.sender = sender;
+        this.messageId = messageId;
         this.content = content;
         this.sendTime = sendTime;
         this.type = type;

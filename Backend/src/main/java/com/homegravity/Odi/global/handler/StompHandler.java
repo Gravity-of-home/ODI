@@ -64,6 +64,8 @@ public class StompHandler implements ChannelInterceptor {
             // 퇴장한 클라이언트의 roomId 맵핑 정보를 삭제한다.
             chatRoomRepository.removeUserEnterInfo(sessionId);
             log.info("DISCONNECTED {}, {}", sessionId, roomId);
+        } else if (StompCommand.UNSUBSCRIBE == accessor.getCommand()) { // 채팅룸 구독취소
+            log.info("!!!UNSUBSCRIBED!!!");
         }
         return message;
     }
