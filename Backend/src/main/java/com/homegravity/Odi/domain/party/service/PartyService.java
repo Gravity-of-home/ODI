@@ -304,8 +304,8 @@ public class PartyService {
         }
 
         // 정산완료 여부 확인
-        if(party.getState() != StateType.SETTLED) {
-            throw new BusinessException(ErrorCode.PARTY_SETTLEMENT_NOT_COMPLETED, ErrorCode.PARTY_SETTLEMENT_NOT_COMPLETED.getMessage());
+        if(party.getState() != StateType.SETTLED && party.getState() != StateType.GATHERING ) {
+            throw new BusinessException(ErrorCode.PARTY_SETTLEMENT_NOT_COMPLETED, "삭제할 수 없는 파티입니다.");
         }
 
         // party member 및 신청자 삭제
