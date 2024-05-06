@@ -295,12 +295,17 @@ public class PartyService {
     @Transactional
     public void deleteParty(Long partyId, Member member) {
 
-        Party party = partyRepository.findById(partyId)
+        Party party = partyRepository.findParty(partyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
 
         // 요청자와 작성자가 동일인인지 확인
         if (member.getId() != Long.parseLong(party.getCreatedBy())) {
             throw new BusinessException(ErrorCode.PARTY_MEMBER_ACCESS_DENIED, ErrorCode.PARTY_MEMBER_ACCESS_DENIED.getMessage());
+        }
+
+        // 정산완료 여부 확인
+        if(party.getState() != StateType.SETTLED) {
+            throw new BusinessException(ErrorCode.PARTY_SETTLEMENT_NOT_COMPLETED, ErrorCode.PARTY_SETTLEMENT_NOT_COMPLETED.getMessage());
         }
 
         // party member 및 신청자 삭제
