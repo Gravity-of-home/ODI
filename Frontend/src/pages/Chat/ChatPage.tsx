@@ -4,7 +4,6 @@ import NavBar from './components/NavBar';
 import axios from 'axios';
 import Info from './components/Info';
 import Chat from './components/Chat';
-import { WebSocketProvider } from '../../context/webSocketProvider';
 
 // TODO
 //1. stomp 연결
@@ -26,19 +25,17 @@ const ChatPage = () => {
   }
 
   return (
-    <WebSocketProvider partyId={partyId}>
-      <div className='chat-page'>
-        <div className='nav'>
-          <NavBar />
-        </div>
-        <div>
-          <Info />
-        </div>
-        <div>
-          <Chat />
-        </div>
+    <div className='chat-page'>
+      <div className='nav'>
+        <NavBar />
       </div>
-    </WebSocketProvider>
+      <div>
+        <Info />
+      </div>
+      <div>
+        <Chat />
+      </div>
+    </div>
   );
 };
 
