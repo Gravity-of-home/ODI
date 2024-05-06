@@ -1,13 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import MemberInfo from './components/MemberInfo';
 import PartyInfo from './components/PartyInfo';
 import PathMap from './components/PathMap';
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import BottomButton from './components/BottomButton';
 import jwtAxios from '@/utils/JWTUtil';
-
+import { getCookie } from '@/utils/CookieUtil';
+import TopNav from './components/TopNav';
+import './components/topnav.css';
 interface IInfo {
   id: number;
   createdAt: string;
@@ -58,8 +58,7 @@ interface IInfo {
 }
 
 const PartyDetailPage = () => {
-  // const { partyId } = useParams();
-  const [partyId, setPartyId] = useState(1);
+  const { partyId } = useParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState<IInfo>({
@@ -139,46 +138,44 @@ const PartyDetailPage = () => {
     return participants.find((p: { role: string }) => p.role === 'ORGANIZER');
   };
 
-  // 상세 페이지 데이터 불러오고 각 컴포넌트로 전달 합시다
   const fetchData = async () => {
-    try {
-      // const response = await axios.get(`http://localhost:8080/api/party-boards/${partyId}`, {
-      //   headers: {
-      //     AUTHORIZATION:
-      //       'Bearer eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInJvbGUiOiJST0xFX1VTRVIiLCJpZCI6IjEiLCJpYXQiOjE3MTQ1NDUzNjUsImV4cCI6MTcxNDU0ODM2NX0.Y5JCvTIcMF6eF3VoHXnOgniu4J-xTmNOSAjfvCp9GJ0',
-      //   },
-      // });
-      const response = await jwtAxios.get(`http://localhost:8080/api/party-boards/${partyId}`);
-      console.log(response);
-      setIsLoading(false);
-      setInfo(response.data.data);
+    await jwtAxios
+      .get(`api/party-boards/${partyId}`, {
+        headers: {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+        },
+      })
+      .then(res => {
+        console.log(res);
+        const pathInfoObject = JSON.parse(res.data.data.pathInfo);
+        const data = pathInfoObject.route.traoptimal[0].summary;
+        const path = pathInfoObject.route.traoptimal[0].path;
+        console.log(pathInfoObject);
+        setInfo(prevInfo => ({
+          ...prevInfo,
+          ...res.data.data,
+          expectedCost: data.taxiFare,
+          expectedDuration: Math.floor(data.duration / 60000),
+          path: path,
+          distance: data.distance / 1000,
+        }));
 
-      const pathInfoObject = JSON.parse(response.data.data.pathInfo);
-      const data = pathInfoObject.route.traoptimal[0].summary;
-      const path = pathInfoObject.route.traoptimal[0].path;
-      console.log(pathInfoObject);
-      setInfo(prevInfo => ({
-        ...prevInfo,
-        expectedCost: data.taxiFare,
-        expectedDuration: Math.floor(data.duration / 60000),
-        path: path,
-        distance: data.distance / 1000,
-      }));
+        setHostInfo(FindHost(res.data.data.participants));
+      })
+      .catch(err => {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+      });
 
-      setHostInfo(FindHost(response.data.data.participants));
-    } catch (error: unknown) {
-      // 에러 타입을 좁히는 타입 가드
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        // 에러 객체가 아니라면 일반 문자열로 처리하거나 기본 메시지 설정
-        setError('An unknown error occurred');
-      }
-    }
+    setIsLoading(false);
   };
+
   useEffect(() => {
     fetchData();
-  }, []);
+  }, []); // 이제 `fetchData`에 대한 의존성이 명시적
 
   function formatTimeDifference(createdAt: string) {
     const now: Date = new Date();
@@ -213,6 +210,17 @@ const PartyDetailPage = () => {
   if (error) return <p>{error}에런디유? 다시 시도해봐유 </p>;
   return (
     <div className='container'>
+      <div className='mb-24'>
+        <TopNav
+          role={info.role}
+          state={info.state}
+          partyId={partyId}
+          currentParticipants={info.currentParticipants}
+          expectedCost={info.expectedCost}
+          fetchData={fetchData}
+        />
+      </div>
+
       <div className='party-info'>
         <div className='flex gap-x-2 content-center items-center'>
           <img src={hostInfo.profileImage} alt='파티장 사진' className='rounded-full w-8 h-8 ' />
@@ -262,11 +270,17 @@ const PartyDetailPage = () => {
           participants={info.participants}
           guests={info.guests}
           role={info.role}
+          partyId={partyId}
           fetchData={fetchData}
         />
         <div className='h-1 bg-slate-100'></div>
         <div className='request-btn text-center'>
-          <BottomButton state={info.state} role={info.role} partyId={1} />
+          <BottomButton
+            state={info.state}
+            role={info.role}
+            partyId={partyId}
+            fetchData={fetchData}
+          />
         </div>
       </div>
     </div>

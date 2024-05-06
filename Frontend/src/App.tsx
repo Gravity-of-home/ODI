@@ -4,7 +4,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import queryClient from './utils/QueryClient.ts';
 import { Layout } from './components/Layout.tsx';
 import router from './Router.tsx';
-// import PartyDetailPage from './pages/Party/PartyDetailPage';
 
 function App() {
   return (
@@ -15,7 +14,6 @@ function App() {
           <RouterProvider router={router} />
         </Layout>
       </QueryClientProvider>
-      {/* <PartyDetailPage /> */}
     </>
   );
 }

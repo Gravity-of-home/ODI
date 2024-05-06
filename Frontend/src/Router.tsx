@@ -8,6 +8,9 @@ import NaverLoginRedirect from './pages/Login/components/NaverLoginRedirect';
 import HomePage from './pages/Home/HomePage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import LoginPage from './pages/Login/LoginPage';
+import PartyDetailPage from './pages/Party/PartyDetailPage';
+import ChatListPage from './pages/Chat/ChatListPage';
+import ChatPage from './pages/Chat/ChatPage';
 
 type AuthWrapperProps = {
   children: React.ReactNode;
@@ -81,6 +84,30 @@ const router = createBrowserRouter([
     element: (
       <AuthWrapper>
         <ProfilePage />
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: '/party/:partyId',
+    element: (
+      <AuthWrapper>
+        <PartyDetailPage></PartyDetailPage>
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: '/party/chat/:partyId',
+    element: (
+      <AuthWrapper>
+        <ChatPage></ChatPage>
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: '/chatlist',
+    element: (
+      <AuthWrapper>
+        <ChatListPage></ChatListPage>
       </AuthWrapper>
     ),
   },

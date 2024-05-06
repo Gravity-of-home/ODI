@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import axios from 'axios';
-
+import end from '@/assets/image/icons/end.png';
 interface IPathMapProps {
   departuresName: string;
   departuresX: number;
@@ -48,7 +48,7 @@ const PathMap: React.FC<IPathMapProps> = ({
         return 14;
       }
     }
-    const zoomLevel = calculateZoomLevel(distance / 3);
+    const zoomLevel = calculateZoomLevel(distance / 2.5);
     if (!mapRef.current) {
       mapRef.current = new naver.maps.Map('map', {
         zoom: zoomLevel,
@@ -79,12 +79,19 @@ const PathMap: React.FC<IPathMapProps> = ({
       markerRef.current = new naver.maps.Marker({
         position: arrivalPosition,
         map: mapRef.current,
+        icon: {
+          url: `${end}`,
+          size: new naver.maps.Size(32, 32),
+          scaledSize: new naver.maps.Size(32, 32),
+        },
+        // 마커의 쌓임 순서
+        zIndex: 999,
       });
 
-      const infoWindow = new naver.maps.InfoWindow({
-        content: '<div style="padding:5px;">도착지</div>',
-      });
-      infoWindow.open(mapRef.current, markerRef.current);
+      // const infoWindow = new naver.maps.InfoWindow({
+      //   content: '<div style="padding:1px;">도착지</div>',
+      // });
+      // infoWindow.open(mapRef.current, markerRef.current);
     } else {
       markerRef.current.setMap(mapRef.current);
     }
