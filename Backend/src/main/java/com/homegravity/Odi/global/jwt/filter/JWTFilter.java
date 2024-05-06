@@ -9,11 +9,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -26,8 +28,22 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
 
+    @Value("${WHITE_LIST}")
+    private String[] whiteList;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String path = request.getRequestURI();
+
+        AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+        for (String list : whiteList) {
+            if (antPathMatcher.match(list, path)) {
+                //log.info("pass token filter .....");
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
         // 헤더에서 토큰 검증
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 

@@ -46,7 +46,7 @@ public enum ErrorCode {
     FAIL_TO_OAUTH_LOGIN(400, "소셜 로그인에 실패했습니다."),
     MEMBER_ID_NOT_EXIST(400, "회원 ID가 존재하지 않습니다."),
     MEMBER_ID_ALREADY_EXIST(400, "회원 ID가 이미 존재합니다."),
-    NICKNAME_ALREAD_EXIST(400,"닉네임이 이미 존재합니다."),
+    NICKNAME_ALREAD_EXIST(400, "닉네임이 이미 존재합니다."),
 
     // JWT
     REFRESH_INVALID(400, "리프레시 토큰이 유효하지 않습니다."),
@@ -67,6 +67,19 @@ public enum ErrorCode {
     // Payment
     ORDER_ID_NOT_EXIST(400, "존재하지 않는 결제 정보입니다."),
 
+    // Party Member
+    PARTY_MEMBER_NOT_EXIST(400, "존재하지 않는 파티 참여자입니다."),
+
+    //party
+    PARTY_MEMBER_ALREADY_JOIN_EXIST(400, "이미 파티에 해당 유저가 신청했습니다."),
+    PARTY_MEMBER_ACCESS_DENIED(403, "수정할 권한이 없는 유저입니다."),
+    PARTY_MEMBER_ALREADY_EXIST(400, "이미 해당 파티에 존재하는 참여자 입니다."),
+    PARTY_MEMBER_CNT_MAX(400, "해당 파티의 정원이 다 찼습니다."),
+    PARTY_NOT_GATHERING_NOW(400, "해당 파티가 현재 모집중이 아닙니다."),
+
+    // Settlement
+    PARTY_STATE_TYPE_ERROR(400, "요청에 부합하지 않는 파티 상태 입니다."),
+    POINT_LACK_ERROR(402, "포인트가 부족합니다."),
     ;
     /**
      * ******************************* Error Code Field ***************************************

@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-// TODO ?
-// 1. 방 제목 어떻게 넘겨주지
-// 2.d
 const Info = () => {
   let [title, setTitle] = useState('');
 
