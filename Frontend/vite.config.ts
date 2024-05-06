@@ -12,4 +12,8 @@ export default defineConfig({
     port: 3000,
     host: true,
   },
+  // SockJS global 설정 필요해서 추가
+  define: {
+    global: {},
+  },
 });

@@ -5,7 +5,6 @@ import queryClient from './utils/QueryClient.ts';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Layout } from './components/Layout.tsx';
 import router from './Router.tsx';
-// import PartyDetailPage from './pages/Party/PartyDetailPage';
 
 function App() {
   return (
@@ -17,7 +16,6 @@ function App() {
         </Layout>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
-      {/* <PartyDetailPage /> */}
     </>
   );
 }

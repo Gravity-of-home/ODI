@@ -1,0 +1,9 @@
+.navbar {
+  position: fixed;
+  top: 0; /* 화면의 맨 위에 위치 */
+  left: 0; /* 왼쪽 가장자리와 정렬 */
+  width: 100%; /* 너비를 화면 전체 크기로 설정 */
+  z-index: 1000; /* 다른 요소들 위에 레이어 */
+  background: white; /* 배경색 설정, 내용이 스크롤할 때 보이지 않도록 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 하단 그림자 효과 */
+}
