@@ -29,7 +29,7 @@ public class PartySettlementService {
     private final PointService pointService;
 
     // 동승 파티 성사 (모집 완료)
-    public PartySettlementResponseDto matchParty(Member member, Long partyId) {
+    public PartySettlementResponseDto matchParty(Member member, Long partyId, Integer expectedCost) {
 
         // 파티 존재 및 모집완료를 할 수 있는 상황인지 확인
         Party party = partyService.getParty(partyId);
@@ -46,9 +46,6 @@ public class PartySettlementService {
         // 파티 멤버 조회
         List<PartyMember> partyMembers = partyMemberRepository.findAllPartyMember(party);
 
-        // 예상 택시비 (임시: 10000원으로 가정)
-        // TODO: 예상택시비 가져오는 로직으로 수정
-        int expectedCost = 10000;
         int prepaidAmount = expectedCost / party.getCurrentParticipants();
 
         // 선불 가능 여부 확인 및 선불!
