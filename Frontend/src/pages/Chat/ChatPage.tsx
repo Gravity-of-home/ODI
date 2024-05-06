@@ -13,20 +13,20 @@ import { WebSocketProvider } from '../../context/webSocketProvider';
 const ChatPage = () => {
   const { partyId } = useParams();
 
-  // 채팅기록 불러와야겠지?
-  function fetchData() {
-    const response = axios
-      .post(`http://localhost:8080/api/parties/${partyId}`)
-      .then(res => {
-        console.log(res.data);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
+  // // 채팅기록 불러와야겠지?
+  // function fetchData() {
+  //   const response = axios
+  //     .post(`http://localhost:8080/api/parties/${partyId}`)
+  //     .then(res => {
+  //       console.log(res.data);
+  //     })
+  //     .catch(err => {
+  //       console.log(err);
+  //     });
+  // }
 
   return (
-    <WebSocketProvider partyId={partyId}>
+    <WebSocketProvider>
       <div className='chat-page'>
         <div className='nav'>
           <NavBar />
@@ -34,9 +34,7 @@ const ChatPage = () => {
         <div>
           <Info />
         </div>
-        <div>
-          <Chat />
-        </div>
+        <div>{/* <Chat /> */}</div>
       </div>
     </WebSocketProvider>
   );

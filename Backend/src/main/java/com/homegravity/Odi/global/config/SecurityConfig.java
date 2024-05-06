@@ -61,7 +61,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService))
                         .successHandler(customSuccessHandler))  // OAuth 2.0 로그인 성공 후에 수행될 커스텀 핸들러
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(whiteList).permitAll()
+                        .requestMatchers("*").permitAll()
                         .anyRequest().authenticated())
                 // 로그인 후에 JWTFilter로 검증
                 .addFilterAfter(new JWTFilter(jwtUtil, userDetailsService), OAuth2LoginAuthenticationFilter.class)
