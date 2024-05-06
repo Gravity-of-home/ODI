@@ -3,7 +3,7 @@ import './index.css';
 import { QueryClientProvider } from '@tanstack/react-query';
 import queryClient from './utils/QueryClient.ts';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { WebSocketProvider } from './context/webSocketProvider.tsx';
+import { Layout } from './components/Layout.tsx';
 import router from './Router.tsx';
 
 function App() {
@@ -11,9 +11,9 @@ function App() {
     <>
       {/* <h1>OD! Welcome 🍀</h1> */}
       <QueryClientProvider client={queryClient}>
-        <WebSocketProvider>
+        <Layout>
           <RouterProvider router={router} />
-        </WebSocketProvider>
+        </Layout>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </>
