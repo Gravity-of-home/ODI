@@ -25,9 +25,9 @@ public class PartySettlementController {
 
     @Operation(summary = "동승(파티) 성사", description = "동승 파티 모집을 마감하고, 선불금액을 차감합니다.")
     @PostMapping("/{party-id}/success")
-    public ApiResponse<PartySettlementResponseDto> matchParty(@AuthenticationPrincipal Member member, @PathVariable(name = "party-id") Long partyId) {
+    public ApiResponse<PartySettlementResponseDto> matchParty(@AuthenticationPrincipal Member member, @PathVariable(name = "party-id") Long partyId, @RequestParam("expected_cost") Integer expectedCost) {
 
-        return ApiResponse.of(SuccessCode.PARTY_MATCH_STATE_UPDATE_SUCCESS, partySettlementService.matchParty(member, partyId));
+        return ApiResponse.of(SuccessCode.PARTY_MATCH_STATE_UPDATE_SUCCESS, partySettlementService.matchParty(member, partyId, expectedCost));
     }
 
     @Operation(summary = "동승(파티) 정산 요청", description = "동승 파티 택시 이용이 끝나고, 정산 요청 상태로 만들어요..")
