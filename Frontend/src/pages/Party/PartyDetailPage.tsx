@@ -4,9 +4,10 @@ import PartyInfo from './components/PartyInfo';
 import PathMap from './components/PathMap';
 import { useEffect, useState, useCallback } from 'react';
 import BottomButton from './components/BottomButton';
-import { ViteConfig } from '@/apis/ViteConfig';
 import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
+import TopNav from './components/TopNav';
+import './components/topnav.css';
 interface IInfo {
   id: number;
   createdAt: string;
@@ -137,40 +138,44 @@ const PartyDetailPage = () => {
     return participants.find((p: { role: string }) => p.role === 'ORGANIZER');
   };
 
-  const fetchData = useCallback(async () => {
-    try {
-      const response = await jwtAxios.get(`api/party-boards/${partyId}`, {
-        headers: { AUTHORIZATION: `Bearer ${getCookie('Authorization')}` },
+  const fetchData = async () => {
+    await jwtAxios
+      .get(`api/party-boards/${partyId}`, {
+        headers: {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+        },
+      })
+      .then(res => {
+        console.log(res);
+        const pathInfoObject = JSON.parse(res.data.data.pathInfo);
+        const data = pathInfoObject.route.traoptimal[0].summary;
+        const path = pathInfoObject.route.traoptimal[0].path;
+        console.log(pathInfoObject);
+        setInfo(prevInfo => ({
+          ...prevInfo,
+          ...res.data.data,
+          expectedCost: data.taxiFare,
+          expectedDuration: Math.floor(data.duration / 60000),
+          path: path,
+          distance: data.distance / 1000,
+        }));
+
+        setHostInfo(FindHost(res.data.data.participants));
+      })
+      .catch(err => {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       });
-      console.log(response.data.message);
-      setIsLoading(false);
 
-      const pathInfoObject = JSON.parse(response.data.data.pathInfo);
-      const data = pathInfoObject.route.traoptimal[0].summary;
-      const path = pathInfoObject.route.traoptimal[0].path;
-      console.log(pathInfoObject.message);
-      setInfo(prevInfo => ({
-        ...prevInfo,
-        ...response.data.data,
-        expectedCost: data.taxiFare,
-        expectedDuration: Math.floor(data.duration / 60000),
-        path: path,
-        distance: data.distance / 1000,
-      }));
-
-      setHostInfo(FindHost(response.data.data.participants));
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An unknown error occurred');
-      }
-    }
-  }, [partyId]); // `partyId`가 변경되면 `fetchData` 업데이트
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]); // 이제 `fetchData`에 대한 의존성이 명시적
+  }, []); // 이제 `fetchData`에 대한 의존성이 명시적
 
   function formatTimeDifference(createdAt: string) {
     const now: Date = new Date();
@@ -205,6 +210,10 @@ const PartyDetailPage = () => {
   if (error) return <p>{error}에런디유? 다시 시도해봐유 </p>;
   return (
     <div className='container'>
+      <div className='mb-24'>
+        <TopNav role={info.role} state={info.state} partyId={partyId} fetchData={fetchData} />
+      </div>
+
       <div className='party-info'>
         <div className='flex gap-x-2 content-center items-center'>
           <img src={hostInfo.profileImage} alt='파티장 사진' className='rounded-full w-8 h-8 ' />

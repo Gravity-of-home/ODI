@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import jwtAxios from '@/utils/JWTUtil';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -34,10 +34,20 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   partyId,
   fetchData,
 }) => {
+  const [userId, setUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const myData = localStorage.getItem('User');
+    if (myData) {
+      const userData = JSON.parse(myData);
+      setUserId(userData.state.id); // 상태 업데이트
+    }
+  }, []);
+
   // 파티 신청 수락
   const acceptEnterParty = (memberId: number) => () => {
     jwtAxios
-      .put(`api/parties/${partyId}/2`, {})
+      .put(`api/parties/${partyId}/${memberId}`, {})
       .then(res => {
         console.log(res.data);
         if (res.data.status === 201) {
@@ -53,7 +63,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   // 파티 신청 거절
   const rejectEnterParty = (memberId: number) => () => {
     jwtAxios
-      .delete(`api/parties/${partyId}/2`, {})
+      .delete(`api/parties/${partyId}/${memberId}`, {})
       .then(res => {
         console.log(res.data);
         if (res.data.status === 204) {
@@ -69,7 +79,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   // 파티원 추방
   const banParticipant = (memberId: number) => () => {
     jwtAxios
-      .delete(`api/parties/${partyId}/2`, {})
+      .delete(`api/parties/${partyId}/${memberId}`, {})
       .then(res => {
         console.log(res.data);
         if (res.data.status === 204) {
@@ -102,6 +112,11 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
             </button>
           )}
         </div>
+        {person.id === userId && (
+          <div className='content-center text-center rounded-full w-10 bg-blue-100'>
+            <p className='content-center text-center '>나</p>
+          </div>
+        )}
       </li>
     ));
 
@@ -114,18 +129,20 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         <div>{applicant.gender === 'M' ? '남' : '여'}</div>
         <div>{applicant.ageGroup}</div>
       </div>
-      <div>
-        <button
-          onClick={acceptEnterParty(applicant.id)}
-          className='ml-2 py-1 px-3 rounded bg-green-500 text-white'>
-          수락
-        </button>
-        <button
-          onClick={rejectEnterParty(applicant.id)}
-          className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
-          거절
-        </button>
-      </div>
+      {role === 'ORGANIZER' && (
+        <div>
+          <button
+            onClick={acceptEnterParty(applicant.id)}
+            className='ml-2 py-1 px-3 rounded bg-green-500 text-white'>
+            수락
+          </button>
+          <button
+            onClick={rejectEnterParty(applicant.id)}
+            className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
+            거절
+          </button>
+        </div>
+      )}
     </li>
   ));
 
@@ -160,17 +177,17 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         </div>
 
         {/* 조회자가 팟장이고 파티신청자가 있으면 */}
-        {role == 'ORGANIZER' && applicantList.length != 0 && (
+        {applicantList && applicantList.length != 0 && (
           <div className='mt-4'>
             <div>
               <p className='font-bold text-xl'>파티 신청자 목록</p>
             </div>
-            <div className='p-1 mt-4 applicant-list '>
+            <div className='p-1 mt-4 applicant-list'>
               <ul>{applicantList}</ul>
             </div>
           </div>
         )}
-        {role == 'ORGANIZER' && applicantList.length == 0 && (
+        {applicantList && applicantList.length == 0 && (
           <div className=' mt-4'>
             <div>
               <p className='font-bold text-xl'>매칭신청</p>

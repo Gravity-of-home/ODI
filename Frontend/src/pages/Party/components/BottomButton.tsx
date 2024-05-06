@@ -60,13 +60,28 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   let buttonComponent;
 
   if (state === 'GATHERING') {
-    if (role === 'ORGANIZER' || role === 'PARTICIPANT') {
+    if (role === 'ORGANIZER') {
       buttonComponent = (
         <div>
           <button
             onClick={GoChat}
             className='bg-blue-500 hover:bg-blue-700  w-11/12 text-white font-bold py-2 px-4 rounded'>
             <p>팟 채팅</p>
+          </button>
+        </div>
+      );
+    } else if (role === 'PARTICIPANT') {
+      buttonComponent = (
+        <div className='flex justify-between gap-x-4'>
+          <button
+            onClick={GoChat}
+            className='w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+            <p>팟 채팅</p>
+          </button>
+          <button
+            onClick={CancelMatching}
+            className='w-1/2 bg-gray-200 hover:bg-gray-700 text-purple font-bold py-2 px-4 rounded'>
+            <p>신청 취소하기</p>
           </button>
         </div>
       );
