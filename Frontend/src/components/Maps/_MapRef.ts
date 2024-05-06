@@ -1,24 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import LatLngAddStore from '@/stores/useLatLngAddStore';
-import DarkModeStyle from './DarkModeStyle';
 import mapStore from '@/stores/useMapStore';
-import { Layout } from '../Layout';
-import { useNavigate } from 'react-router-dom';
+import DarkModeStyle from './DarkModeStyle';
 
-const MapRef = () => {
-  const ref = useRef<HTMLDivElement>(null);
-  const nav = useNavigate();
+const MapRef = (() => {
+  let googleMap: google.maps.Map;
+
   const { setGoogleMap } = mapStore();
 
   const { currentLat, currentLng } = LatLngAddStore();
 
-  const goCreateParty = () => {
-    nav('/party-boards');
-  };
+  const container = document.createElement('div');
 
-  useEffect(() => {
-    if (ref.current) {
-      const initialMap = new window.google.maps.Map(ref.current, {
+  container.id = 'map';
+  container.style.width = '100%';
+  container.style.height = '100vh';
+
+  document.body.appendChild(container);
+
+  return () => {
+    if (!googleMap) {
+      googleMap = new window.google.maps.Map(container, {
         center: {
           lat: currentLat,
           lng: currentLng,
@@ -39,21 +41,10 @@ const MapRef = () => {
           strictBounds: true,
         },
       });
-
-      setGoogleMap(initialMap);
     }
-  }, []);
 
-  return (
-    <Layout>
-      <div ref={ref} id='map' className='w-[100%] h-[100%]' />
-      <button
-        className='btn z-10 w-[15%] h-[5%] absolute right-0 bottom-[10%]'
-        onClick={goCreateParty}>
-        글 생성 가보자!
-      </button>
-    </Layout>
-  );
-};
+    return setGoogleMap(googleMap);
+  };
+})();
 
 export default MapRef;

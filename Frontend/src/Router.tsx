@@ -6,9 +6,10 @@ import useAuth from '@/hooks/queries/useAuth';
 import { useEffect } from 'react';
 import loadingStore from './stores/useLoadingStore';
 import NaverLoginRedirect from './pages/Login/components/NaverLoginRedirect';
+import LoginPage from './pages/Login/LoginPage';
 import HomePage from './pages/Home/HomePage';
 import ProfilePage from './pages/Profile/ProfilePage';
-import LoginPage from './pages/Login/LoginPage';
+import PartyCreatePage from './pages/Party/PartyCreatePage';
 
 type AuthWrapperProps = {
   children: React.ReactNode;
@@ -86,6 +87,14 @@ const router = createBrowserRouter([
     element: (
       <AuthWrapper>
         <ProfilePage />
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: '/party-boards',
+    element: (
+      <AuthWrapper>
+        <PartyCreatePage />
       </AuthWrapper>
     ),
   },

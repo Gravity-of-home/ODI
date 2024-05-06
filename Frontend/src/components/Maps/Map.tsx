@@ -1,6 +1,7 @@
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
 import { ViteConfig } from '@/apis/ViteConfig';
 import MapRef from './MapRef';
+import jwtAxios from '@/utils/JWTUtil';
 
 const render = (status: Status) => {
   switch (status) {
@@ -29,7 +30,9 @@ const render = (status: Status) => {
 };
 
 const Map = () => {
-  return <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} />;
+  return (
+    <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
+  );
 };
 
 export default Map;
