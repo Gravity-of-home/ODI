@@ -33,17 +33,17 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getRequestURI();
-
-        AntPathMatcher antPathMatcher = new AntPathMatcher();
-
-        for (String list : whiteList) {
-            if (antPathMatcher.match(list, path)) {
-                //log.info("pass token filter .....");
-                filterChain.doFilter(request, response);
-                return;
-            }
-        }
+//        String path = request.getRequestURI();
+//
+//        AntPathMatcher antPathMatcher = new AntPathMatcher();
+//
+//        for (String list : whiteList) {
+//            if (antPathMatcher.match(list, path)) {
+//                //log.info("pass token filter .....");
+//                filterChain.doFilter(request, response);
+//                return;
+//            }
+//        }
         // 헤더에서 토큰 검증
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
