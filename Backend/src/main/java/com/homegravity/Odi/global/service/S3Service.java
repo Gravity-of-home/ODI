@@ -42,7 +42,7 @@ public class S3Service {
             return amazonS3.getUrl(bucket, originalFilename).toString();
         } catch (IOException e) {
             log.info("S3 파일 저장 실퍠");
-            throw new BusinessException(ErrorCode.S3_PROCESS_ERROR, ErrorCode.S3_PROCESS_ERROR.getMessage());
+            throw new BusinessException(ErrorCode.S3_SAVE_ERROR, ErrorCode.S3_SAVE_ERROR.getMessage());
         }
 
     }
@@ -50,7 +50,15 @@ public class S3Service {
     /*
     S3 버킷 파일 삭제
      */
-    public void deleteFile(String originalFilename)  {
-        amazonS3.deleteObject(bucket, originalFilename);
+    public void deleteFile(String originalFilenUrl)  {
+        try {
+            // URL 주소에서 key값 생성
+            String key = originalFilenUrl.split("/")[3];
+            // 버킷에 파일 삭제
+            amazonS3.deleteObject(bucket, key);
+        } catch (Exception e) {
+            log.info("S3 파일 삭제 실패");
+            throw new BusinessException(ErrorCode.S3_DELETE_ERROR, ErrorCode.DELETE_ERROR.getMessage());
+        }
     }
 }
