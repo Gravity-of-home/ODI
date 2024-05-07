@@ -7,6 +7,7 @@ import com.homegravity.Odi.domain.party.entity.PartyMember;
 import com.homegravity.Odi.domain.party.entity.QPartyMember;
 import com.homegravity.Odi.domain.party.entity.RoleType;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -96,7 +97,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
     //참여자 혹은 신청자인 경우일 때
     @Override
-    public Optional<PartyMember> findPartyPartiAndReqByMember(Party party, Member member) {
+    public Optional<PartyMember> findPartyPartiOrReqByMember(Party party, Member member) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
 
         return Optional.ofNullable(jpaQueryFactory.selectFrom(qPartyMember)
@@ -127,6 +128,24 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                 .where(qPartyMember.party.eq(party)
                         .and(qPartyMember.deletedAt.isNull()))
                 .fetch();
+    }
+
+    @Override
+    public List<PartyMemberDTO> findAllParticipant(Party party, Member member) {
+
+        QPartyMember qPartyMember = QPartyMember.partyMember;
+
+        return jpaQueryFactory.selectFrom(qPartyMember)
+                .where(qPartyMember.deletedAt.isNull()
+                        , qPartyMember.role.eq(RoleType.PARTICIPANT)
+                        , neMember(member, qPartyMember))
+                .fetch()
+                .stream().map(pm -> PartyMemberDTO.from(pm))
+                .toList();
+    }
+
+    private BooleanExpression neMember(Member member, QPartyMember qPartyMember) {
+        return member != null ? qPartyMember.member.ne(member) : null;
     }
 
     @Override
