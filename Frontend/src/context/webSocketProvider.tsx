@@ -16,8 +16,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
     console.log('provider attached');
     const sockJS = new SockJS(`http://localhost:8080/ws-stomp`); // partyId를 사용하는 WebSocket URL
     const client = new Client({
+      brokerURL: `ws://localhost:8080/ws-stomp`,
       webSocketFactory: () => new SockJS(`http://localhost:8080/ws-stomp`),
-      reconnectDelay: 5000,
       debug: str => {
         console.log('STOMP Debug:', str);
       },
