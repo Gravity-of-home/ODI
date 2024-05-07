@@ -10,6 +10,7 @@ import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.response.PartyResponseDTO;
 import com.homegravity.Odi.domain.party.entity.*;
 import com.homegravity.Odi.domain.party.respository.PartyBoardStatsRepository;
+import com.homegravity.Odi.domain.party.respository.PartyDocumentRepository;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartyRepository;
 import com.homegravity.Odi.global.redis.handler.TransactionHandler;
@@ -33,6 +34,7 @@ import java.util.Optional;
 public class PartyService {
 
     private final PartyRepository partyRepository;
+    private final PartyDocumentRepository partyDocumentRepository;
     private final PartyBoardStatsRepository partyBoardStatsRepository;
     private final PartyMemberRepository partyMemberRepository;
     private final MemberRepository memberRepository;
@@ -45,6 +47,7 @@ public class PartyService {
     public Long createParty(PartyRequestDTO partyRequestDTO, Member member) {
 
         Party party = partyRepository.save(Party.of(partyRequestDTO, member.getGender()));
+        partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
 
         PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0); // 생성시 조회수 초기화
         partyMemberRepository.save(PartyMember.of(RoleType.ORGANIZER, false, party, member));
@@ -282,7 +285,8 @@ public class PartyService {
         if (!partyRequestDTO.getContent().equals("")) {
             party.updateContent(partyRequestDTO.getContent());
         }
-
+        
+        partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
         return party.getId();
     }
 
