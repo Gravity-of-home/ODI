@@ -7,6 +7,7 @@ import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
+import com.homegravity.Odi.domain.party.dto.response.PartyChatInfoResponseDTO;
 import com.homegravity.Odi.domain.party.dto.response.PartyResponseDTO;
 import com.homegravity.Odi.domain.party.entity.*;
 import com.homegravity.Odi.domain.party.respository.PartyBoardStatsRepository;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -66,9 +66,11 @@ public class PartyService {
         partyBoardStats.addViewCount(); // 조회수 증가
 
         // 파티 참여 신청자 수 조회
+        // TODO: 리팩토링
         partyBoardStats.updateRequestCount(partyMemberRepository.countAllPartyGuests(party));
 
         // 파티원, 파티 참여 신정자 목록 조회
+        // TODO: 리팩토링
         RoleType role = partyMemberRepository.findParticipantRole(party, member);
 
         List<PartyMemberDTO> guests = null;
@@ -143,7 +145,7 @@ public class PartyService {
         Party party = getParty(partyId);
 
 
-        PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, member)
+        PartyMember partyMember = partyMemberRepository.findPartyPartiOrReqByMember(party, member)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
         partyMemberRepository.delete(partyMember);
@@ -174,7 +176,7 @@ public class PartyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
 
         //신청자 partyMember 정보
-        PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, requester)
+        PartyMember partyMember = partyMemberRepository.findPartyPartiOrReqByMember(party, requester)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
         //신청자가 아니면 이미 파티 참여자임
@@ -208,7 +210,7 @@ public class PartyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
 
         //partyMember 정보
-        PartyMember partyMember = partyMemberRepository.findPartyPartiAndReqByMember(party, requester)
+        PartyMember partyMember = partyMemberRepository.findPartyPartiOrReqByMember(party, requester)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
 
         //반환을 위한 roleTyle 받기
@@ -321,5 +323,23 @@ public class PartyService {
 
         partyRepository.delete(party);
 
+    }
+
+    @Transactional(readOnly = true)
+    public PartyChatInfoResponseDTO getPartyChatInfo(Long partyId, Member member) {
+        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
+
+        // 조회 요청자 정보
+        PartyMemberDTO me = PartyMemberDTO.from(partyMemberRepository.findByPartyAndMember(party, member)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage())));
+
+        // 파티장 정보
+        PartyMemberDTO organizer = PartyMemberDTO.from(partyMemberRepository.findOrganizer(party)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage())));
+        
+        // 파티원 정보
+        List<PartyMemberDTO> participants = partyMemberRepository.findAllParticipant(party, member);
+
+        return PartyChatInfoResponseDTO.of(party, me, organizer, participants);
     }
 }

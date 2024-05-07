@@ -61,4 +61,10 @@ public class PartyController {
         return ApiResponse.of(SuccessCode.PARTY_DELETE_SUCCESS);
     }
 
+    @Operation(summary = "파티 채팅 정보 조회", description = "파티 정보를 채팅방에 제공합니다.")
+    @PostMapping("/{party-id}/chat-info")
+    public ApiResponse<?> getPartyChatInfo(@PathVariable(value = "party-id") Long partyId, @AuthenticationPrincipal Member member) {
+        return ApiResponse.of(SuccessCode.PARTY_GET_SUCCESS, partyService.getPartyChatInfo(partyId, member));
+    }
+
 }
