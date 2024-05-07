@@ -61,6 +61,10 @@ public enum ErrorCode {
     FAILED_TO_GET_LOCK(100, "락 권한 획득에 실패했습니다."),
     CONTENT_IS_NULL(400, "컨텐츠가 존재하지 않습니다."),
 
+    //S3
+    S3_SAVE_ERROR(400, "S3에 파일 저장에 실패하였습니다."),
+    S3_DELETE_ERROR(400, "S3에 파일 삭제에 실패하였습니다."),
+
     // Place
     NEAR_PLACE_NOT_EXIST(400, "인근 장소를 찾을 수 없습니다."),
 
