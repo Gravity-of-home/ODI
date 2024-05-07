@@ -1,9 +1,15 @@
 package com.homegravity.Odi.domain.member.service;
 
+import com.homegravity.Odi.domain.member.dto.MemberBrixDTO;
+import com.homegravity.Odi.domain.member.dto.request.MemberBrixListRequestDTO;
 import com.homegravity.Odi.domain.member.dto.request.MemberUpdateRequestDTO;
 import com.homegravity.Odi.domain.member.dto.response.MemberResponseDTO;
 import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.member.entity.MemberReview;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
+import com.homegravity.Odi.domain.member.repository.MemberReviewRepository;
+import com.homegravity.Odi.domain.party.entity.Party;
+import com.homegravity.Odi.domain.party.respository.PartyRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +21,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final PartyRepository partyRepository;
+    private final MemberReviewRepository memberReviewRepository;
 
     // 사용자 상세정보 조회
     public MemberResponseDTO getMemberInfo(Member member){
@@ -35,4 +43,21 @@ public class MemberService {
 
         return MemberResponseDTO.from(member);
     }
+
+    //동승자 평가
+    public Long createMemberBrix(MemberBrixListRequestDTO memberBrixListRequestDTO, Member reviewer){
+
+        Party party = partyRepository.findParty(memberBrixListRequestDTO.getPartyId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
+
+        for(MemberBrixDTO memberBrixDTO : memberBrixListRequestDTO.getMemberBrixDTOList()) {
+            Member reviewee = memberRepository.findByIdAndDeletedAtIsNull(memberBrixDTO.getReviewee_id())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+
+            memberReviewRepository.save(MemberReview.of(memberBrixDTO, reviewee, party.getId(), reviewer));
+        }
+
+        return party.getId();
+    }
+
 }
