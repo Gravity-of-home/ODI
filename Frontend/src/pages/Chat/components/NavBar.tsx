@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
-const NavBar = () => {
-  let [title, setTitle] = useState('');
+interface INavBarProps {
+  title: string;
+}
 
-  function GoChat() {
-    // 채팅방으로 routing
+const NavBar: React.FC<INavBarProps> = ({ title }) => {
+  const { partyId } = useParams();
+  const navigate = useNavigate();
+
+  function goDetail() {
+    navigate(`/chat/detail/${partyId}`);
   }
 
   return (
@@ -26,10 +31,10 @@ const NavBar = () => {
         </button>
       </div>
       <div className='flex'>
-        <a className='btn btn-ghost text-xl'>김수민 바보</a>
+        <div className='btn btn-ghost text-xl'>{title}</div>
       </div>
       <div className='flex-none'>
-        <button className='btn btn-square btn-ghost'>
+        <button onClick={goDetail} className='btn btn-square btn-ghost'>
           <svg
             xmlns='http://www.w3.org/2000/svg'
             fill='none'

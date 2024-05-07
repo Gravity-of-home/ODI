@@ -1,38 +1,79 @@
-import React, { useEffect, useState } from 'react';
+// Chat.js
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWebSocket } from '@/context/webSocketProvider';
+import { getCookie } from '@/utils/CookieUtil';
 
 const Chat = () => {
   const { partyId } = useParams<{ partyId: string }>();
-  const stompClient = useWebSocket();
+  const { client, isConnected } = useWebSocket();
   const [messages, setMessages] = useState<string[]>([]);
+  const [inputMessage, setInputMessage] = useState('');
 
   useEffect(() => {
-    // 연결 상태를 확인하고 구독을 설정하는 함수를 정의합니다.
-    const setupSubscription = () => {
-      if (stompClient && stompClient.connected) {
-        const subscription = stompClient.subscribe(`/sub/chat/room/${partyId}`, message => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/sub/chat/message`,
+        message => {
           const newMessage = JSON.parse(message.body).message;
-          console.log(newMessage); // 개발 중에는 로그를 확인할 수 있지만, 프로덕션에서는 제거하는 것이 좋습니다.
           setMessages(prevMessages => [...prevMessages, newMessage]);
-        });
+        },
+        {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+          token: `${getCookie('Authorization')}`,
+        },
+      );
 
-        return () => subscription.unsubscribe(); // 구독 해제
-      }
-    };
+      return () => subscription.unsubscribe();
+    }
+  }, [client, isConnected]);
 
-    // 클라이언트가 연결될 때 구독을 설정합니다.
-    const subscription = setupSubscription();
-    return () => {
-      // 컴포넌트 언마운트 시 구독을 해제합니다.
-      if (subscription) {
-        subscription();
-      }
-    };
-  }, [stompClient, partyId]);
+  const handleSendMessage = () => {
+    if (client && client.connected) {
+      client.publish({
+        destination: `/pub/chat/message`,
+        body: JSON.stringify({ content: inputMessage, senderId: 1, messageType: 'TALK', party: 1 }),
+        headers: {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+          token: `${getCookie('Authorization')}`,
+          body: JSON.stringify({
+            content: inputMessage,
+            senderId: 1,
+            messageType: 'TALK',
+            party: 1,
+          }),
+        },
+      });
+      setInputMessage('');
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
 
-  // 메시지 표시 부분은 따로 컴포넌트로 분리할 수도 있습니다.
-  return <div className='chat'>{messages}</div>;
+  return (
+    <div className=''>
+      <div className='h-48'>
+        {messages.map((msg, index) => (
+          <div key={index}>{msg}</div>
+        ))}
+      </div>
+      <div>
+        <input
+          type='text'
+          value={inputMessage}
+          onChange={e => setInputMessage(e.target.value)}
+          onKeyPress={e => {
+            if (e.key === 'Enter') {
+              handleSendMessage();
+            }
+          }}
+          placeholder='메세지를 입력하세요'
+          className='input w-full max-w-xs'
+        />
+        <button onClick={handleSendMessage}>Send</button>
+      </div>
+    </div>
+  );
 };
 
 export default Chat;
