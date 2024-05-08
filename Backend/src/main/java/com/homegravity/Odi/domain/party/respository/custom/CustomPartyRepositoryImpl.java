@@ -175,7 +175,7 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
         return condition;
     }
 
-    //정산다된 모든 party 찾기
+    //정산 중, 정산다된 모든 party 찾기
     @Override
     public List<Party> findAllPartiedsSettlingSettled(){
         QParty qparty = QParty.party;
