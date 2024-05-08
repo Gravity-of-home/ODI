@@ -31,33 +31,34 @@ const ChatPage = () => {
   const [info, setInfo] = useState<IInfo>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
-  const fetchData = async () => {
-    await jwtAxios
-      .get(`api/party-boards/${partyId}`, {
-        headers: {
-          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
-        },
-      })
-      .then(res => {
-        console.log(res);
+  // const fetchData = async () => {
+  //   await jwtAxios
+  //     .get(`api/party-boards/${partyId}`, {
+  //       headers: {
+  //         AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+  //       },
+  //     })
+  //     .then(res => {
+  //       console.log(res);
 
-        setInfo(res.data.data);
+  //       setInfo(res.data.data);
 
-        // setHostInfo(FindHost(res.data.data.participants));
-      })
-      .catch(err => {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-      });
+  //       // setHostInfo(FindHost(res.data.data.participants));
+  //     })
+  //     .catch(err => {
+  //       if (err instanceof Error) {
+  //         setError(err.message);
+  //       } else {
+  //         setError('An unknown error occurred');
+  //       }
+  //     });
 
-    setIsLoading(false);
-  };
+  //   setIsLoading(false);
+  // };
 
   useEffect(() => {
-    fetchData();
+    setIsLoading(false);
+    // fetchData();
   }, []); // 이제 `fetchData`에 대한 의존성이 명시적
   if (isLoading)
     return (
