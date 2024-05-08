@@ -9,12 +9,19 @@ import com.homegravity.Odi.domain.member.entity.MemberReview;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
 import com.homegravity.Odi.domain.member.repository.MemberReviewRepository;
 import com.homegravity.Odi.domain.party.entity.Party;
+import com.homegravity.Odi.domain.party.entity.PartyMember;
+import com.homegravity.Odi.domain.party.entity.StateType;
+import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartyRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -23,17 +30,22 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PartyRepository partyRepository;
     private final MemberReviewRepository memberReviewRepository;
+    private final PartyMemberRepository partyMemberRepository;
+
+    private double KIND_PERCENT = 0.3;
+    private double PROMISE_PERCENT = 0.1;
+    private double FASTCHAT_PERCENT = 0.2;
 
     // 사용자 상세정보 조회
-    public MemberResponseDTO getMemberInfo(Member member){
+    public MemberResponseDTO getMemberInfo(Member member) {
         return MemberResponseDTO.from(member);
     }
 
     //사용자 정보 수정
-    public MemberResponseDTO updateMemberInfo(MemberUpdateRequestDTO memberUpdateRequestDTO, Member member){
+    public MemberResponseDTO updateMemberInfo(MemberUpdateRequestDTO memberUpdateRequestDTO, Member member) {
         boolean IsExistNickname = memberRepository.existsByNicknameAndDeletedAtIsNull(memberUpdateRequestDTO.getNewNickname());
 
-        if(IsExistNickname) {//이미 존재하는 닉네임이면 변경 불가
+        if (IsExistNickname) {//이미 존재하는 닉네임이면 변경 불가
             throw BusinessException.builder().errorCode(ErrorCode.NICKNAME_ALREAD_EXIST).message(ErrorCode.NICKNAME_ALREAD_EXIST.getMessage()).build();
         }
 
@@ -45,12 +57,12 @@ public class MemberService {
     }
 
     //동승자 평가
-    public Long createMemberBrix(MemberBrixListRequestDTO memberBrixListRequestDTO, Member reviewer){
+    public Long createMemberBrix(MemberBrixListRequestDTO memberBrixListRequestDTO, Member reviewer) {
 
         Party party = partyRepository.findParty(memberBrixListRequestDTO.getPartyId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
 
-        for(MemberBrixDTO memberBrixDTO : memberBrixListRequestDTO.getMemberBrixDTOList()) {
+        for (MemberBrixDTO memberBrixDTO : memberBrixListRequestDTO.getMemberBrixDTOList()) {
             Member reviewee = memberRepository.findByIdAndDeletedAtIsNull(memberBrixDTO.getReviewee_id())
                     .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
 
@@ -58,6 +70,72 @@ public class MemberService {
         }
 
         return party.getId();
+    }
+
+
+    @Scheduled(fixedDelay = 300000, zone = "Asia/Seoul")//이전 task의 종료시점 이후 5분 후 작업 실행
+    public void chekckMemberBrix() {
+        //log.info("작업 종료 후 1분 뒤 실행 => time: {}", LocalTime.now());
+
+        List<Party> partyList = partyRepository.findAllPartiedsSettlingSettled();
+
+        for (Party party : partyList) {
+            //아직 정산중일 경우
+            if (party.getState().equals(StateType.SETTLING)) {
+
+                //정산시작 날의 3일이 지났다면 정산 종료 시키기
+                if (party.getModifiedAt().plusDays(3).isBefore(LocalDateTime.now())) {
+                    party.updateState(StateType.SETTLED);
+                    partyRepository.save(party);
+                }
+            }
+
+            List<PartyMember> partyMemberList = partyMemberRepository.findAllPartyMember(party);
+
+            for (PartyMember partyMember : partyMemberList) {
+                //이미 매너점수 계산 완료 됐는지 체크
+                if (partyMember.getIsBrix()) continue;
+
+                int kindScore = 0;
+                int promiseScore = 0;
+                int fastChatScore = 0;
+                double all = 0.0;
+
+                //정산 안 한 사용자 있으면
+                if (!partyMember.getIsPaid()) {
+                    all -= 4.0; //감점 4점 주고 시작
+                    //log.info("{}님이 정산하지 않아 매너점수 감점으로 시작합니당", partyMember.getMember().getName());
+                }
+                List<MemberReview> memberReviewList = memberReviewRepository.findAllMemberReview(partyMember.getMember(), party.getId());
+
+                //리뷰 덜받음. =>정산이 완료된 PARTY 기준인데 리뷰를 덜받는걸 어떻게 생각해야하는 가...
+                if (memberReviewList.size() != party.getCurrentParticipants() - 1) {
+                    //log.info("리뷰 덜받아서 실행 안되지렁이");
+                    return;
+                }
+
+                for (MemberReview memberReview : memberReviewList) {
+                    kindScore += memberReview.getKindScore();
+                    promiseScore += memberReview.getPromiseScore();
+                    fastChatScore += memberReview.getFastChatScore();
+                }
+
+                double kind = kindScore / 5.0 / party.getCurrentParticipants() * KIND_PERCENT;
+                double promise = promiseScore / 5.0 / party.getCurrentParticipants() * PROMISE_PERCENT;
+                double fastChat = fastChatScore / 5.0 / party.getCurrentParticipants() * FASTCHAT_PERCENT;
+
+                //기본점수 0.5 + 평가 평균점수
+                all = kind + promise + fastChat + 0.5;
+                log.info("{} 의 이번 합승 점수는: {}", partyMember.getMember().getEmail(), all);
+
+                Member updateMember = partyMember.getMember();
+                updateMember.updateBrix(all);
+                memberRepository.save(updateMember);
+
+                partyMember.updateIsBrix(true);
+                partyMemberRepository.save(partyMember);
+            }
+        }
     }
 
 }

@@ -34,20 +34,21 @@ public class MemberReview extends BaseTime {
     private Integer kindScore;//친절 매너 점수
 
     @Column(name = "promise_score", nullable = false)
-    private Integer promizeScore;//시간 약속 점수
+    private Integer promiseScore;//시간 약속 점수
 
     @Column(name = "fast_chat_score", nullable = false)
     private Integer fastChatScore;//빠른 응답 점수
 
     @Builder
-    private MemberReview(Member reviewee, Long partyId, Long reviewerId, Integer kindScore, Integer promizeScore, Integer fastChatScore) {
+    private MemberReview(Member reviewee, Long partyId, Long reviewerId, Integer kindScore, Integer promiseScore, Integer fastChatScore) {
         this.reviewee = reviewee;
         this.partyId = partyId;
         this.reviewerId = reviewerId;
         this.kindScore = kindScore;
-        this.promizeScore = promizeScore;
+        this.promiseScore = promiseScore;
         this.fastChatScore = fastChatScore;
     }
+
 
     public static MemberReview of(MemberBrixDTO memberBrixDTO, Member reviewee, Long partyId, Member reviewer) {
         return builder()
@@ -55,7 +56,7 @@ public class MemberReview extends BaseTime {
                 .partyId(partyId)
                 .reviewerId(reviewer.getId())
                 .kindScore(memberBrixDTO.getKindScore())
-                .promizeScore(memberBrixDTO.getPromiseScore())
+                .promiseScore(memberBrixDTO.getPromiseScore())
                 .fastChatScore(memberBrixDTO.getFastChatScore())
                 .build();
     }
