@@ -33,6 +33,9 @@ public class PartyMember extends BaseBy {
     @Column(name = "is_paid")
     private Boolean isPaid;
 
+    @Column(name = "is_brix")
+    private Boolean isBrix;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -42,13 +45,14 @@ public class PartyMember extends BaseBy {
     private Party party;
 
     @Builder
-    private PartyMember(RoleType role, Boolean isPaid, Integer settleAmount, Integer paidAmount, Party party, Member member) {
+    private PartyMember(RoleType role, Integer settleAmount, Integer paidAmount, Boolean isPaid, Boolean isBrix, Member member, Party party) {
         this.role = role;
-        this.isPaid = isPaid;
         this.settleAmount = settleAmount;
         this.paidAmount = paidAmount;
-        this.party = party;
+        this.isPaid = isPaid;
+        this.isBrix = isBrix;
         this.member = member;
+        this.party = party;
     }
 
     public static PartyMember of(RoleType role, Boolean isPaid, Party party, Member member) {
@@ -57,6 +61,7 @@ public class PartyMember extends BaseBy {
                 .isPaid(isPaid)
                 .settleAmount(0)
                 .paidAmount(0)
+                .isBrix(false)
                 .party(party)
                 .member(member)
                 .build();
@@ -77,5 +82,7 @@ public class PartyMember extends BaseBy {
     public void updateSettleAmount(Integer settleAmount) {
         this.settleAmount = settleAmount;
     }
+
+    public void updateIsBrix(Boolean isBrix){ this.isBrix = isBrix; }
 
 }
