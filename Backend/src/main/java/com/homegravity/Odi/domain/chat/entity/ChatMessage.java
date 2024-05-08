@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.chat.entity;
 
+import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.global.entity.BaseBy;
 import jakarta.persistence.*;
@@ -24,8 +25,9 @@ public class ChatMessage extends BaseBy {
     @Column(name = "content")
     private String content;
 
-    @Column(name = "sender_id")
-    private Long senderId;
+    @ManyToOne
+    @JoinColumn(name = "sender_id")
+    private Member sender;
 
     @ManyToOne
     @JoinColumn(name = "party_id")
@@ -36,17 +38,17 @@ public class ChatMessage extends BaseBy {
     private MessageType messageType;
 
     @Builder
-    private ChatMessage(String content, Long senderId, Party party, MessageType messageType) {
+    private ChatMessage(String content, Member sender, Party party, MessageType messageType) {
         this.content = content;
-        this.senderId = senderId;
+        this.sender = sender;
         this.party = party;
         this.messageType = messageType;
     }
 
-    public static ChatMessage of (String content, Long senderId, Party party, MessageType messageType) {
+    public static ChatMessage of (String content, Member sender, Party party, MessageType messageType) {
         return builder()
                 .content(content)
-                .senderId(senderId)
+                .sender(sender)
                 .party(party)
                 .messageType(messageType)
                 .build();

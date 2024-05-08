@@ -6,6 +6,7 @@ import com.homegravity.Odi.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -19,9 +20,12 @@ public class ChatController {
      */
     @MessageMapping("/chat/message")
     public void message(ChatMessageDTO message, @AuthenticationPrincipal Member member) {
+
         String nickname = member.getNickname();
+        String image = member.getImage();
         // 로그인 회원 정보로 대화명 설정
-        message.setSender(nickname);
+        message.setSenderNickname(nickname);
+        message.setSenderImage(image);
         // Websocket에 발행된 메시지를 redis로 발행(publish)
         chatService.sendChatMessage(message);
     }
