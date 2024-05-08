@@ -1,6 +1,5 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import './topnav.css';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -141,20 +140,10 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
   };
 
   return (
-    <div className='navbar bg-base-100 justify-between'>
-      <div className='flex-none'>
-        <button onClick={goBack} className='btn btn-square btn-ghost'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            fill='none'
-            viewBox='0 0 24 24'
-            className='inline-block w-5 h-5 stroke-current'>
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth='2'
-              d='M4 6h16M4 12h16M4 18h16'></path>
-          </svg>
+    <div className='flex justify-between fixed w-screen top-0 z-[1000] bg-white'>
+      <div className=''>
+        <button onClick={goBack} className='btn btn-square btn-ghost text-3xl font-bold'>
+          {'<'}
         </button>
       </div>
       {role == 'ORGANIZER' && (

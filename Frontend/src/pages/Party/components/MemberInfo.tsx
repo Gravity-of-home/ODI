@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import jwtAxios from '@/utils/JWTUtil';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface IMemberInfoProps {
@@ -148,7 +148,6 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
 
   return (
     <div className='container p-2'>
-      <ToastContainer autoClose={1000} />
       <div className='host-info mb-5'>
         <p className='mb-4 font-bold text-xl'>팟장</p>
         <div className='flex justify-between content-center'>
@@ -159,7 +158,11 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
             <p>{hostAge}</p>
           </div>
 
-          {role !== 'ORGANIZER' && <button className='bg-slate-300 rounded p-2'>1:1채팅</button>}
+          {role !== 'ORGANIZER' && (
+            <p className=' rounded p-2' style={{ backgroundColor: '#A75DFC' }}>
+              당도자리
+            </p>
+          )}
           {role === 'ORGANIZER' && (
             <p className='content-center text-center w-10 rounded-full bg-blue-100'>나</p>
           )}
@@ -178,7 +181,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
 
         {/* 조회자가 팟장이고 파티신청자가 있으면 */}
         {applicantList && applicantList.length != 0 && (
-          <div className='mt-4'>
+          <div className='mt-4 mb-20'>
             <div>
               <p className='font-bold text-xl'>파티 신청자 목록</p>
             </div>
