@@ -5,6 +5,7 @@ import userStore from '@/stores/useUserStore';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { UseMutationCustomOptions, UseQueryCustomOptions } from '@/types/common';
 import { removeHeader, setHeader } from '@/utils/HeaderUtil';
+import { getCookie } from '@/utils/CookieUtil';
 import { IUser } from '@/types/User';
 // import queryClient from '@/utils/QueryClient';
 
@@ -38,7 +39,7 @@ const useGetRefreshToken = (queryOptions?: UseQueryCustomOptions) => {
 
   useEffect(() => {
     if (isSuccess) {
-      setHeader('AUTHORIZATION', `Bearer ${data}`);
+      setHeader('AUTHORIZATION', `Bearer ${getCookie('Authorization')}`);
     }
   }, [isSuccess]);
 

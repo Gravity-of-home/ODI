@@ -10,6 +10,8 @@ import LoginPage from './pages/Login/LoginPage';
 import HomePage from './pages/Home/HomePage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import PartyCreatePage from './pages/Party/PartyCreatePage';
+import SetDeparture from './pages/Party/components/SetDeparture';
+import SetArrival from './pages/Party/components/SetArrival';
 import PartyDetailPage from './pages/Party/PartyDetailPage';
 import ChatListPage from './pages/Chat/ChatListPage';
 import ChatPage from './pages/Chat/ChatPage';
@@ -19,7 +21,7 @@ type AuthWrapperProps = {
 };
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  const { isLogin, id, loginUser, logoutUser } = userStore();
+  const { isLogin, loginUser } = userStore();
   const { refreshTokenQuery, getUserInfoQuery } = useAuth();
 
   useEffect(() => {
@@ -36,25 +38,25 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   return <>{children}</>;
 };
 
-const spinner = () => {
-  const { isLoading } = loadingStore();
+// const spinner = () => {
+//   const { isLoading } = loadingStore();
 
-  if (isLoading) {
-    return (
-      <>
-        <div
-          className='absolute h-full w-full bg-white/50 z-20'
-          onClick={e => e.stopPropagation()}
-        />
-        <div className='z-50 absolute left-0 right-0 top-0 bottom-0 flex justify-center items-center'>
-          <svg className='animate-spin h-5 w-5 mr-3 bg-yellow-500' viewBox='0 0 24 24'></svg>
-        </div>
-      </>
-    );
-  } else {
-    return <></>;
-  }
-};
+//   if (isLoading) {
+//     return (
+//       <>
+//         <div
+//           className='absolute h-full w-full bg-white/50 z-20'
+//           onClick={e => e.stopPropagation()}
+//         />
+//         <div className='z-50 absolute left-0 right-0 top-0 bottom-0 flex justify-center items-center'>
+//           <svg className='animate-spin h-5 w-5 mr-3 bg-yellow-500' viewBox='0 0 24 24'></svg>
+//         </div>
+//       </>
+//     );
+//   } else {
+//     return <></>;
+//   }
+// };
 
 const router = createBrowserRouter([
   {
@@ -98,6 +100,22 @@ const router = createBrowserRouter([
     element: (
       <AuthWrapper>
         <PartyCreatePage />
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: 'party-boards/departure',
+    element: (
+      <AuthWrapper>
+        <SetDeparture />
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: 'party-boards/arrival',
+    element: (
+      <AuthWrapper>
+        <SetArrival />
       </AuthWrapper>
     ),
   },

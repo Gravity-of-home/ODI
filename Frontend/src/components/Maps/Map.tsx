@@ -1,38 +1,50 @@
-import { Status, Wrapper } from '@googlemaps/react-wrapper';
+import { APIProvider, Map } from '@vis.gl/react-google-maps';
 import { ViteConfig } from '@/apis/ViteConfig';
-import MapRef from './MapRef';
-import jwtAxios from '@/utils/JWTUtil';
+import { useState, useEffect } from 'react';
+import LatLngAddStore from '@/stores/useLatLngAddStore';
+import DarkModeStyle from './DarkModeStyle';
 
-const render = (status: Status) => {
-  switch (status) {
-    case Status.LOADING:
-      return (
-        <>
-          <div className='gird grid-cols-1 gap-6 h-[100%] flex flex-col justify-center items-center animate-fadeIn'>
-            <img
-              src='https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Cyclone.png'
-              alt='Cyclone'
-              width='200'
-              height='200'
-            />
-          </div>
-        </>
-      );
-    case Status.FAILURE:
-      return <>에러 발생</>;
-    case Status.SUCCESS:
-      return (
-        <>
-          <MapRef />
-        </>
-      );
-  }
-};
+const GoogleMap = () => {
+  const VITE_GOOGLE_MAP_API_KEY = ViteConfig.VITE_GOOGLE_MAP_API_KEY;
+  const { currentLat, currentLng } = LatLngAddStore();
+  const [isLoaded, setIsLoaded] = useState(false);
 
-const Map = () => {
+  // TODO : SearchBar 구현 -> 엘라스틱 서치를 적용
+  // 엘라스틱 서치 결과를 바탕으로 GET 요청을 보내서 마커를 찍어야함 & Bottom Sheet 구현
+
   return (
-    <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
+    <APIProvider
+      apiKey={VITE_GOOGLE_MAP_API_KEY}
+      onLoad={() => {
+        setIsLoaded(true);
+      }}>
+      {isLoaded === true ? (
+        <Map
+          styles={DarkModeStyle}
+          style={{ width: '100%', height: '100%' }}
+          disableDefaultUI={true}
+          defaultCenter={{ lat: currentLat, lng: currentLng }}
+          defaultZoom={16}
+          minZoom={10}
+          maxZoom={18}
+          gestureHandling={'greedy'}
+          restriction={{
+            latLngBounds: {
+              north: 43,
+              south: 33,
+              west: 124,
+              east: 132,
+            },
+            strictBounds: true,
+          }}
+        />
+      ) : (
+        <>
+          <span className='loading loading-dots loading-lg'></span>
+        </>
+      )}
+    </APIProvider>
   );
 };
 
-export default Map;
+export default GoogleMap;

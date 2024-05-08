@@ -1,4 +1,5 @@
 import LatLngAddstore from '@/stores/useLatLngAddStore';
+import usePartyStore from '@/stores/usePartyStore';
 // import { distance } from '../Pages/util/calc';
 
 interface PositionOptions {
@@ -24,11 +25,15 @@ function watchPositionHook() {
     // }
     // console.log(d);
     // if (d < 10) {
-    localStorage.setItem('latitude', pos.coords.latitude.toString());
-    localStorage.setItem('longitude', pos.coords.longitude.toString());
+    // localStorage.setItem('latitude', pos.coords.latitude.toString());
+    // localStorage.setItem('longitude', pos.coords.longitude.toString());
     LatLngAddstore.setState({
       currentLat: pos.coords.latitude,
       currentLng: pos.coords.longitude,
+    });
+    usePartyStore.setState({
+      departuresName: '내 위치',
+      departuresLocation: { longitude: pos.coords.longitude, latitude: pos.coords.latitude },
     });
     // }
   }
