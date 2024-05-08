@@ -43,23 +43,24 @@ const Chat = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (client && client.connected) {
-  //     const subscription = client.subscribe(
-  //       `/sub/chat/message`,
-  //       message => {
-  //         const newMessage = JSON.parse(message.body).message;
-  //         setMessages(prevMessages => [...prevMessages, newMessage]);
-  //       },
-  //       {
-  //         AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
-  //         token: `${getCookie('Authorization')}`,
-  //       },
-  //     );
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/sub/chat/message`,
+        message => {
+          console.log(message);
+          // const newMessage = JSON.parse(message.body).message;
+          // setMessages(prevMessages => [...prevMessages, newMessage]);
+        },
+        {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+          token: `${getCookie('Authorization')}`,
+        },
+      );
 
-  //     return () => subscription.unsubscribe();
-  //   }
-  // }, [client, isConnected]);
+      return () => subscription.unsubscribe();
+    }
+  }, [client, isConnected]);
 
   const handleSendMessage = () => {
     if (client && client.connected) {
