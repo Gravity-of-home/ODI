@@ -26,7 +26,7 @@ public class ChatMessage extends BaseBy {
     private String content;
 
     @ManyToOne
-    @Column(name = "sender_id")
+    @JoinColumn(name = "sender_id")
     private Member sender;
 
     @ManyToOne

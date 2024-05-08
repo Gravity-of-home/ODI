@@ -48,7 +48,7 @@ public enum ErrorCode {
     MEMBER_ID_ALREADY_EXIST(400, "회원 ID가 이미 존재합니다."),
 
     MEMBER_NICKNAME_NOT_EXIST(400, "회원 닉네임이 존재하지 않습니다."),
-    NICKNAME_ALREAD_EXIST(400, "닉네임이 이미 존재합니다."),
+    NICKNAME_ALREADY_EXIST(400, "닉네임이 이미 존재합니다."),
 
     // JWT
     REFRESH_INVALID(400, "리프레시 토큰이 유효하지 않습니다."),

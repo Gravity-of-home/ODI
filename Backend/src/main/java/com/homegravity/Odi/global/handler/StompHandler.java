@@ -4,8 +4,6 @@ import com.homegravity.Odi.domain.chat.dto.ChatMessageDTO;
 import com.homegravity.Odi.domain.chat.entity.MessageType;
 import com.homegravity.Odi.domain.chat.repository.ChatRoomRepository;
 import com.homegravity.Odi.domain.chat.service.ChatService;
-import com.homegravity.Odi.domain.member.entity.Member;
-import com.homegravity.Odi.global.jwt.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -13,9 +11,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
