@@ -2,15 +2,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MemberInfo from './components/MemberInfo';
 import PartyInfo from './components/PartyInfo';
 import PathMap from './components/PathMap';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import BottomButton from './components/BottomButton';
 import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
 import TopNav from './components/TopNav';
-import './components/topnav.css';
+
 interface IInfo {
   id: number;
-  createdAt: string;
+  createAt: string;
   modifiedAt: string;
   title: string;
   departuresName: string;
@@ -62,8 +62,8 @@ const PartyDetailPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState<IInfo>({
-    id: 2,
-    createdAt: '',
+    id: 0,
+    createAt: '',
     modifiedAt: '',
     title: 'OD!',
     departuresName: 'OD!',
@@ -146,11 +146,11 @@ const PartyDetailPage = () => {
         },
       })
       .then(res => {
-        console.log(res);
+        console.log(res.data);
         const pathInfoObject = JSON.parse(res.data.data.pathInfo);
         const data = pathInfoObject.route.traoptimal[0].summary;
         const path = pathInfoObject.route.traoptimal[0].path;
-        console.log(pathInfoObject);
+
         setInfo(prevInfo => ({
           ...prevInfo,
           ...res.data.data,
@@ -175,14 +175,13 @@ const PartyDetailPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, []); // 이제 `fetchData`에 대한 의존성이 명시적
+  }, []);
 
-  function formatTimeDifference(createdAt: string) {
+  //
+  function formatTimeDifference(createAt: string) {
     const now: Date = new Date();
-    const createdTime: Date = new Date(createdAt);
-
+    const createdTime: Date = new Date(createAt);
     const timeDifference: number = now.getTime() - createdTime.getTime(); // 현재 시간과 생성 시간의 차이 (밀리초 단위)
-
     const minutesDifference = Math.floor(timeDifference / (1000 * 60)); // 분 단위로 변환
     const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60)); // 시간 단위로 변환
     const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24)); // 일 단위로 변환
@@ -210,23 +209,22 @@ const PartyDetailPage = () => {
   if (error) return <p>{error}에런디유? 다시 시도해봐유 </p>;
   return (
     <div className='container'>
-      <div className='mb-24'>
-        <TopNav
-          role={info.role}
-          state={info.state}
-          partyId={partyId}
-          currentParticipants={info.currentParticipants}
-          expectedCost={info.expectedCost}
-          fetchData={fetchData}
-        />
-      </div>
+      <TopNav
+        role={info.role}
+        state={info.state}
+        partyId={partyId}
+        currentParticipants={info.currentParticipants}
+        expectedCost={info.expectedCost}
+        fetchData={fetchData}
+      />
 
-      <div className='party-info'>
+      <div className='party-info p-4 mt-10'>
+        {/* 다른 컨텐츠는 TopNav에 가려지지 않도록 marginTop 조정 */}
         <div className='flex gap-x-2 content-center items-center'>
           <img src={hostInfo.profileImage} alt='파티장 사진' className='rounded-full w-8 h-8 ' />
           <p className='font-bold'>{hostInfo.nickname}</p>
           <p>{hostInfo.gender === 'F' ? '여' : '남'}</p>
-          <p>{formatTimeDifference(info.createdAt)}</p>
+          <p>{formatTimeDifference(info.createAt)}</p>
           <p>조회수: {info.viewCount}</p>
         </div>
         <div className='party-title mt-2 font-bold text-xl'>
@@ -234,7 +232,7 @@ const PartyDetailPage = () => {
         </div>
       </div>
 
-      <div className='path-map mt-2 p-2'>
+      <div className='path-map mt-2 p-4'>
         <PathMap
           departuresName={info.departuresName}
           arrivalsName={info.arrivalsName}
@@ -247,7 +245,7 @@ const PartyDetailPage = () => {
         />
       </div>
       <div className='h-5 bg-slate-100'></div>
-      <div>
+      <div className=''>
         <PartyInfo
           category={info.category}
           state={info.state}
@@ -258,6 +256,8 @@ const PartyDetailPage = () => {
           expectedTime={info.expectedDuration}
           content={info.content}
           genderRestriction={info.genderRestriction}
+          hostName={hostInfo.nickname}
+          hostImgUrl={hostInfo.profileImage}
         />
       </div>
       <div className='h-5 bg-slate-100'></div>
@@ -273,16 +273,16 @@ const PartyDetailPage = () => {
           partyId={partyId}
           fetchData={fetchData}
         />
-        <div className='h-1 bg-slate-100'></div>
-        <div className='request-btn text-center'>
-          <BottomButton
-            state={info.state}
-            role={info.role}
-            partyId={partyId}
-            fetchData={fetchData}
-          />
-        </div>
       </div>
+      <div className='divider h-16'></div>
+      <BottomButton
+        state={info.state}
+        role={info.role}
+        partyId={partyId}
+        fetchData={fetchData}
+        hostGender={hostInfo.gender}
+        genderRestriction={info.genderRestriction}
+      />
     </div>
   );
 };

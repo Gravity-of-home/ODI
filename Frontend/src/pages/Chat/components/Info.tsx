@@ -20,7 +20,7 @@ const Info: React.FC<IInfoProps> = ({ departuresName, arrivalsName, departuresDa
 
   return (
     <div>
-      <div className='party-info'>
+      <div className='fixed top-14 party-info bg-white z-10'>
         <div className='flex'>
           <div className='px-4'>{stateComponent}</div>
           <div>

@@ -8,13 +8,31 @@ import Chat from './components/Chat';
 import { WebSocketProvider } from '../../context/webSocketProvider';
 
 interface IInfo {
-  id: number;
+  partyId: number;
   title: string;
+  currentParticipants: number;
   departuresName: string;
   arrivalsName: string;
   departuresDate: string;
   state: string;
-  role: string;
+  me: {
+    id: number;
+    role: string;
+    nickname: string;
+    gender: string;
+    ageGroup: string;
+    profileImage: string;
+    isPaid: boolean;
+  };
+  organizer: {
+    id: number;
+    role: string;
+    nickname: string;
+    gender: string;
+    ageGroup: string;
+    profileImage: string;
+    isPaid: boolean;
+  };
   participants: {
     id: number;
     role: string;
@@ -33,7 +51,7 @@ const ChatPage = () => {
   const [error, setError] = useState('');
   const fetchData = async () => {
     await jwtAxios
-      .get(`api/party-boards/${partyId}`, {
+      .get(`api/party-boards/${partyId}/chat-info`, {
         headers: {
           AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
         },
@@ -72,10 +90,10 @@ const ChatPage = () => {
   return (
     <WebSocketProvider>
       <div className='chat-page'>
-        <div className='nav mb-20'>{info && <NavBar title={info.title} />}</div>
-        <div>
+        <div className=''>
           {info && (
-            <Info
+            <NavBar
+              title={info.title}
               departuresName={info.departuresName}
               arrivalsName={info.arrivalsName}
               departuresDate={info.departuresDate}
@@ -83,9 +101,12 @@ const ChatPage = () => {
             />
           )}
         </div>
+
         <div className='divider'></div>
 
-        <Chat />
+        <div className='flex-1 overflow-y mt-20'>
+          <Chat />
+        </div>
       </div>
     </WebSocketProvider>
   );
