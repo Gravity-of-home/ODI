@@ -1,7 +1,14 @@
 package com.homegravity.Odi.domain.chat.service;
 
 import com.homegravity.Odi.domain.chat.dto.ChatMessageDTO;
+import com.homegravity.Odi.domain.chat.entity.ChatMessage;
 import com.homegravity.Odi.domain.chat.entity.MessageType;
+import com.homegravity.Odi.domain.chat.repository.ChatMessageRepository;
+import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.member.repository.MemberRepository;
+import com.homegravity.Odi.domain.party.respository.PartyRepository;
+import com.homegravity.Odi.global.response.error.ErrorCode;
+import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -10,6 +17,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class ChatService {
+
+    private final ChatMessageRepository chatMessageRepository;
+    private final MemberRepository memberRepository;
+    private final PartyRepository partyRepository;
 
     private final ChannelTopic channelTopic;
     private final RedisTemplate redisTemplate;
@@ -30,17 +41,25 @@ public class ChatService {
      */
     public void sendChatMessage(ChatMessageDTO chatMessage) {
         if (MessageType.ENTER.equals(chatMessage.getType())) {
-            chatMessage.setContent(chatMessage.getSender() + "님이 방에 입장했습니다.");
-            chatMessage.setSender("[알림]");
+            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 방에 입장했습니다.");
         } else if (MessageType.QUIT.equals(chatMessage.getType())) {
-            chatMessage.setContent(chatMessage.getSender() + "님이 방에서 나갔습니다.");
-            chatMessage.setSender("[알림]");
+            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 방에서 나갔습니다.");
         } else if (MessageType.DATE.equals(chatMessage.getType())) {
             chatMessage.setContent(chatMessage.getSendTime().toString());
-            chatMessage.setSender("[날짜]");
         } else if (MessageType.SETTLEMENT.equals(chatMessage.getType())) {
-            chatMessage.setContent(chatMessage.getSender() + "님이 정산을 요청하셨습니다.");
+            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 정산을 요청하셨습니다.");
         }
         redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+
+        // 메세지 닉네임 기반으로 유저 조회
+        Member sender = memberRepository.findByNicknameAndDeletedAtIsNull(chatMessage.getSenderNickname())
+                .orElseThrow(()->new BusinessException(ErrorCode.MEMBER_NICKNAME_NOT_EXIST,ErrorCode.MEMBER_NICKNAME_NOT_EXIST.getMessage()));
+        // 메세지 DB 저장
+        chatMessageRepository.save(ChatMessage.builder()
+                        .content(chatMessage.getContent())
+                        .sender(sender)
+                        .party(partyRepository.findParty(chatMessage.getPartyId()).orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage())))
+                        .messageType(chatMessage.getType())
+                .build());
     }
 }

@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.chat.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.homegravity.Odi.domain.chat.entity.ChatMessage;
 import com.homegravity.Odi.domain.chat.entity.MessageType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -14,13 +15,16 @@ import java.time.LocalDateTime;
 public class ChatMessageDTO {
 
     @NotNull
-    private Long senderId;
+    private Long partyId; // 동승글 아이디
 
     @NotNull
-    private String sender; // 메시지 보낸사람
+    private String roomId; // 채팅방 아이디
 
     @NotNull
-    private Long messageId;
+    private String senderImage; // 메세지 보낸 사람 프로필사진
+
+    @NotNull
+    private String senderNickname; // 메시지 보낸 사람 이름
 
     @NotNull
     private String content; // 메시지 내용
@@ -31,18 +35,26 @@ public class ChatMessageDTO {
     @NotNull
     private MessageType type; // 메시지 타입
 
-    @NotNull
-    private String roomId;
-
     @Builder
-    public ChatMessageDTO(Long senderId, String sender, Long messageId, String content, LocalDateTime sendTime, MessageType type, String roomId) {
-        this.senderId = senderId;
-        this.sender = sender;
-        this.messageId = messageId;
+    public ChatMessageDTO(Long partyId, String roomId, String senderImage, String senderNickname, String content, LocalDateTime sendTime, MessageType type) {
+        this.partyId=partyId;
+        this.roomId=roomId;
+        this.senderImage = senderImage;
+        this.senderNickname = senderNickname;
         this.content = content;
         this.sendTime = sendTime;
         this.type = type;
-        this.roomId = roomId;
     }
 
+    public static ChatMessageDTO from (ChatMessage chatMessage) {
+        return builder()
+                .partyId(chatMessage.getParty().getId())
+                .roomId(chatMessage.getParty().getRoomId())
+                .senderImage(chatMessage.getSender().getImage())
+                .senderNickname(chatMessage.getSender().getNickname())
+                .content(chatMessage.getContent())
+                .sendTime(chatMessage.getCreatedAt())
+                .type(chatMessage.getMessageType())
+                .build();
+    }
 }

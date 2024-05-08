@@ -1,5 +1,7 @@
 package com.homegravity.Odi.domain.party.service;
 
+import com.homegravity.Odi.domain.chat.dto.ChatRoomDTO;
+import com.homegravity.Odi.domain.chat.repository.ChatRoomRepository;
 import com.homegravity.Odi.domain.map.service.MapService;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
@@ -25,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -36,6 +38,7 @@ public class PartyService {
     private final PartyBoardStatsRepository partyBoardStatsRepository;
     private final PartyMemberRepository partyMemberRepository;
     private final MemberRepository memberRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     private final MapService mapService;
     private final RedisLockRepository redisLockRepository;
@@ -44,7 +47,8 @@ public class PartyService {
     @Transactional
     public Long createParty(PartyRequestDTO partyRequestDTO, Member member) {
 
-        Party party = partyRepository.save(Party.of(partyRequestDTO, member.getGender()));
+        String roomId = chatRoomRepository.createChatRoom();
+        Party party = partyRepository.save(Party.of(partyRequestDTO, member.getGender(), roomId));
 
         PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0); // 생성시 조회수 초기화
         partyMemberRepository.save(PartyMember.of(RoleType.ORGANIZER, false, party, member));
