@@ -4,6 +4,7 @@ import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.QParty;
+import com.homegravity.Odi.domain.party.entity.StateType;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
@@ -172,6 +173,18 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
 
         log.info("카테고리 조건 : {}", condition);
         return condition;
+    }
+
+    //정산 중, 정산다된 모든 party 찾기
+    @Override
+    public List<Party> findAllPartiedsSettlingSettled(){
+        QParty qparty = QParty.party;
+
+        return jpaQueryFactory.selectFrom(qparty)
+                .where(qparty.state.eq(StateType.SETTLED)
+                        .or(qparty.state.eq(StateType.SETTLING))
+                        .and(qparty.deletedAt.isNull()))
+                .fetch();
     }
 
 }

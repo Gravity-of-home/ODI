@@ -4,6 +4,7 @@ import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
+import com.homegravity.Odi.domain.party.dto.response.PartyChatInfoResponseDTO;
 import com.homegravity.Odi.domain.party.dto.response.PartyResponseDTO;
 import com.homegravity.Odi.domain.party.service.PartyService;
 import com.homegravity.Odi.global.response.success.ApiResponse;
@@ -59,6 +60,12 @@ public class PartyController {
     public ApiResponse<Void> deletePartyDetail(@PathVariable(value = "party-id") Long partyId, @AuthenticationPrincipal Member member) {
         partyService.deleteParty(partyId, member);
         return ApiResponse.of(SuccessCode.PARTY_DELETE_SUCCESS);
+    }
+
+    @Operation(summary = "파티 채팅 정보 조회", description = "파티 정보를 채팅방에 제공합니다.")
+    @GetMapping("/{party-id}/chat-info")
+    public ApiResponse<PartyChatInfoResponseDTO> getPartyChatInfo(@PathVariable(value = "party-id") Long partyId, @AuthenticationPrincipal Member member) {
+        return ApiResponse.of(SuccessCode.PARTY_GET_SUCCESS, partyService.getPartyChatInfo(partyId, member));
     }
 
 }

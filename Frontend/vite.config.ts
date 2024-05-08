@@ -14,6 +14,6 @@ export default defineConfig({
   },
   // SockJS global 설정 필요해서 추가
   define: {
-    global: {},
+    global: 'window',
   },
 });
