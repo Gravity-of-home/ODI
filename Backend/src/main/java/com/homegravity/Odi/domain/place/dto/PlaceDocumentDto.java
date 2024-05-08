@@ -33,11 +33,20 @@ public class PlaceDocumentDto {
     @Schema(description = "시도")
     private String sido;
 
+    @Schema(description = "시군구")
+    private String sigungu;
+
     @Schema(description = "장소 위치 (위경도)")
     private LocationPoint geoPoint;
 
+    @Schema(description = "대분류")
+    private String majorCategory;
+
+    @Schema(description = "중분류")
+    private String subCategory;
+
     @Builder
-    private PlaceDocumentDto(String id, String placeName, String buildingName, String jibunAddress, String roadNameAddress, Integer postalCode, String sido, LocationPoint geoPoint) {
+    private PlaceDocumentDto(String id, String placeName, String buildingName, String jibunAddress, String roadNameAddress, Integer postalCode, String sido, String sigungu, LocationPoint geoPoint, String majorCategory, String subCategory) {
         this.id = id;
         this.placeName = placeName;
         this.buildingName = buildingName;
@@ -45,7 +54,10 @@ public class PlaceDocumentDto {
         this.roadNameAddress = roadNameAddress;
         this.postalCode = postalCode;
         this.sido = sido;
+        this.sigungu = sigungu;
         this.geoPoint = geoPoint;
+        this.majorCategory = majorCategory;
+        this.subCategory = subCategory;
     }
 
     public static PlaceDocumentDto from(PlaceDocument placeDocument) {
@@ -58,7 +70,10 @@ public class PlaceDocumentDto {
                 .roadNameAddress(placeDocument.getRoadNameAddress())
                 .postalCode(placeDocument.getPostalCode())
                 .sido(placeDocument.getSido())
+                .sigungu(placeDocument.getSigungu())
                 .geoPoint(LocationPoint.of(placeDocument.getLatitude(), placeDocument.getLongitude()))
+                .majorCategory(placeDocument.getMajorCategory())
+                .subCategory(placeDocument.getSubCategory())
                 .build();
     }
 }
