@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberBrixDTO {
 
-    @Schema(description = "파티 멤버 아이디(리뷰 받는 사람)")
+    @Schema(description = "멤버 아이디(리뷰 받는 사람)")
     private Long reviewee_id;
 
     @Schema(description = "친절 매너 점수")

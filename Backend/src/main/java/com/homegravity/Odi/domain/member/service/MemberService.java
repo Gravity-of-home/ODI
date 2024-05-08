@@ -46,7 +46,7 @@ public class MemberService {
         boolean IsExistNickname = memberRepository.existsByNicknameAndDeletedAtIsNull(memberUpdateRequestDTO.getNewNickname());
 
         if (IsExistNickname) {//이미 존재하는 닉네임이면 변경 불가
-            throw BusinessException.builder().errorCode(ErrorCode.NICKNAME_ALREAD_EXIST).message(ErrorCode.NICKNAME_ALREAD_EXIST.getMessage()).build();
+            throw BusinessException.builder().errorCode(ErrorCode.NICKNAME_ALREADY_EXIST).message(ErrorCode.NICKNAME_ALREADY_EXIST.getMessage()).build();
         }
 
         //member nickname 업데이트
@@ -68,12 +68,11 @@ public class MemberService {
 
             memberReviewRepository.save(MemberReview.of(memberBrixDTO, reviewee, party.getId(), reviewer));
         }
-
         return party.getId();
     }
 
 
-    @Scheduled(fixedDelay = 300000, zone = "Asia/Seoul")//이전 task의 종료시점 이후 5분 후 작업 실행
+    @Scheduled(fixedDelay = 3600000, zone = "Asia/Seoul")//이전 task의 종료시점 이후 1시간 후 실행
     public void chekckMemberBrix() {
         //log.info("작업 종료 후 1분 뒤 실행 => time: {}", LocalTime.now());
 
@@ -83,12 +82,11 @@ public class MemberService {
             //아직 정산중일 경우
             if (party.getState().equals(StateType.SETTLING)) {
 
-                //정산시작 날의 3일이 지났다면 정산 종료 시키기
-                if (party.getModifiedAt().plusDays(3).isBefore(LocalDateTime.now())) {
-                    party.updateState(StateType.SETTLED);
-                    partyRepository.save(party);
-                }
+                //정산시작 날의 3일 안 지났으면 아직 대기
+                if (party.getModifiedAt().plusDays(3).isAfter(LocalDateTime.now())) continue;
             }
+
+            //정산중이더라도 3일 지났으면 리뷰를 바탕으로 매너 점수 처리 진행
 
             List<PartyMember> partyMemberList = partyMemberRepository.findAllPartyMember(party);
 
@@ -104,28 +102,29 @@ public class MemberService {
                 //정산 안 한 사용자 있으면
                 if (!partyMember.getIsPaid()) {
                     all -= 4.0; //감점 4점 주고 시작
-                    //log.info("{}님이 정산하지 않아 매너점수 감점으로 시작합니당", partyMember.getMember().getName());
+                    //log.info("{}님이 정산하지 않아 매너점수 감점.", partyMember.getMember().getName());
                 }
                 List<MemberReview> memberReviewList = memberReviewRepository.findAllMemberReview(partyMember.getMember(), party.getId());
-
-                //리뷰 덜받음. =>정산이 완료된 PARTY 기준인데 리뷰를 덜받는걸 어떻게 생각해야하는 가...
-                if (memberReviewList.size() != party.getCurrentParticipants() - 1) {
-                    //log.info("리뷰 덜받아서 실행 안되지렁이");
-                    return;
-                }
 
                 for (MemberReview memberReview : memberReviewList) {
                     kindScore += memberReview.getKindScore();
                     promiseScore += memberReview.getPromiseScore();
                     fastChatScore += memberReview.getFastChatScore();
+
+                    Member reviewer = memberRepository.findByIdAndDeletedAtIsNull(memberReview.getReviewerId())
+                            .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+
+                    //리뷰 단 사람 추가 점수 부가
+                    reviewer.updateBrix(0.05);
+                    memberRepository.save(reviewer);
                 }
 
-                double kind = kindScore / 5.0 / party.getCurrentParticipants() * KIND_PERCENT;
-                double promise = promiseScore / 5.0 / party.getCurrentParticipants() * PROMISE_PERCENT;
-                double fastChat = fastChatScore / 5.0 / party.getCurrentParticipants() * FASTCHAT_PERCENT;
+                double kind = kindScore / 5.0 / memberReviewList.size() * KIND_PERCENT;
+                double promise = promiseScore / 5.0 / memberReviewList.size() * PROMISE_PERCENT;
+                double fastChat = fastChatScore / 5.0 / memberReviewList.size() * FASTCHAT_PERCENT;
 
                 //기본점수 0.5 + 평가 평균점수
-                all = kind + promise + fastChat + 0.5;
+                all = 0.5 + kind + promise + fastChat;
                 log.info("{} 의 이번 합승 점수는: {}", partyMember.getMember().getEmail(), all);
 
                 Member updateMember = partyMember.getMember();
@@ -137,5 +136,4 @@ public class MemberService {
             }
         }
     }
-
 }
