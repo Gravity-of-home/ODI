@@ -23,9 +23,11 @@ public interface CustomPartyMember {
 
     List<PartyMember> findAllPartyMember(Party party);
 
-    Optional<PartyMember> findPartyPartiAndReqByMember(Party party, Member member);
+    Optional<PartyMember> findPartyPartiOrReqByMember(Party party, Member member);
 
     Optional<PartyMember> findByPartyAndMember(Party party, Member member);
 
     List<PartyMember> findAllPartyMemberAndRequester(Party party);
+
+    List<PartyMemberDTO> findAllParticipant(Party party, Member member);
 }
