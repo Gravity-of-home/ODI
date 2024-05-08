@@ -19,63 +19,40 @@ public class PlaceDocument {
     @Id
     private String id;
 
-    @Field(type = FieldType.Text, fielddata = true, analyzer = "suggest_index_analyzer", searchAnalyzer = "suggest_search_analyzer", name = "place_name")
+    @Field(type = FieldType.Text, analyzer = "suggest_index_analyzer", searchAnalyzer = "suggest_search_analyzer", name = "place_name")
     private String placeName;
 
-    @Field(type = FieldType.Text, fielddata = true, name = "building_name")
+    @Field(type = FieldType.Text, name = "building_name")
     private String buildingName;
 
-    @Field(type = FieldType.Text, fielddata = true, name = "jibun_address")
+    @Field(type = FieldType.Text, name = "jibun_address")
     private String jibunAddress;
 
-    @Field(type = FieldType.Text, fielddata = true, name = "road_name_address")
+    @Field(type = FieldType.Text, name = "road_name_address")
     private String roadNameAddress;
 
     @Field(type = FieldType.Integer, name = "postal_code")
     private Integer postalCode;
 
-    @Field(type = FieldType.Text, fielddata = true, name="sido")
+    @Field(type = FieldType.Text, name="sido")
     private String sido;
 
-    @Field(type = FieldType.Text, fielddata = true, name="sigungu")
+    @Field(type = FieldType.Text, name="sigungu")
     private String sigungu;
 
-    @Field(type = FieldType.Double, fielddata = true, name="latitude")
+    @Field(type = FieldType.Double, name="latitude")
     private Double latitude;
 
-    @Field(type = FieldType.Double, fielddata = true, name="longitude")
+    @Field(type = FieldType.Double, name="longitude")
     private Double longitude;
+
+    @Field(type= FieldType.Text, name="major_category")
+    private String majorCategory;
+
+    @Field(type= FieldType.Text, name="sub_category")
+    private String subCategory;
 
     @GeoPointField
     private GeoPoint locationGeopoint;
 
-    @Builder
-    private PlaceDocument(String placeName, String buildingName, String jibunAddress, String roadNameAddress, Integer postalCode, String sido, String sigungu, Double latitude, Double longitude, GeoPoint locationGeopoint) {
-        this.placeName = placeName;
-        this.buildingName = buildingName;
-        this.jibunAddress = jibunAddress;
-        this.roadNameAddress = roadNameAddress;
-        this.postalCode = postalCode;
-        this.sido = sido;
-        this.sigungu = sigungu;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.locationGeopoint = locationGeopoint;
-    }
-
-    public static PlaceDocument of(String placeName, String buildingName, String jibunAddress, String roadNameAddress, Integer postalCode, String sido, String sigungu, Double latitude, Double longitude, GeoPoint locationGeopoint) {
-
-        return builder()
-                .placeName(placeName)
-                .buildingName(buildingName)
-                .jibunAddress(jibunAddress)
-                .roadNameAddress(roadNameAddress)
-                .postalCode(postalCode)
-                .sido(sido)
-                .sigungu(sigungu)
-                .latitude(latitude)
-                .longitude(longitude)
-                .locationGeopoint(locationGeopoint)
-                .build();
-    }
 }
