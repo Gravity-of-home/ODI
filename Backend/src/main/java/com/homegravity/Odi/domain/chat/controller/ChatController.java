@@ -11,9 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,8 +39,9 @@ public class ChatController {
         // 로그인 회원 정보로 대화명 설정
         message.setSenderNickname(nickname);
         message.setSenderImage(image);
+        message.setSendTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         // Websocket에 발행된 메시지를 redis로 발행(publish)
-        log.info("pub!!!!!!!!!! {}", message.getSenderNickname());
+        log.info("pub!!!!!!!!!! {}", message.getSendTime());
         chatService.sendChatMessage(message);
     }
 }

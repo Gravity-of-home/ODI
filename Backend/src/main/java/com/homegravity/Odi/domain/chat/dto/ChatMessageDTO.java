@@ -29,14 +29,13 @@ public class ChatMessageDTO {
     @NotNull
     private String content; // 메시지 내용
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime sendTime; // 메세지 보낸 시간
+    private String sendTime; // 메세지 보낸 시간
 
     @NotNull
     private MessageType type; // 메시지 타입
 
     @Builder
-    public ChatMessageDTO(Long partyId, String roomId, String senderImage, String senderNickname, String content, LocalDateTime sendTime, MessageType type) {
+    public ChatMessageDTO(Long partyId, String roomId, String senderImage, String senderNickname, String content, String sendTime, MessageType type) {
         this.partyId=partyId;
         this.roomId=roomId;
         this.senderImage = senderImage;
@@ -53,7 +52,7 @@ public class ChatMessageDTO {
                 .senderImage(chatMessage.getSender().getImage())
                 .senderNickname(chatMessage.getSender().getNickname())
                 .content(chatMessage.getContent())
-                .sendTime(chatMessage.getCreatedAt())
+                .sendTime(chatMessage.getCreatedAt().toString())
                 .type(chatMessage.getMessageType())
                 .build();
     }

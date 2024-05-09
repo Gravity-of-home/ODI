@@ -52,6 +52,7 @@ public class ChatService {
         } else if (MessageType.SETTLEMENT.equals(chatMessage.getType())) {
             chatMessage.setContent(chatMessage.getSenderNickname() + "님이 정산을 요청하셨습니다.");
         }
+        log.info("시간어떻게들어오니??? {}",chatMessage.getSendTime());
         redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
         log.info("@@@@@@@@@@@@@@@@@@ {}",chatMessage.getRoomId());
         // 메세지 닉네임 기반으로 유저 조회

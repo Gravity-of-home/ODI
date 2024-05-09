@@ -46,8 +46,11 @@ public class PartyChatInfoResponseDTO {
     @Schema(description = "파티 참여자들의 정보")
     private List<PartyMemberDTO> participants;
 
+    @Schema(description = "채팅방 roomId")
+    private String roomId;
+
     @Builder
-    private PartyChatInfoResponseDTO(Long partyId, String title, Integer currentParticipants, String departuresName, String arrivalsName, LocalDateTime departuresDate, StateType state, PartyMemberDTO me, PartyMemberDTO organizer, List<PartyMemberDTO> participants) {
+    private PartyChatInfoResponseDTO(Long partyId, String title, Integer currentParticipants, String departuresName, String arrivalsName, LocalDateTime departuresDate, StateType state, PartyMemberDTO me, PartyMemberDTO organizer, List<PartyMemberDTO> participants, String roomId) {
         this.partyId = partyId;
         this.title = title;
         this.currentParticipants = currentParticipants;
@@ -58,9 +61,10 @@ public class PartyChatInfoResponseDTO {
         this.me = me;
         this.organizer = organizer;
         this.participants = participants;
+        this.roomId = roomId;
     }
 
-    public static PartyChatInfoResponseDTO of(Party party, PartyMemberDTO me, PartyMemberDTO organizer, List<PartyMemberDTO> participants) {
+    public static PartyChatInfoResponseDTO of(Party party, PartyMemberDTO me, PartyMemberDTO organizer, List<PartyMemberDTO> participants, String roomId) {
         return PartyChatInfoResponseDTO.builder()
                 .partyId(party.getId())
                 .title(party.getTitle())
@@ -72,6 +76,7 @@ public class PartyChatInfoResponseDTO {
                 .me(me)
                 .organizer(organizer)
                 .participants(participants)
+                .roomId(roomId)
                 .build();
     }
 }
