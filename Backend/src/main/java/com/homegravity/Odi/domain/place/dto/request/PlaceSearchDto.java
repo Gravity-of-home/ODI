@@ -11,8 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PlaceSearchDto {
 
-    @Schema(description = "장소명")
-    private String placeName;
+    @Schema(description = "검색 내용")
+    private String query;
 
     @Schema(description = "현재 위치 위도")
     private Double latitude;
