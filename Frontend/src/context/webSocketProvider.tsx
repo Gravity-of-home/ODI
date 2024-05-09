@@ -32,12 +32,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       brokerURL: `ws://localhost:8080/ws-stomp`,
       connectHeaders: {
         AUTHORIZATION: `Bearer ${token}`,
-        token: `Bearer ${token}`,
+        token: `${token}`,
       },
       heartbeatIncoming: 20000, // 20초
       heartbeatOutgoing: 20000, // 20초
       webSocketFactory: () => new SockJS('http://localhost:8080/ws-stomp'),
-      debug: str => console.log('STOMP Debug:', str),
+      // debug: str => console.log('STOMP Debug:', str),
       onConnect: () => {
         console.log('Client CONNECT');
         setIsConnected(true); // 연결 성공시 상태 업데이트

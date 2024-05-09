@@ -5,28 +5,18 @@ import { useWebSocket } from '@/context/webSocketProvider';
 import { getCookie } from '@/utils/CookieUtil';
 
 interface IMessage {
-  id: number;
-  senderId: number;
+  senderNickname: string;
   content: string;
   timestamp: string; // 메시지 수신 또는 발신 시간
+  senderImage: string;
+  sendTime: string;
+  type: string;
 }
 
 const Chat = () => {
-  const { partyId } = useParams<{ partyId: string }>();
+  const { partyId } = useParams();
   const { client, isConnected } = useWebSocket();
-  const [messages, setMessages] = useState<IMessage[]>([
-    { id: 1, senderId: 1, content: '안녕하세요, 반갑습니다!', timestamp: '12:45' },
-    { id: 2, senderId: 2, content: '안녕하세요, 오늘 날씨가 참 좋네요.', timestamp: '12:46' },
-    { id: 3, senderId: 1, content: '그러게요! 산책하기 딱 좋은 날이죠.', timestamp: '12:47' },
-    { id: 4, senderId: 2, content: '다음에 함께 산책 가시죠!', timestamp: '12:48' },
-    { id: 5, senderId: 1, content: '좋아요! 기대하겠습니다.', timestamp: '12:49' },
-    ...Array.from({ length: 100 }, (_, index) => ({
-      id: index + 6,
-      senderId: index % 2 === 0 ? 1 : 2,
-      content: `메시지 내용 ${index + 6}`,
-      timestamp: `12:${50 + (index % 10)}`,
-    })),
-  ]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [myNickName, setMyNickName] = useState('');
   const [myId, setMyID] = useState(0);
@@ -46,27 +36,18 @@ const Chat = () => {
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(
-        `/sub/chat/room/3a10d8e6-ee23-4b8b-86c9-6d3121abedf2`,
+        `/sub/chat/room/b49e3144-1191-4adc-aa38-1e8ea6382832`,
         message => {
-          console.log(message);
-          // const newMessage = JSON.parse(message.body).message;
-          // setMessages(prevMessages => [...prevMessages, newMessage]);
+          console.log(JSON.parse(message.body));
+          const newMessage = JSON.parse(message.body);
+          setMessages(prevMessages => [...prevMessages, newMessage]);
         },
         {
-          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
-          token: `Bearer ${getCookie('Authorization')}`,
-          body: JSON.stringify({
-            AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
-            token: `Bearer ${getCookie('Authorization')}`,
-            content: inputMessage,
-            senderId: 1,
-            messageType: 'TALK',
-            party: 1,
-          }),
+          token: `${getCookie('Authorization')}`,
         },
       );
 
-      // return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
     }
   }, [client, isConnected]);
 
@@ -76,21 +57,13 @@ const Chat = () => {
         destination: `/pub/chat/message`,
         body: JSON.stringify({
           partyId: 1,
-          roomId: '3a10d8e6-ee23-4b8b-86c9-6d3121abedf2',
+          roomId: 'b49e3144-1191-4adc-aa38-1e8ea6382832',
           content: inputMessage,
-          senderId: 1,
+          // sendTime: new Date().toISOString(),
           type: 'TALK',
-          party: { partyId },
         }),
         headers: {
-          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
           token: `${getCookie('Authorization')}`,
-          body: JSON.stringify({
-            content: inputMessage,
-            senderId: 1,
-            messageType: 'TALK',
-            party: 1,
-          }),
         },
       });
       setInputMessage('');
@@ -101,33 +74,28 @@ const Chat = () => {
 
   return (
     <div className='flex flex-col'>
-      <div className='h-96 overflow-y mb-12'>
+      <div className='h-96 overflow-y mb-12 p-4'>
         {messages.map(msg =>
-          msg.senderId === myId ? (
-            <div className='chat chat-end' key={msg.id}>
+          msg.type === 'TALK' && msg.senderNickname === myNickName ? (
+            <div className='chat chat-end'>
               <div className='chat-header'>
-                {myNickName}
-                <time className='text-xs opacity-50'>12:46</time>
+                <time className='text-xs opacity-50'>{msg.sendTime}</time>
               </div>
               <div className='chat-bubble'>{msg.content}</div>
-              <div className='chat-footer opacity-50'>Seen at 12:46</div>
+              {/* <div className='chat-footer opacity-50'>Seen at 12:46</div> */}
             </div>
           ) : (
             <div className='chat chat-start'>
               <div className='chat-image avatar'>
                 <div className='w-10 rounded-full'>
-                  <img
-                    alt='Tailwind CSS chat bubble component'
-                    src='https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
-                  />
+                  <img alt='Tailwind CSS chat bubble component' src={msg.senderImage} />
                 </div>
               </div>
               <div className='chat-header'>
-                Obi-Wan Kenobi
-                <time className='text-xs opacity-50'>12:45</time>
+                {msg.senderNickname}
+                <time className='text-xs opacity-50'>{msg.sendTime}</time>
               </div>
-              <div className='chat-bubble'>You were the Chosen One!</div>
-              <div className='chat-footer opacity-50'>Delivered</div>
+              <div className='chat-bubble'>{msg.content}</div>
             </div>
           ),
         )}

@@ -63,7 +63,6 @@ const ChatPage = () => {
       })
       .then(res => {
         console.log(res);
-
         setInfo(res.data.data);
       })
       .catch(err => {
