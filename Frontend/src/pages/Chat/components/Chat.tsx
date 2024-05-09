@@ -48,7 +48,7 @@ const Chat = () => {
       const subscription = client.subscribe(
         `/sub/chat/room/3a10d8e6-ee23-4b8b-86c9-6d3121abedf2`,
         message => {
-          console.log(message);
+          console.log(JSON.parse(message.body));
           // const newMessage = JSON.parse(message.body).message;
           // setMessages(prevMessages => [...prevMessages, newMessage]);
         },
