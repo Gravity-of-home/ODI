@@ -64,7 +64,7 @@ public class PartyChatInfoResponseDTO {
         this.roomId = roomId;
     }
 
-    public static PartyChatInfoResponseDTO of(Party party, PartyMemberDTO me, PartyMemberDTO organizer, List<PartyMemberDTO> participants, String roomId) {
+    public static PartyChatInfoResponseDTO of(Party party, PartyMemberDTO me, PartyMemberDTO organizer, List<PartyMemberDTO> participants) {
         return PartyChatInfoResponseDTO.builder()
                 .partyId(party.getId())
                 .title(party.getTitle())
@@ -76,7 +76,7 @@ public class PartyChatInfoResponseDTO {
                 .me(me)
                 .organizer(organizer)
                 .participants(participants)
-                .roomId(roomId)
+                .roomId(party.getRoomId())
                 .build();
     }
 }
