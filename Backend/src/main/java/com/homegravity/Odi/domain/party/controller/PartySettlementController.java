@@ -32,7 +32,7 @@ public class PartySettlementController {
 
     @Operation(summary = "동승(파티) 정산 요청", description = "동승 파티 택시 이용이 끝나고, 정산 요청 상태로 만들어요..")
     @PostMapping("/{party-id}/arriving")
-    public ApiResponse<PartySettlementResponseDto> askForSettlement(@AuthenticationPrincipal Member member, @PathVariable(name = "party-id") Long partyId, @RequestBody @Valid PartySettlementRequestDto requestDto) {
+    public ApiResponse<PartySettlementResponseDto> askForSettlement(@AuthenticationPrincipal Member member, @PathVariable(name = "party-id") Long partyId, @Valid PartySettlementRequestDto requestDto) {
 
         return ApiResponse.of(SuccessCode.PARTY_STATE_UPDATE_TO_SETTLING_SUCCESS, partySettlementService.askForSettlement(member, partyId, requestDto));
     }
