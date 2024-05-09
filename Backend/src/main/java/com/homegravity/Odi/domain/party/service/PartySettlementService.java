@@ -11,6 +11,7 @@ import com.homegravity.Odi.domain.payment.entity.PointHistoryType;
 import com.homegravity.Odi.domain.payment.service.PointService;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
+import com.homegravity.Odi.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class PartySettlementService {
     private final PartySettlementRepository partySettlementRepository;
     private final PartyService partyService;
     private final PointService pointService;
+    private final S3Service s3Service;
 
     // 동승 파티 성사 (모집 완료)
     public PartySettlementResponseDto matchParty(Member member, Long partyId, Integer expectedCost) {
@@ -78,9 +80,12 @@ public class PartySettlementService {
         int cost = requestDto.getCost();
         int settlementAmount = cost / party.getCurrentParticipants();
 
+        // 이미지 저장
+        String imgUrl = s3Service.saveFile(requestDto.getNewImage());
+
         // 정산 정보 업데이트
         PartySettlement partySettlement = party.getPartySettlement();
-        partySettlement.updateSettlementInfo(requestDto.getImage(), cost, member.getId());
+        partySettlement.updateSettlementInfo(imgUrl, cost, member.getId());
 
         // 파티원들에게 정산 요청
         partyMemberRepository.findAllPartyMember(party).forEach(
