@@ -71,7 +71,7 @@ public class PlaceDocumentDto {
                 .postalCode(placeDocument.getPostalCode())
                 .sido(placeDocument.getSido())
                 .sigungu(placeDocument.getSigungu())
-                .geoPoint(LocationPoint.of(placeDocument.getLatitude(), placeDocument.getLongitude()))
+                .geoPoint(LocationPoint.of(placeDocument.getLongitude(), placeDocument.getLatitude()))
                 .majorCategory(placeDocument.getMajorCategory())
                 .subCategory(placeDocument.getSubCategory())
                 .build();
