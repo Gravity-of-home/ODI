@@ -48,6 +48,7 @@ public enum SuccessCode {
     PARTY_DELETE_SUBSCRIBE_SUCCESS(204, "택시 파티 참여 신청 취소에 성공했습니다."),
     PARTY_ACCEPT_SUBSCRIBE_SUCCESS(201, "택시 파티 신청자를 참여자로 수락하였습니다."),
     PARTY_REFUSE_SUCCESS(204, "택시 파티 동승 참여 거절에 성공했습니다."),
+    PARTY_LIST_GET_SUCCESS(200, "파티 이용내역 조회에 성공했습니다."),
 
 
     // Place
