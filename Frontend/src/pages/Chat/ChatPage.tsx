@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import NavBar from './components/NavBar';
+import { useNavigate, useParams } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
-import Info from './components/Info';
-import Chat from './components/Chat';
 import { WebSocketProvider } from '../../context/webSocketProvider';
+import NavBar from './components/NavBar';
+import Chat from './components/Chat';
 
 interface IInfo {
   partyId: number;
@@ -49,6 +48,12 @@ const ChatPage = () => {
   const [info, setInfo] = useState<IInfo>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
+
+  const navigate = useNavigate();
+  function goBack() {
+    navigate(`/home`);
+  }
+
   const fetchData = async () => {
     await jwtAxios
       .get(`api/party-boards/${partyId}/chat-info`, {
@@ -60,15 +65,10 @@ const ChatPage = () => {
         console.log(res);
 
         setInfo(res.data.data);
-
-        // setHostInfo(FindHost(res.data.data.participants));
       })
       .catch(err => {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
+        console.error(err);
+        setError(err.response.data.message);
       });
 
     setIsLoading(false);
@@ -86,7 +86,30 @@ const ChatPage = () => {
         <span className='loading loading-ball loading-lg'></span>
       </div>
     );
-  if (error) return <p>{error}에런디유? 다시 시도해봐유 </p>;
+  if (error)
+    return (
+      <div role='alert' className='alert alert-error bg-white h-screen content-center'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='stroke-current shrink-0 h-12 w-12 text-red-600'
+          fill='none'
+          viewBox='0 0 24 24'>
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth='2'
+            d='M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+          />
+        </svg>
+        <div>
+          <h3 className='font-bold'>Error!</h3>
+          <div className='text-xs'>{error}</div>
+        </div>
+        <button onClick={goBack} className='btn btn-sm'>
+          돌아가기
+        </button>
+      </div>
+    );
   return (
     <WebSocketProvider>
       <div className='chat-page'>
@@ -98,6 +121,8 @@ const ChatPage = () => {
               arrivalsName={info.arrivalsName}
               departuresDate={info.departuresDate}
               state={info.state}
+              me={info.me}
+              fetchData={fetchData}
             />
           )}
         </div>

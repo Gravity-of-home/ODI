@@ -32,7 +32,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       brokerURL: `ws://localhost:8080/ws-stomp`,
       connectHeaders: {
         AUTHORIZATION: `Bearer ${token}`,
-        token: `${token}`,
+        token: `Bearer ${token}`,
       },
       heartbeatIncoming: 20000, // 20초
       heartbeatOutgoing: 20000, // 20초

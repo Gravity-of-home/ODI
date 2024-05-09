@@ -46,7 +46,7 @@ const Chat = () => {
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(
-        `/sub/chat/message`,
+        `/sub/chat/room/1`,
         message => {
           console.log(message);
           // const newMessage = JSON.parse(message.body).message;
@@ -54,11 +54,19 @@ const Chat = () => {
         },
         {
           AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
-          token: `${getCookie('Authorization')}`,
+          token: `Bearer ${getCookie('Authorization')}`,
+          body: JSON.stringify({
+            AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+            token: `Bearer ${getCookie('Authorization')}`,
+            content: inputMessage,
+            senderId: 1,
+            messageType: 'TALK',
+            party: 1,
+          }),
         },
       );
 
-      return () => subscription.unsubscribe();
+      // return () => subscription.unsubscribe();
     }
   }, [client, isConnected]);
 
