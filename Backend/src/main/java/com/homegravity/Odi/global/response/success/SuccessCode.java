@@ -61,7 +61,9 @@ public enum SuccessCode {
     PAYMENT_REQUEST_SUCCESS(201, "결제 요청에 성공했습니다."),
     PAYMENT_CONFIRM_SUCCESS(201, "결제 승인에 성공했습니다."),
     PAYMENT_FAIL_UPDATE_SUCCESS(204, "결제 실패 업데이트에 성공했습니다."),
-
+    
+    // Point
+    POINT_HISTORY_GET_SUCCESS(200, "포인트 내역 조회에 성공했습니다."),
 
     // Party Settlement
     PARTY_MATCH_STATE_UPDATE_SUCCESS(204, "동승 성사에 성공했습니다."),
