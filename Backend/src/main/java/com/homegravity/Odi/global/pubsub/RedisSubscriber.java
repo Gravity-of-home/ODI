@@ -20,10 +20,12 @@ public class RedisSubscriber {
      */
     public void sendMessage(String publishMessage) {
         try {
+            log.info("??????여기들어오니????? {}", publishMessage);
             // ChatMessage 객채로 맵핑
             ChatMessageDTO chatMessage = objectMapper.readValue(publishMessage, ChatMessageDTO.class);
             // 채팅방을 구독한 클라이언트에게 메시지 발송
             messagingTemplate.convertAndSend("/sub/chat/room/" + chatMessage.getRoomId(), chatMessage);
+            log.info("오잉######################## {}", chatMessage.getRoomId());
         } catch (Exception e) {
             log.error("메세지 처리 중 에러 발생: Exception {}", e);
         }
