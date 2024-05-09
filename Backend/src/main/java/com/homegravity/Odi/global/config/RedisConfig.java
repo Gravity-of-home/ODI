@@ -46,8 +46,8 @@ public class RedisConfig {
 
         // todo 레디스 설정 자세히 하기
 
-        //redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        //redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+//        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+//        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
 
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));

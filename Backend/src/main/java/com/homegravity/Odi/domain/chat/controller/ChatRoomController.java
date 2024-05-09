@@ -26,9 +26,9 @@ public class ChatRoomController {
     }
 
     // 특정 채팅방 조회
-    @GetMapping("/room/{roomId}")
+    @GetMapping("/room/{room-id}")
     @ResponseBody
-    public ChatRoomDTO roomInfo(@PathVariable String roomId) {
+    public ChatRoomDTO roomInfo(@PathVariable(value = "room-id") String roomId) {
         return chatRoomRepository.findRoomById(roomId);
     }
 
