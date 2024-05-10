@@ -158,8 +158,10 @@ public class MemberService {
             return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.REQUESTER, pageable, true);
         } else if (range.equals("organizer")) {// 내가 파티장인거 조회
             return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.ORGANIZER, pageable, false);
-        } else {//파티장 아닌데 내가 참여한거
+        } else if (range.equals("other")) {//파티장 아닌데 내가 참여한거
             return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.PARTICIPANT, pageable, false);
         }
+        return null;
+
     }
 }
