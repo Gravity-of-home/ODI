@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
-import { WebSocketProvider } from '../../context/webSocketProvider';
 import NavBar from './components/NavBar';
 import Chat from './components/Chat';
 
@@ -111,26 +110,24 @@ const ChatPage = () => {
       </div>
     );
   return (
-    <WebSocketProvider>
-      <div className='chat-page'>
-        {info && (
-          <NavBar
-            title={info.title}
-            departuresName={info.departuresName}
-            arrivalsName={info.arrivalsName}
-            departuresDate={info.departuresDate}
-            state={info.state}
-            me={info.me}
-            roomId={info.roomId}
-            fetchData={fetchData}
-          />
-        )}
-        <div className='divider mt-20'></div>
-        <div className='mt-20'>
-          <Chat roomId={info?.roomId} fetchData={fetchData} />
-        </div>
+    <div className='chat-page'>
+      {info && (
+        <NavBar
+          title={info.title}
+          departuresName={info.departuresName}
+          arrivalsName={info.arrivalsName}
+          departuresDate={info.departuresDate}
+          state={info.state}
+          me={info.me}
+          roomId={info.roomId}
+          fetchData={fetchData}
+        />
+      )}
+      <div className='divider mt-20'></div>
+      <div className='mt-20'>
+        <Chat roomId={info?.roomId} fetchData={fetchData} />
       </div>
-    </WebSocketProvider>
+    </div>
   );
 };
 
