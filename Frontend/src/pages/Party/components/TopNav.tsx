@@ -1,6 +1,5 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import './topnav.css';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -18,6 +17,7 @@ interface ModalProps {
 interface INavProps {
   role: string;
   state: string;
+  title: string;
   partyId: string | undefined;
   expectedCost: number;
   currentParticipants: number;
@@ -116,6 +116,7 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
   role,
   state,
   partyId,
+  title,
   expectedCost,
   currentParticipants,
   fetchData,
@@ -141,30 +142,21 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
   };
 
   return (
-    <div className='navbar bg-base-100 justify-between'>
-      <div className='flex-none'>
-        <button onClick={goBack} className='btn btn-square btn-ghost'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            fill='none'
-            viewBox='0 0 24 24'
-            className='inline-block w-5 h-5 stroke-current'>
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth='2'
-              d='M4 6h16M4 12h16M4 18h16'></path>
-          </svg>
+    <div className='fixed top-0 bg-white w-screen z-[1000]'>
+      <div className='flex items-center justify-between px-4 py-2'>
+        <button onClick={goBack} className='btn btn-square btn-ghost text-3xl'>
+          {'<'}
         </button>
-      </div>
-      {role == 'ORGANIZER' && (
-        <div className='flex-none'>
+        <p className='text-xl font-bold flex-grow text-center'>
+          {title.length > 10 ? `${title.substring(0, 8)}...` : title}
+        </p>
+        {role === 'ORGANIZER' ? (
           <button onClick={toggleModal} className='btn btn-square btn-ghost'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
               fill='none'
               viewBox='0 0 24 24'
-              className='inline-block w-5 h-5 stroke-current'>
+              className='inline-block w-6 h-6 stroke-current'>
               <path
                 strokeLinecap='round'
                 strokeLinejoin='round'
@@ -172,8 +164,10 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
                 d='M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0 a1 1 0 11-2 0 1 1 0 012 0zm7 0 a1 1 0 11-2 0 1 1 0 012 0z'></path>
             </svg>
           </button>
-        </div>
-      )}
+        ) : (
+          <div className='w-12'></div> // 빈 공간 유지
+        )}
+      </div>
       {modalVisible && (
         <Modal
           role={role}

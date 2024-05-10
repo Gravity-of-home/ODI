@@ -34,5 +34,6 @@ public interface CustomPartyMember {
 
     List<PartyMemberDTO> findAllParticipant(Party party, Member member);
 
+    List<PartyMember> findAllByMember(Member member);
     Slice<MemberPartyHistoryResponseDTO> findAllPartyMemberByMember(Member member, RoleType roleType, Pageable pageable, boolean isAll);
 }
