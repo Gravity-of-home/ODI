@@ -3,13 +3,16 @@ package com.homegravity.Odi.domain.member.service;
 import com.homegravity.Odi.domain.member.dto.MemberBrixDTO;
 import com.homegravity.Odi.domain.member.dto.request.MemberBrixListRequestDTO;
 import com.homegravity.Odi.domain.member.dto.request.MemberUpdateRequestDTO;
+import com.homegravity.Odi.domain.member.dto.response.MemberPartyHistoryResponseDTO;
 import com.homegravity.Odi.domain.member.dto.response.MemberResponseDTO;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.member.entity.MemberReview;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
 import com.homegravity.Odi.domain.member.repository.MemberReviewRepository;
+import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.PartyMember;
+import com.homegravity.Odi.domain.party.entity.RoleType;
 import com.homegravity.Odi.domain.party.entity.StateType;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartyRepository;
@@ -17,6 +20,9 @@ import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -135,5 +141,18 @@ public class MemberService {
                 partyMemberRepository.save(partyMember);
             }
         }
+    }
+
+    //파티 이용 내역 조회
+    public Slice<MemberPartyHistoryResponseDTO> getPartyHistory(Member member, String range, Pageable pageable){
+
+        if(range.equals("all")){//모두 조회
+            return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.REQUESTER, pageable,true);
+        }else if(range.equals("organizer")){// 내가 파티장인거 조회
+            return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.ORGANIZER,pageable, false);
+        }else{//파티장 아닌데 내가 참여한거
+            return partyMemberRepository.findAllPartyMemberByMember(member,RoleType.PARTICIPANT, pageable, false);
+        }
+
     }
 }

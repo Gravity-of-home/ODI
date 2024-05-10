@@ -3,12 +3,18 @@ package com.homegravity.Odi.domain.payment.service;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
 import com.homegravity.Odi.domain.party.entity.Party;
+import com.homegravity.Odi.domain.payment.dto.response.PointHistoryResponseDto;
+import com.homegravity.Odi.domain.payment.entity.Payment;
 import com.homegravity.Odi.domain.payment.entity.PointHistory;
 import com.homegravity.Odi.domain.payment.entity.PointHistoryType;
 import com.homegravity.Odi.domain.payment.repository.PointHistoryRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,5 +58,18 @@ public class PointService {
 
         String detailContent = String.format(POINT_HISTORY_DETAIL_CONTENT, party.getDeparturesName(), party.getArrivalsName(), wholeCost, party.getCurrentParticipants());
         pointHistoryRepository.save(PointHistory.createSettleHistory(member, party.getId(), party.getTitle(), detailContent + " [정산자 입금]", PointHistoryType.SETTLEMENT, cost));
+    }
+
+    // 포인트 충전
+    public void chargePoint(Payment payment) {
+        payment.getCustomer().updatePoint(payment.getAmount());
+        pointHistoryRepository.save(PointHistory.createPaymentHistory(payment.getCustomer(), payment.getId(), "포인트 충전: 토스페이", payment.getAmount()));
+    }
+
+    // 포인트 사용 내역
+    public Slice<PointHistoryResponseDto> getPointHistory(Member member, Pageable pageable) {
+
+        Pageable sortPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Order.desc("createdAt")));
+        return pointHistoryRepository.findAllByMemberAndDeletedAtIsNull(member, pageable).map(PointHistoryResponseDto::from);
     }
 }

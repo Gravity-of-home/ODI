@@ -48,6 +48,7 @@ public enum SuccessCode {
     PARTY_DELETE_SUBSCRIBE_SUCCESS(204, "택시 파티 참여 신청 취소에 성공했습니다."),
     PARTY_ACCEPT_SUBSCRIBE_SUCCESS(201, "택시 파티 신청자를 참여자로 수락하였습니다."),
     PARTY_REFUSE_SUCCESS(204, "택시 파티 동승 참여 거절에 성공했습니다."),
+    PARTY_LIST_GET_SUCCESS(200, "파티 이용내역 조회에 성공했습니다."),
 
 
     // Place
@@ -61,7 +62,9 @@ public enum SuccessCode {
     PAYMENT_REQUEST_SUCCESS(201, "결제 요청에 성공했습니다."),
     PAYMENT_CONFIRM_SUCCESS(201, "결제 승인에 성공했습니다."),
     PAYMENT_FAIL_UPDATE_SUCCESS(204, "결제 실패 업데이트에 성공했습니다."),
-
+    
+    // Point
+    POINT_HISTORY_GET_SUCCESS(200, "포인트 내역 조회에 성공했습니다."),
 
     // Party Settlement
     PARTY_MATCH_STATE_UPDATE_SUCCESS(204, "동승 성사에 성공했습니다."),
