@@ -7,7 +7,9 @@ const render = (status: Status) => {
     case Status.LOADING:
       return (
         <>
-          <span className='loading loading-dots loading-lg'></span>
+          <div className='w-[100%] h-[100%] flex justify-center items-center'>
+            <span className='loading loading-dots loading-lg'></span>
+          </div>
         </>
       );
     case Status.FAILURE:

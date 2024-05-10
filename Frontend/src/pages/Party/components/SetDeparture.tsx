@@ -78,9 +78,7 @@ const MapRef = () => {
 
   const getAddByLatLng = async (lat: number, lng: number) => {
     try {
-      const res = await jwtAxios.get(
-        `${ViteConfig.VITE_BASE_URL}/api/places/place?longitude=${lng}&latitude=${lat}`,
-      );
+      const res = await jwtAxios.get(`/api/places/place?longitude=${lng}&latitude=${lat}`);
 
       console.log(res);
       console.log('장소 이름 : ', res.data.data.placeName);
