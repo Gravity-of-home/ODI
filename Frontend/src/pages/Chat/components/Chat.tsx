@@ -12,8 +12,11 @@ interface IMessage {
   sendTime: string;
   type: string;
 }
+interface ChatProps {
+  roomId: string | undefined;
+}
 
-const Chat = () => {
+const Chat: React.FC<ChatProps> = ({ roomId }) => {
   const { partyId } = useParams();
   const { client, isConnected } = useWebSocket();
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -35,8 +38,9 @@ const Chat = () => {
 
   useEffect(() => {
     if (client && client.connected) {
+      console.log(roomId);
       const subscription = client.subscribe(
-        `/sub/chat/room/b49e3144-1191-4adc-aa38-1e8ea6382832`,
+        `/sub/chat/room/${roomId}`,
         message => {
           console.log(JSON.parse(message.body));
           const newMessage = JSON.parse(message.body);
@@ -53,20 +57,23 @@ const Chat = () => {
 
   const handleSendMessage = () => {
     if (client && client.connected) {
-      client.publish({
-        destination: `/pub/chat/message`,
-        body: JSON.stringify({
-          partyId: 1,
-          roomId: 'b49e3144-1191-4adc-aa38-1e8ea6382832',
-          content: inputMessage,
-          // sendTime: new Date().toISOString(),
-          type: 'TALK',
-        }),
-        headers: {
-          token: `${getCookie('Authorization')}`,
-        },
-      });
-      setInputMessage('');
+      if (inputMessage.trim()) {
+        client.publish({
+          destination: `/pub/chat/message`,
+          body: JSON.stringify({
+            partyId: 1,
+            roomId: roomId,
+            content: inputMessage,
+            // sendTime: new Date().toISOString(),
+            type: 'TALK',
+          }),
+          headers: {
+            token: `${getCookie('Authorization')}`,
+          },
+        });
+        setInputMessage('');
+      } else {
+      }
     } else {
       alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
     }
@@ -112,7 +119,7 @@ const Chat = () => {
             }
           }}
           placeholder='메세지를 입력하세요'
-          className='input w-full max-w-xs'
+          className='input w-full'
         />
         <button className='btn' onClick={handleSendMessage}>
           전송

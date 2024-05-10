@@ -8,6 +8,7 @@ import Chat from './components/Chat';
 
 interface IInfo {
   partyId: number;
+  roomId: string;
   title: string;
   currentParticipants: number;
   departuresName: string;
@@ -62,7 +63,7 @@ const ChatPage = () => {
         },
       })
       .then(res => {
-        console.log(res);
+        // console.log(res);
         setInfo(res.data.data);
       })
       .catch(err => {
@@ -112,24 +113,20 @@ const ChatPage = () => {
   return (
     <WebSocketProvider>
       <div className='chat-page'>
-        <div className=''>
-          {info && (
-            <NavBar
-              title={info.title}
-              departuresName={info.departuresName}
-              arrivalsName={info.arrivalsName}
-              departuresDate={info.departuresDate}
-              state={info.state}
-              me={info.me}
-              fetchData={fetchData}
-            />
-          )}
-        </div>
-
-        <div className='divider'></div>
-
-        <div className='flex-1 overflow-y mt-20'>
-          <Chat />
+        {info && (
+          <NavBar
+            title={info.title}
+            departuresName={info.departuresName}
+            arrivalsName={info.arrivalsName}
+            departuresDate={info.departuresDate}
+            state={info.state}
+            me={info.me}
+            fetchData={fetchData}
+          />
+        )}
+        <div className='divider mt-20'></div>
+        <div className='mt-20'>
+          <Chat roomId={info?.roomId} />
         </div>
       </div>
     </WebSocketProvider>

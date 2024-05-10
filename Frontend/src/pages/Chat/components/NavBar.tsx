@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
+import imageCompression from 'browser-image-compression';
 
 interface IUser {
   id: number;
@@ -39,22 +40,48 @@ const NavBar: React.FC<INavBarProps> = ({
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
   const [amount, setAmount] = useState<number>(0);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | undefined>(undefined);
 
-  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  async function handleImageUpload(event) {
+    const imageFile = event;
+    console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
+    console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+    try {
+      const compressedFile = await imageCompression(imageFile, options);
+      console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
+      console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
+      return compressedFile;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  const handleAmountChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(Number(event.target.value));
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (
       event.target.files &&
       event.target.files[0] &&
       event.target.files[0].type.startsWith('image/')
     ) {
-      setImageFile(event.target.files[0]);
+      try {
+        const compressedImage = await handleImageUpload(event.target.files[0]); // Wait for the compression to complete
+        setImageFile(compressedImage); // Set the compressed image file
+      } catch (error) {
+        console.error('Error compressing the image:', error);
+        alert('Failed to compress image.');
+        setImageFile(undefined);
+      }
     } else {
       alert('이미지 파일만 업로드 가능합니다.');
-      setImageFile(null);
+      setImageFile(undefined);
     }
   };
   let stateComponent;
@@ -79,6 +106,7 @@ const NavBar: React.FC<INavBarProps> = ({
       alert('영수증을 첨부해주세요.');
       return;
     }
+
     const formData = new FormData();
     formData.append('newImage', imageFile);
     formData.append('cost', amount.toString());
@@ -92,7 +120,8 @@ const NavBar: React.FC<INavBarProps> = ({
       .then(res => {
         console.log(res);
         if (res.data.status) {
-          toast.success(res.data.data.message);
+          toast.success(res.data.message);
+          toggleModal();
         }
       })
       .catch(err => {
@@ -139,7 +168,8 @@ const NavBar: React.FC<INavBarProps> = ({
           </svg>
         </button>
       </div>
-      <div className='flex'>
+      <div className='divider m-0'></div>
+      <div className='flex mt-2'>
         <div className='px-4'>{stateComponent}</div>
         <div>
           <p>
@@ -148,16 +178,18 @@ const NavBar: React.FC<INavBarProps> = ({
           <p>{departuresDate}</p>
         </div>
       </div>
-      {state === 'COMPLETED' && (
-        <div onClick={toggleModal} className='btn btn-block'>
-          <p>1/N 정산요청하기</p>
-        </div>
-      )}
-      {state === 'SETTLING' && me.isPaid === false && (
-        <div onClick={chargeFee} className='btn btn-block'>
-          <p>1/N 정산하기</p>
-        </div>
-      )}
+      <div className='mt-1'>
+        {state === 'COMPLETED' && (
+          <div onClick={toggleModal} className='btn btn-block btn-primary'>
+            <p className='font-bold text-white'>1/N 정산요청하기</p>
+          </div>
+        )}
+        {state === 'SETTLING' && me.isPaid === false && (
+          <div onClick={chargeFee} className='btn btn-block'>
+            <p>1/N 정산하기</p>
+          </div>
+        )}
+      </div>
 
       {isModalOpen && (
         <div className='modal modal-open'>
