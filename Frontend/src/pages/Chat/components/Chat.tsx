@@ -38,7 +38,6 @@ const Chat: React.FC<ChatProps> = ({ roomId }) => {
 
   useEffect(() => {
     if (client && client.connected) {
-      console.log(roomId);
       const subscription = client.subscribe(
         `/sub/chat/room/${roomId}`,
         message => {
@@ -61,10 +60,9 @@ const Chat: React.FC<ChatProps> = ({ roomId }) => {
         client.publish({
           destination: `/pub/chat/message`,
           body: JSON.stringify({
-            partyId: 1,
+            partyId: partyId,
             roomId: roomId,
             content: inputMessage,
-            // sendTime: new Date().toISOString(),
             type: 'TALK',
           }),
           headers: {

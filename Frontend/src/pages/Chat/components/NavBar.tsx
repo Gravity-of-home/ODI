@@ -42,7 +42,7 @@ const NavBar: React.FC<INavBarProps> = ({
   const [amount, setAmount] = useState<number>(0);
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
 
-  async function handleImageUpload(event) {
+  async function handleImageUpload(event: File) {
     const imageFile = event;
     console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
     console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
@@ -120,15 +120,19 @@ const NavBar: React.FC<INavBarProps> = ({
       .then(res => {
         console.log(res);
         if (res.data.status) {
-          toast.success(res.data.message);
+          toast.success(res.data.message, {
+            pauseOnFocusLoss: false,
+            hideProgressBar: true,
+            closeOnClick: true,
+          });
           toggleModal();
         }
       })
       .catch(err => {
-        toast.error(err.data.data.message);
+        toast.error(err.response.data.reason);
         console.error(err);
       });
-    fetchData;
+    fetchData();
   };
 
   const chargeFee = () => {
@@ -136,15 +140,15 @@ const NavBar: React.FC<INavBarProps> = ({
       .post(`/api/parties/${partyId}/settlement`)
       .then(res => {
         console.log(res);
-        if (res.data.status) {
-          toast.success(res.data.data.message);
+        if (res.data.status === 204) {
+          toast.success('정산을 완료했습니다');
         }
       })
       .catch(err => {
-        toast.error(err.data.data.message);
+        toast.error(err.response.data.message);
         console.error(err);
       });
-    fetchData;
+    fetchData();
   };
 
   return (
