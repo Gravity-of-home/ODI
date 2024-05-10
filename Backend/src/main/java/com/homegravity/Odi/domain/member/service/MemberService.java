@@ -61,6 +61,7 @@ public class MemberService {
 
         //이미지를 변경한다면
         if (!memberUpdateRequestDTO.getNewImage().isEmpty()) {
+            s3Service.deleteFile(member.getImage());
             member.updateImage(s3Service.saveFile(memberUpdateRequestDTO.getNewImage()));
         }
 
@@ -160,6 +161,5 @@ public class MemberService {
         } else {//파티장 아닌데 내가 참여한거
             return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.PARTICIPANT, pageable, false);
         }
-
     }
 }
