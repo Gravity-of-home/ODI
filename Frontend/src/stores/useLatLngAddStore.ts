@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 interface ILatLngAddState {
   currentLat: number;
   currentLng: number;
-  currentAdd?: string;
+  currentAdd: string;
   setLatLngAdd: (currentLat: number, currentLng: number, currentAdd?: string) => void;
   removeAll: () => void;
 }
@@ -14,14 +14,24 @@ const useLatLngAddStore = create(
     set => ({
       currentLat: 36.1071359,
       currentLng: 128.4161679,
-      currentAdd: '',
+      currentAdd: 'DEFAULT',
       setLatLngAdd: (Lat, Lng, currentAdd) =>
         set(() => ({ currentLat: Lat, currentLng: Lng, currentAdd: currentAdd })),
       removeAll: () => set(() => ({ currentLat: 0, currentLng: 0, currentAdd: '' })),
     }),
     {
       name: 'LatLngAdd',
-      getStorage: () => sessionStorage,
+      storage: {
+        getItem: name => {
+          const item = sessionStorage.getItem(name);
+          return item ? JSON.parse(item) : null;
+        },
+        setItem: (name, value) => {
+          const stringValue = JSON.stringify(value);
+          sessionStorage.setItem(name, stringValue);
+        },
+        removeItem: name => sessionStorage.removeItem(name),
+      },
     },
   ),
 );

@@ -1,18 +1,16 @@
 // import getUserInfoQuery
 import { useEffect } from 'react';
 import Map from '@/components/Maps/Map';
+import { Layout } from '@/components/Layout';
+import watchPositionHook from '@/hooks/useRefreshLocation';
 
 const HomePage = () => {
-  useEffect(() => {
-    // const userInfo = getUserInfo();
-    // console.log('USER INFO: ', userInfo);
-  }, []);
+  watchPositionHook();
   return (
-    <>
-      <h1>여기는 홈 화면</h1>
-      <p>실시간 예약 버튼이랑 실시간 예약, 인기 예약 보여줄 예정</p>
+    <Layout>
       <Map />
-    </>
+      {/* TODO : Bottom Sheet 만든것 넣기 */}
+    </Layout>
   );
 };
 

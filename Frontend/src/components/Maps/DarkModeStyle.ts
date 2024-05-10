@@ -11,6 +11,8 @@ const DarkModeStyle = [
     featureType: 'poi',
     elementType: 'labels.text.fill',
     stylers: [{ color: '#d59563' }],
+    // elementType: 'labels',
+    // stylers: [{ visibility: 'off' }],
   },
   {
     featureType: 'poi.park',
