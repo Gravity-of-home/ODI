@@ -61,8 +61,11 @@ public class MemberService {
 
         //이미지를 변경한다면
         if (!memberUpdateRequestDTO.getNewImage().isEmpty()) {
-            s3Service.deleteFile(member.getImage());
-            member.updateImage(s3Service.saveFile(memberUpdateRequestDTO.getNewImage()));
+            String oldImgS3Url = member.getImage();
+            String newImgS3Url = s3Service.saveFile(memberUpdateRequestDTO.getNewImage());
+
+            s3Service.deleteFile(oldImgS3Url);
+            member.updateImage(newImgS3Url);
         }
 
         memberRepository.save(member);
