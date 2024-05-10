@@ -9,7 +9,6 @@ import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.member.entity.MemberReview;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
 import com.homegravity.Odi.domain.member.repository.MemberReviewRepository;
-import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.PartyMember;
 import com.homegravity.Odi.domain.party.entity.RoleType;
@@ -18,11 +17,11 @@ import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartyRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
+import com.homegravity.Odi.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +36,7 @@ public class MemberService {
     private final PartyRepository partyRepository;
     private final MemberReviewRepository memberReviewRepository;
     private final PartyMemberRepository partyMemberRepository;
+    private final S3Service s3Service;
 
     private double KIND_PERCENT = 0.3;
     private double PROMISE_PERCENT = 0.1;
@@ -49,14 +49,21 @@ public class MemberService {
 
     //사용자 정보 수정
     public MemberResponseDTO updateMemberInfo(MemberUpdateRequestDTO memberUpdateRequestDTO, Member member) {
-        boolean IsExistNickname = memberRepository.existsByNicknameAndDeletedAtIsNull(memberUpdateRequestDTO.getNewNickname());
+        if (!memberUpdateRequestDTO.getNewNickname().isEmpty()) {
+            boolean IsExistNickname = memberRepository.existsByNicknameAndDeletedAtIsNull(memberUpdateRequestDTO.getNewNickname());
 
-        if (IsExistNickname) {//이미 존재하는 닉네임이면 변경 불가
-            throw BusinessException.builder().errorCode(ErrorCode.NICKNAME_ALREADY_EXIST).message(ErrorCode.NICKNAME_ALREADY_EXIST.getMessage()).build();
+            if (IsExistNickname) {//이미 존재하는 닉네임이면 변경 불가
+                throw BusinessException.builder().errorCode(ErrorCode.NICKNAME_ALREADY_EXIST).message(ErrorCode.NICKNAME_ALREADY_EXIST.getMessage()).build();
+            }
+            //member nickname 업데이트
+            member.updateNickname(memberUpdateRequestDTO.getNewNickname());
         }
 
-        //member nickname 업데이트
-        member.updateNickname(memberUpdateRequestDTO.getNewNickname());
+        //이미지를 변경한다면
+        if (!memberUpdateRequestDTO.getNewImage().isEmpty()) {
+            member.updateImage(s3Service.saveFile(memberUpdateRequestDTO.getNewImage()));
+        }
+
         memberRepository.save(member);
 
         return MemberResponseDTO.from(member);
@@ -144,14 +151,14 @@ public class MemberService {
     }
 
     //파티 이용 내역 조회
-    public Slice<MemberPartyHistoryResponseDTO> getPartyHistory(Member member, String range, Pageable pageable){
+    public Slice<MemberPartyHistoryResponseDTO> getPartyHistory(Member member, String range, Pageable pageable) {
 
-        if(range.equals("all")){//모두 조회
-            return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.REQUESTER, pageable,true);
-        }else if(range.equals("organizer")){// 내가 파티장인거 조회
-            return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.ORGANIZER,pageable, false);
-        }else{//파티장 아닌데 내가 참여한거
-            return partyMemberRepository.findAllPartyMemberByMember(member,RoleType.PARTICIPANT, pageable, false);
+        if (range.equals("all")) {//모두 조회
+            return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.REQUESTER, pageable, true);
+        } else if (range.equals("organizer")) {// 내가 파티장인거 조회
+            return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.ORGANIZER, pageable, false);
+        } else {//파티장 아닌데 내가 참여한거
+            return partyMemberRepository.findAllPartyMemberByMember(member, RoleType.PARTICIPANT, pageable, false);
         }
 
     }
