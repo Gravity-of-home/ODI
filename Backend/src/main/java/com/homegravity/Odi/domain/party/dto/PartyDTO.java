@@ -55,8 +55,10 @@ public class PartyDTO {
 
     private PartyMemberDTO organizer;
 
+    private String roomId;
+
     @Builder
-    private PartyDTO(Long id, Double distance, CategoryType category, GenderType genderRestriction, LocalDateTime createAt, LocalDateTime modifiedAt, String title, String departuresName, LocationPoint departuresLocation, String arrivalsName, LocationPoint arrivalsLocation, LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, StateType state, Integer viewCount, Integer requestCount, PartyMemberDTO organizer) {
+    private PartyDTO(Long id, Double distance, CategoryType category, GenderType genderRestriction, LocalDateTime createAt, LocalDateTime modifiedAt, String title, String departuresName, LocationPoint departuresLocation, String arrivalsName, LocationPoint arrivalsLocation, LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, StateType state, Integer viewCount, Integer requestCount, PartyMemberDTO organizer, String roomId) {
         this.id = id;
         this.distance = distance;
         this.category = category;
@@ -75,6 +77,7 @@ public class PartyDTO {
         this.viewCount = viewCount;
         this.requestCount = requestCount;
         this.organizer = organizer;
+        this.roomId = roomId;
     }
 
     public static PartyDTO of(Party party, PartyMember partyMember, Double distance) {
@@ -101,6 +104,7 @@ public class PartyDTO {
                 .viewCount(party.getPartyBoardStats().getViewCount())
                 .requestCount(party.getPartyBoardStats().getRequestCount())
                 .organizer(PartyMemberDTO.from(partyMember))
+                .roomId(party.getRoomId())
                 .build();
     }
 }

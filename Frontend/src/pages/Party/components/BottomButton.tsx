@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface IButtonProps {
   state: string;
   role: string;
   partyId: string | undefined;
+  hostGender: string;
+  genderRestriction: string;
 }
 
 // 파티 상태와 조회하는 사람마다 다르게 버튼을 보여주어야 함
@@ -17,9 +19,34 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   state,
   role,
   partyId,
+  hostGender,
+  genderRestriction,
   fetchData,
 }) => {
   const nav = useNavigate();
+  const [gender, setGender] = useState<string | undefined>();
+
+  function RequestDisplay() {
+    return (
+      <div className=' bg-white'>
+        <div className=' '>
+          <p>매칭 신청 완료</p>
+          <p>팟장에게 매칭 신청 알림을 보냈어요</p>
+          <p>수락 후에 채팅으로 자세한 장소, 시간을 정해보세요!</p>
+        </div>
+      </div>
+    );
+  }
+
+  useEffect(() => {
+    const userDataJSON = localStorage.getItem('User');
+
+    if (userDataJSON) {
+      const userData = JSON.parse(userDataJSON);
+      const userGender = userData?.state?.gender;
+      setGender(userGender);
+    }
+  }, []);
 
   // 동승 참여 요청
   function RequestMatching() {
@@ -28,7 +55,7 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
       .then(res => {
         console.log(res.data);
         if (res.data.status === 201) {
-          toast.success(`${res.data.message}`, { position: 'top-center' });
+          toast(<RequestDisplay />, { autoClose: false });
         }
         fetchData();
       })
@@ -65,7 +92,7 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         <div>
           <button
             onClick={GoChat}
-            className='bg-blue-500 hover:bg-blue-700  w-11/12 text-white font-bold py-2 px-4 rounded'>
+            className='btn btn-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4'>
             <p>팟 채팅</p>
           </button>
         </div>
@@ -86,21 +113,27 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         </div>
       );
     } else if (role === null) {
-      buttonComponent = (
-        <div>
-          <button
-            onClick={RequestMatching}
-            className='rounded-lg w-11/12 h-12 bg-blue-600 text-white'>
-            <p>매칭 신청하기</p>
-          </button>
-        </div>
-      );
+      if (genderRestriction === 'ANY' || (genderRestriction !== 'ANY' && gender === hostGender)) {
+        buttonComponent = (
+          <div>
+            <button onClick={RequestMatching} className='btn btn-block h-12 bg-blue-600 text-white'>
+              <p>매칭 신청하기</p>
+            </button>
+          </div>
+        );
+      } else {
+        buttonComponent = (
+          <div className=''>
+            <button className='btn btn-ghost btn-block no-animation btn-disabled'>
+              같은 성별끼리만 매칭이 가능해요
+            </button>
+          </div>
+        );
+      }
     } else if (role === 'REQUESTER') {
       buttonComponent = (
         <div>
-          <button
-            onClick={CancelMatching}
-            className='rounded-lg w-11/12 h-12 bg-red-600 text-white'>
+          <button onClick={CancelMatching} className='btn btn-block h-12 bg-red-600 text-white'>
             <p>신청 취소하기</p>
           </button>
         </div>
@@ -112,31 +145,67 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         <div className='flex justify-between'>
           <button
             onClick={GoChat}
-            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-1/2'>
+            className='btn btn-block bg-blue-500 hover:bg-blue-700 text-white font-bold '>
             <p>팟 채팅</p>
           </button>
-          <div className='w-1/2'>
-            <p>모집마감</p>
-          </div>
         </div>
       );
     } else if (role === null) {
       buttonComponent = (
-        <div>
-          <div>
-            <p>모집마감</p>
-          </div>
+        <div className=''>
+          <button className='btn btn-ghost btn-block no-animation btn-disabled'>모집마감</button>
+        </div>
+      );
+    }
+  } else if (state === 'SETTLING') {
+    if (role === 'ORGANIZER' || role === 'PARTICIPANT') {
+      buttonComponent = (
+        <div className='flex justify-between'>
+          <button
+            onClick={GoChat}
+            className='btn  bg-blue-500 hover:bg-blue-700 text-white font-bold w-7/12'>
+            <p>팟 채팅</p>
+          </button>
+          <button
+            onClick={GoChat}
+            className='btn btn-ghost btn-block no-animation btn-disabled w-4/12'>
+            <p>정산중</p>
+          </button>
+        </div>
+      );
+    } else if (role === null) {
+      buttonComponent = (
+        <div className=''>
+          <button className='btn btn-ghost btn-block no-animation btn-disabled'>모집마감</button>
+        </div>
+      );
+    }
+  } else if (state === 'SETTLED') {
+    if (role === 'ORGANIZER' || role === 'PARTICIPANT') {
+      buttonComponent = (
+        <div className='flex justify-between'>
+          <button
+            onClick={GoChat}
+            className='btn  bg-blue-500 hover:bg-blue-700 text-white font-bold w-7/12'>
+            <p>팟 채팅</p>
+          </button>
+          <button
+            onClick={GoChat}
+            className='btn btn-ghost btn-block no-animation btn-disabled w-4/12'>
+            <p>정산완료</p>
+          </button>
+        </div>
+      );
+    } else if (role === null) {
+      buttonComponent = (
+        <div className=''>
+          <button className='btn btn-ghost btn-block no-animation btn-disabled'>모집마감</button>
         </div>
       );
     }
   }
 
-  return (
-    <div className='container p-2'>
-      {buttonComponent}
-      {/* <ToastContainer autoClose={1000} /> */}
-    </div>
-  );
+  return <div className=' fixed bottom-0 w-full z-10 bg-white p-3'>{buttonComponent}</div>;
 };
 
 export default Button;

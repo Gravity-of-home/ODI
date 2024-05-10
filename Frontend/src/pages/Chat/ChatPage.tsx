@@ -1,41 +1,132 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import NavBar from './components/NavBar';
-import axios from 'axios';
-import Info from './components/Info';
-import Chat from './components/Chat';
+import { useNavigate, useParams } from 'react-router-dom';
+import jwtAxios from '@/utils/JWTUtil';
+import { getCookie } from '@/utils/CookieUtil';
 import { WebSocketProvider } from '../../context/webSocketProvider';
+import NavBar from './components/NavBar';
+import Chat from './components/Chat';
 
-// TODO
-//1. stomp 연결
-//2. 채팅을 어떻게 불러올건가?
-//3. 정산을 여기서 해야하는디 어떻게 만들어야할까
+interface IInfo {
+  partyId: number;
+  roomId: string;
+  title: string;
+  currentParticipants: number;
+  departuresName: string;
+  arrivalsName: string;
+  departuresDate: string;
+  state: string;
+  me: {
+    id: number;
+    role: string;
+    nickname: string;
+    gender: string;
+    ageGroup: string;
+    profileImage: string;
+    isPaid: boolean;
+  };
+  organizer: {
+    id: number;
+    role: string;
+    nickname: string;
+    gender: string;
+    ageGroup: string;
+    profileImage: string;
+    isPaid: boolean;
+  };
+  participants: {
+    id: number;
+    role: string;
+    nickname: string;
+    gender: string;
+    ageGroup: string;
+    profileImage: string;
+    isPaid: boolean;
+  }[];
+}
+
 const ChatPage = () => {
   const { partyId } = useParams();
+  const [info, setInfo] = useState<IInfo>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState('');
 
-  // 채팅기록 불러와야겠지?
-  function fetchData() {
-    const response = axios
-      .post(`http://localhost:8080/api/parties/${partyId}`)
-      .then(res => {
-        console.log(res.data);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+  const navigate = useNavigate();
+  function goBack() {
+    navigate(`/home`);
   }
 
+  const fetchData = async () => {
+    await jwtAxios
+      .get(`api/party-boards/${partyId}/chat-info`, {
+        headers: {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+        },
+      })
+      .then(res => {
+        // console.log(res);
+        setInfo(res.data.data);
+      })
+      .catch(err => {
+        console.error(err);
+        setError(err.response.data.message);
+      });
+
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []); // 이제 `fetchData`에 대한 의존성이 명시적
+  if (isLoading)
+    return (
+      <div className='flex h-screen justify-center'>
+        <span className='loading loading-ball loading-xs'></span>
+        <span className='loading loading-ball loading-sm'></span>
+        <span className='loading loading-ball loading-md'></span>
+        <span className='loading loading-ball loading-lg'></span>
+      </div>
+    );
+  if (error)
+    return (
+      <div role='alert' className='alert alert-error bg-white h-screen content-center'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='stroke-current shrink-0 h-12 w-12 text-red-600'
+          fill='none'
+          viewBox='0 0 24 24'>
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth='2'
+            d='M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+          />
+        </svg>
+        <div>
+          <h3 className='font-bold'>Error!</h3>
+          <div className='text-xs'>{error}</div>
+        </div>
+        <button onClick={goBack} className='btn btn-sm'>
+          돌아가기
+        </button>
+      </div>
+    );
   return (
-    <WebSocketProvider partyId={partyId}>
+    <WebSocketProvider>
       <div className='chat-page'>
-        <div className='nav'>
-          <NavBar />
-        </div>
-        <div>
-          <Info />
-        </div>
-        <div>
-          <Chat />
+        {info && (
+          <NavBar
+            title={info.title}
+            departuresName={info.departuresName}
+            arrivalsName={info.arrivalsName}
+            departuresDate={info.departuresDate}
+            state={info.state}
+            me={info.me}
+            fetchData={fetchData}
+          />
+        )}
+        <div className='divider mt-20'></div>
+        <div className='mt-20'>
+          <Chat roomId={info?.roomId} />
         </div>
       </div>
     </WebSocketProvider>

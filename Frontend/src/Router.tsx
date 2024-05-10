@@ -15,6 +15,7 @@ import SetArrival from './pages/Party/components/SetArrival';
 import PartyDetailPage from './pages/Party/PartyDetailPage';
 import ChatListPage from './pages/Chat/ChatListPage';
 import ChatPage from './pages/Chat/ChatPage';
+import ChatDetailPage from './pages/Chat/ChatDetailPage';
 
 type AuthWrapperProps = {
   children: React.ReactNode;
@@ -140,6 +141,14 @@ const router = createBrowserRouter([
     element: (
       <AuthWrapper>
         <ChatListPage></ChatListPage>
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: '/chat/detail/:partyId',
+    element: (
+      <AuthWrapper>
+        <ChatDetailPage></ChatDetailPage>
       </AuthWrapper>
     ),
   },
