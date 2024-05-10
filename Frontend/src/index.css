@@ -6,7 +6,6 @@ html,
 body,
 #root {
   margin: 0 auto;
-  min-height: 100vh;
   font-family: 'Pretendard-Regular';
 }
 
@@ -14,6 +13,16 @@ body,
 *::-webkit-scrollbar {
   width: 0px;
   display: none;
+}
+
+/* 구글 맵 약관, 단축키 지우기 */
+.gmnoprint a,
+.gmnoprint span,
+.gm-style-cc {
+  display: none;
+}
+.gmnoprint div {
+  background: none !important;
 }
 
 /* Adding Font Face */

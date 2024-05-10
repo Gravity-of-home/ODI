@@ -1,4 +1,7 @@
-export interface ILocation {}
+export interface ILocation {
+  latitude: number;
+  longitude: number;
+}
 
 export type MarkerColor = 'RED' | 'YELLOW' | 'GREEN' | 'BLUE' | 'PURPLE';
 

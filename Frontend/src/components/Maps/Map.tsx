@@ -1,13 +1,13 @@
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
-import { ViteConfig } from '@/apis/ViteConfig';
 import MapRef from './MapRef';
+import { ViteConfig } from '@/apis/ViteConfig';
 
 const render = (status: Status) => {
   switch (status) {
     case Status.LOADING:
       return (
         <>
-          <div className='w-full h-lvh flex justify-center items-center'>
+          <div className='w-[100%] h-[100%] flex justify-center items-center'>
             <span className='loading loading-dots loading-lg'></span>
           </div>
         </>
@@ -23,8 +23,10 @@ const render = (status: Status) => {
   }
 };
 
-const Map = () => {
-  return <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} />;
+const GoogleMap = () => {
+  return (
+    <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
+  );
 };
 
-export default Map;
+export default GoogleMap;
