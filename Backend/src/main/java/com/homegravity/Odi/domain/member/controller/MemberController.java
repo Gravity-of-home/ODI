@@ -45,7 +45,7 @@ public class MemberController {
 
     @Operation(summary = "동승 파티 이용 내역 조회", description = "동승 파티를 이용한 내역을 조회합니다.(전체, 내가 파티장, 내가 참여자 의 경우로 3가지로 나눠서 조회")
     @GetMapping("/me/party")
-    public ApiResponse<Slice<MemberPartyHistoryResponseDTO>>getPartyHistory(@AuthenticationPrincipal Member member, @PathParam("range") String range, Pageable pageable){
+    public ApiResponse<Slice<MemberPartyHistoryResponseDTO>>getPartyHistory(@AuthenticationPrincipal Member member, @RequestParam("range") String range, Pageable pageable){
         return ApiResponse.of(SuccessCode.PARTY_LIST_GET_SUCCESS, memberService.getPartyHistory(member, range, pageable));
     }
 }
