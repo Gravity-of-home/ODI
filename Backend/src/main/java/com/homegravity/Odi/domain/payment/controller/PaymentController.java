@@ -50,7 +50,7 @@ public class PaymentController {
         return ApiResponse.of(SuccessCode.PAYMENT_FAIL_UPDATE_SUCCESS, paymentService.failTossPayment(requestDto));
     }
 
-    @Operation(summary = "포인트 충전 내역 조회", description = "현재 유저의 포인트 거래 내역을 조회합니다.")
+    @Operation(summary = "포인트 충전 내역 조회", description = "현재 유저의 포인트 충전 내역(only 현금 -> 포인트)을 조회합니다.")
     @GetMapping("/history")
     public ApiResponse<Slice<PaymentHistoryResponseDto>> getPaymentHistory(@AuthenticationPrincipal Member member, Pageable pageable) {
 

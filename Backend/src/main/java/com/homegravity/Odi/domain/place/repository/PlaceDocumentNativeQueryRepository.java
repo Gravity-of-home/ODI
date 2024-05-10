@@ -1,5 +1,7 @@
 package com.homegravity.Odi.domain.place.repository;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.json.JsonData;
 import com.homegravity.Odi.domain.place.entity.PlaceDocument;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
@@ -12,7 +14,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
-import org.springframework.data.elasticsearch.core.query.GeoDistanceOrder;
+import org.springframework.data.elasticsearch.core.query.*;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Repository;
 
@@ -23,30 +25,43 @@ import java.util.List;
 public class PlaceDocumentNativeQueryRepository {
 
     // 탐색할 최대 거리 값.
-    private static final String PLACE_MAX_DISTANCE = "1km";
+    private static final String PLACE_MAX_DISTANCE = "10km";
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-    // 장소명으로 장소 검색, 현재 위치에서 가까운 순으로 정렬
-    public List<PlaceDocument> searchPlaces(String placeName, GeoPoint geoPoint, Pageable pageable) {
+    // 검색어로 장소 검색.
+    // 정렬 기준은 가까우면서 검색어의 유사도가 높은 항목 -> 거리가 멀면서 검색어의 유사도가 높은 항목 -> 유사도가 낮은 항목
+    public List<PlaceDocument> searchPlaces(String searchWord, GeoPoint geoPoint, Pageable pageable) {
 
+        // query 검색 대상 필드
+        List<String> searchTargetFields = List.of("major_category^100", "sub_category^100", "road_name_address.analyzed^14", "place_name.analyzed^7", "building_name.analyzed^5");
+
+        // multi match query
+        MultiMatchQuery multiMatchQuery = MultiMatchQuery.of(mmq -> mmq.query(searchWord).fields(searchTargetFields).type(TextQueryType.Phrase));
+
+        // 위치 (geoPoint로 부터 10Km 떨어진 값은 decay만큼 감쇠)
+        DecayPlacement decayPlacement = DecayPlacement.of(dp -> dp.scale(JsonData.of("10km")).offset(JsonData.of("0km")).decay(0.1).origin(JsonData.of(geoPoint)));
+
+        // Decay function
+        DecayFunction decayFunction = DecayFunction.of(df -> df.field("location-geopoint").placement(decayPlacement));
+
+        // 검색어의 유사도 * 거리 (decay 함수 사용)
         Query query = NativeQuery.builder()
-                .withQuery(
-                        q -> q.bool(
-                                b -> b.should(
-                                        s -> s.multiMatch(
-                                                m -> m.fields("place_name.analyzed").query(placeName)
-                                        )
-                                )
+                .withQuery(QueryBuilders.functionScore(fs -> fs
+                                .query(fsq -> fsq.multiMatch(multiMatchQuery))
+                                .functions(f -> f.gauss(decayFunction))
+                                .scoreMode(FunctionScoreMode.Multiply)
                         )
                 )
-                .withSort(Sort.by(
-                        new GeoDistanceOrder("location-geopoint", geoPoint)
-                ))
                 .withPageable(pageable)
                 .build();
 
         SearchHits<PlaceDocument> searchHits = elasticsearchOperations.search(query, PlaceDocument.class);
+
+        if (searchHits.isEmpty()) {
+            throw new BusinessException(ErrorCode.NEAR_PLACE_NOT_EXIST, "검색어에 해당하는 결과가 없습니다.");
+        }
+
         return searchHits.stream().map(SearchHit::getContent).toList();
     }
 
@@ -70,7 +85,7 @@ public class PlaceDocumentNativeQueryRepository {
         SearchHits<PlaceDocument> searchHits = elasticsearchOperations.search(query, PlaceDocument.class);
 
         if (searchHits.isEmpty()) {
-            throw new BusinessException(ErrorCode.NEAR_PLACE_NOT_EXIST, "반경 " +PLACE_MAX_DISTANCE+"내에 있는 장소를 찾을 수 없습니다.");
+            throw new BusinessException(ErrorCode.NEAR_PLACE_NOT_EXIST, "반경 " + PLACE_MAX_DISTANCE + "내에 있는 장소를 찾을 수 없습니다.");
         }
 
         return searchHits.getSearchHit(0).getContent();
