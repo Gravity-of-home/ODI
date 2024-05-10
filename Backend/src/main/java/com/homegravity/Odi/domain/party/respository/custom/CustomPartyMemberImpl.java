@@ -1,17 +1,23 @@
 package com.homegravity.Odi.domain.party.respository.custom;
 
+import com.homegravity.Odi.domain.member.dto.response.MemberPartyHistoryResponseDTO;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.dto.PartyMemberDTO;
-import com.homegravity.Odi.domain.party.entity.Party;
-import com.homegravity.Odi.domain.party.entity.PartyMember;
-import com.homegravity.Odi.domain.party.entity.QPartyMember;
-import com.homegravity.Odi.domain.party.entity.RoleType;
+import com.homegravity.Odi.domain.party.entity.*;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +68,6 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                     .or(qPartyMember.role.eq(RoleType.PARTICIPANT));
         }
 
-
         return jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.party.eq(party)
                         .and(builder)
@@ -79,7 +84,6 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                         .and(qPartyMember.role.eq(RoleType.ORGANIZER))
                         .and(qPartyMember.deletedAt.isNull()))
                 .fetchOne());
-
     }
 
     // 해당 파티에 신청한 사용자가 존재하는지 boolean 확인
@@ -172,5 +176,66 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                         .and(qPartyMember.role.ne(RoleType.REQUESTER)))
                 .fetch();
     }
+    public Slice<MemberPartyHistoryResponseDTO> findAllPartyMemberByMember(Member member, RoleType roleType, Pageable pageable, boolean isAll) {
+        QPartyMember qPartyMember = QPartyMember.partyMember;
+        QParty qParty = QParty.party;
 
+        List<Party> partyList = jpaQueryFactory.select(qParty)
+                .from(qPartyMember)
+                .where(qPartyMember.member.eq(member)
+                        ,(qPartyMember.party.deletedAt.isNull())
+                        , hasRole(qPartyMember, roleType, isAll)
+                        , (qPartyMember.deletedAt.isNull()))
+                .orderBy(getOrderSpecifier(pageable,qParty))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        List<MemberPartyHistoryResponseDTO> memberPartyHistoryResponseDTOList = new ArrayList<>();
+
+        for (Party party : partyList) {
+            List<PartyMemberDTO> partyMemberDTOList = jpaQueryFactory.selectFrom(qPartyMember)
+                    .where(qPartyMember.party.eq(party)
+                            .and(qPartyMember.role.ne(RoleType.REQUESTER))
+                            .and(qPartyMember.deletedAt.isNull()))
+                    .orderBy(qPartyMember.role.asc())
+                    .fetch()
+                    .stream().map(PartyMemberDTO::from)
+                    .toList();
+
+            memberPartyHistoryResponseDTOList.add(MemberPartyHistoryResponseDTO.of(party, partyMemberDTOList));
+        }
+
+        //Slice 생성
+        boolean hasNext = memberPartyHistoryResponseDTOList.size() > pageable.getPageSize();
+        if (hasNext)
+            memberPartyHistoryResponseDTOList.removeLast();
+
+        return new SliceImpl<>(memberPartyHistoryResponseDTOList, pageable, hasNext);
+    }
+
+    private BooleanExpression hasRole(QPartyMember qPartyMember, RoleType roleType, boolean isAll) {
+        if (isAll)//전체 이용내역 검색일경우
+            return qPartyMember != null ?  qPartyMember.role.eq(RoleType.ORGANIZER).or(qPartyMember.role.eq(RoleType.PARTICIPANT)).or(qPartyMember.role.eq(RoleType.REQUESTER)): null;
+        else{
+            //방장이 아닌 정보를 보여줄때 => 신청했지만 참여못한 파티팟에도
+            if(roleType.equals(RoleType.PARTICIPANT)){
+                return qPartyMember != null ? qPartyMember.role.eq(RoleType.PARTICIPANT).or(qPartyMember.role.eq(RoleType.REQUESTER)) : null;
+            }
+            return qPartyMember != null ? qPartyMember.role.eq(RoleType.ORGANIZER) : null;
+        }
+    }
+
+    private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qParty) {
+        OrderSpecifier orderSpecifier =null;
+
+        for(Sort.Order order : pageable.getSort()){
+            Order direction = order.getDirection().isAscending()? Order.ASC: Order.DESC;
+
+            orderSpecifier = new OrderSpecifier(direction, qParty.createdAt);
+        }
+
+        return orderSpecifier;
+
+    }
 }
