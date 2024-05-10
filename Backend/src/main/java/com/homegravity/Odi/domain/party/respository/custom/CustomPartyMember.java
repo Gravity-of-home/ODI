@@ -30,4 +30,6 @@ public interface CustomPartyMember {
     List<PartyMember> findAllPartyMemberAndRequester(Party party);
 
     List<PartyMemberDTO> findAllParticipant(Party party, Member member);
+
+    List<PartyMember> findAllByMember(Member member);
 }

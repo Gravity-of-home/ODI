@@ -75,6 +75,9 @@ public class Party extends BaseBy {
     @Column(name = "room_Id")
     private String roomId;
 
+    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL)
+    private List<ChatMessage> chatMessages;
+
     @Builder
     private Party(String title, String departuresName, Point departuresLocation,
                   String arrivalsName, Point arrivalsLocation,

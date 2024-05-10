@@ -46,7 +46,7 @@ const Chat = () => {
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(
-        `/sub/chat/room/3a10d8e6-ee23-4b8b-86c9-6d3121abedf2`,
+        `/sub/chat/room/f90e1b79-ca25-4239-85ff-175bfdf23ac5`,
         message => {
           console.log(JSON.parse(message.body));
           // const newMessage = JSON.parse(message.body).message;
@@ -68,7 +68,7 @@ const Chat = () => {
         destination: `/pub/chat/message`,
         body: JSON.stringify({
           partyId: 1,
-          roomId: '3a10d8e6-ee23-4b8b-86c9-6d3121abedf2',
+          roomId: 'f90e1b79-ca25-4239-85ff-175bfdf23ac5',
           content: inputMessage,
           senderId: 1,
           type: 'TALK',
