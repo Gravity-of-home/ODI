@@ -34,15 +34,20 @@ public class StompHandler implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        String token = accessor.getFirstNativeHeader("token");
-        log.info("방씀다 토큰임다 {}",token);
-        Member sender = memberRepository.findById(Long.valueOf(jwtUtil.getId(token)))
-                .orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
-        String nickname = sender.getNickname();
         if (StompCommand.CONNECT == accessor.getCommand()) { // websocket 연결요청
+            String token = accessor.getFirstNativeHeader("token");
+            log.info("방씀다 토큰임다 {}",token);
+            Member sender = memberRepository.findById(Long.valueOf(jwtUtil.getId(token)))
+                    .orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+            String nickname = sender.getNickname();
             log.info("!!!CONNECT!!! {}", sender.getNickname());
             // Header의 jwt token 검증
         } else if (StompCommand.SUBSCRIBE == accessor.getCommand()) { // 채팅룸 구독요청
+            String token = accessor.getFirstNativeHeader("token");
+            log.info("방씀다 토큰임다 {}",token);
+            Member sender = memberRepository.findById(Long.valueOf(jwtUtil.getId(token)))
+                    .orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+            String nickname = sender.getNickname();
             // header정보에서 구독 destination정보를 얻고, roomId를 추출한다.
             String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders().get("simpDestination")).orElse("InvalidRoomId"));
             // 채팅방에 들어온 클라이언트 sessionId를 roomId와 맵핑해 놓는다.(나중에 특정 세션이 어떤 채팅방에 들어가 있는지 알기 위함)
@@ -65,6 +70,7 @@ public class StompHandler implements ChannelInterceptor {
         } else if (StompCommand.UNSUBSCRIBE == accessor.getCommand()) { // 채팅룸 구독취소
             log.info("!!!UNSUBSCRIBED!!!");
         }
+        log.info("커맨드 {}", accessor.getCommand());
         return message;
     }
 }
