@@ -105,6 +105,7 @@ const MapRef = () => {
       const initialMap = new window.google.maps.Map(ref.current, {
         center: mapCenter,
         disableDefaultUI: true,
+        clickableIcons: false,
         styles: DarkModeStyle,
         zoom: 16,
         minZoom: 10,
@@ -230,7 +231,7 @@ const SetDeparture = () => {
     }
     try {
       const res = await jwtAxios.get(
-        `${ViteConfig.VITE_BASE_URL}/api/places?query=${searchValue}&latitude=${departuresLocation!.latitude}&longitude=${departuresLocation!.longitude}`,
+        `/api/places?query=${searchValue}&latitude=${departuresLocation!.latitude}&longitude=${departuresLocation!.longitude}`,
       );
       console.log(res.data.data.content);
       setSearchData(res.data.data.content);
