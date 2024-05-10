@@ -17,7 +17,7 @@ public class MemberUpdateRequestDTO {
     private String newNickname;
 
     // todo s3 설정 후 추후 추가 예정
-    //@Schema(description = "수정하려는 새 이미지")
-    //private MultipartFile newImage;
+    @Schema(description = "수정하려는 새 이미지")
+    private MultipartFile newImage;
 
 }
