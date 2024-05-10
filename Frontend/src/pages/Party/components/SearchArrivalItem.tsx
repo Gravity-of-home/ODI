@@ -31,7 +31,13 @@ const SearchArrivalItem: FC<IArrivalProps> = ({ setIsSearch, ...props }) => {
         <div className='modal-box w-11/12'>
           <h3 className='font-bold text-[20px]'>도착지로 설정하시겠습니까?</h3>
           <div className='mt-1 border border-gray-500'></div>
-          <h4 className='mt-3 text-lg'>{props.placeName}</h4>
+          <h4 className='mt-3 text-lg'>
+            {props.placeName === null
+              ? props.buildingName === null
+                ? '장소 또는 건물명 미제공'
+                : props.buildingName
+              : props.placeName}
+          </h4>
           <p className='flex py-2 justify-end'>설정 이후 지도를 통해 정확하게 설정해 주세요.</p>
           <div className='modal-action'>
             <form method='dialog'>

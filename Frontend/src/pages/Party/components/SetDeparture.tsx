@@ -56,6 +56,7 @@ const MapRef = () => {
     });
 
     setDepartures?.('내 위치', { latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+    setDepartName('내 위치');
 
     if (map && marker) {
       map!.setZoom(17);
