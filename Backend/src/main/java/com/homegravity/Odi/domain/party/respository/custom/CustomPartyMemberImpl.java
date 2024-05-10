@@ -174,6 +174,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
         List<Party> partyList = jpaQueryFactory.select(qParty)
                 .from(qPartyMember)
                 .where(qPartyMember.member.eq(member)
+                        ,(qPartyMember.party.deletedAt.isNull())
                         , hasRole(qPartyMember, roleType, isAll)
                         , (qPartyMember.deletedAt.isNull()))
                 .orderBy(getOrderSpecifier(pageable,qParty))
@@ -206,9 +207,14 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
     private BooleanExpression hasRole(QPartyMember qPartyMember, RoleType roleType, boolean isAll) {
         if (isAll)//전체 이용내역 검색일경우
-            return qPartyMember != null ? qPartyMember.role.ne(roleType) : null;
-
-        return qPartyMember != null ? qPartyMember.role.eq(roleType) : null;
+            return qPartyMember != null ?  qPartyMember.role.eq(RoleType.ORGANIZER).or(qPartyMember.role.eq(RoleType.PARTICIPANT)).or(qPartyMember.role.eq(RoleType.REQUESTER)): null;
+        else{
+            //방장이 아닌 정보를 보여줄때 => 신청했지만 참여못한 파티팟에도
+            if(roleType.equals(RoleType.PARTICIPANT)){
+                return qPartyMember != null ? qPartyMember.role.eq(RoleType.PARTICIPANT).or(qPartyMember.role.eq(RoleType.REQUESTER)) : null;
+            }
+            return qPartyMember != null ? qPartyMember.role.eq(RoleType.ORGANIZER) : null;
+        }
     }
 
     private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qParty) {
@@ -223,5 +229,4 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
         return orderSpecifier;
 
     }
-
 }
