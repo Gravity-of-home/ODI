@@ -7,7 +7,6 @@ import { UseMutationCustomOptions, UseQueryCustomOptions } from '@/types/common'
 import { removeHeader, setHeader } from '@/utils/HeaderUtil';
 import { getCookie } from '@/utils/CookieUtil';
 import { IUser } from '@/types/User';
-// import queryClient from '@/utils/QueryClient';
 
 // const useLogin = (mutatuionOptions?: UseMutationCustomOptions) => {
 //   return useMutation({
