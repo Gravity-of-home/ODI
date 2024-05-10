@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import Back from '@/assets/image/icons/Back.png';
+import SvgGoBack from '@/assets/svg/SvgGoBack';
 
 interface HeaderProps {
   isBack: boolean;
@@ -15,19 +15,23 @@ const Header: React.FC<HeaderProps> = ({ isBack, rightButtonText, title, onRight
     nav(-1);
   };
   return (
-    <div className='w-full h-[5%] flex justify-between items-center px-4 bg-black'>
+    <div className='w-[100%] h-[5%] flex justify-between items-center bg-black'>
       {isBack && (
-        <button onClick={onBack} className='w-[5%]'>
-          <div className='w-[100%] h-[90%]'>
-            <img src={Back} alt='뒤로가기' />
-          </div>
-        </button>
+        <div
+          className='px-4 z-10'
+          onClick={() => {
+            nav(-1);
+          }}>
+          <SvgGoBack />
+        </div>
       )}
-      <div className='flex-grow text-center text-lg font-bold text-[20px]'>{title}</div>
+      <div className='fixed w-[100%] h-[5%] flex justify-center items-center font-semibold text-[18px] text-white'>
+        {title}
+      </div>
       {rightButtonText && onRightButtonClick && (
         <button
           onClick={onRightButtonClick}
-          className='px-3 py-1 bg-OD_PURPLE rounded-lg text-white'>
+          className='mx-4 px-3 py-1 bg-OD_PURPLE rounded-lg text-white z-10'>
           {rightButtonText}
         </button>
       )}

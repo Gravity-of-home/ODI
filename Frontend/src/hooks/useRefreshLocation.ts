@@ -27,14 +27,18 @@ function watchPositionHook() {
     // if (d < 10) {
     // localStorage.setItem('latitude', pos.coords.latitude.toString());
     // localStorage.setItem('longitude', pos.coords.longitude.toString());
+
     LatLngAddstore.setState({
+      currentAdd: '내 위치',
       currentLat: pos.coords.latitude,
       currentLng: pos.coords.longitude,
     });
-    usePartyStore.setState({
-      departuresName: '내 위치',
-      departuresLocation: { longitude: pos.coords.longitude, latitude: pos.coords.latitude },
-    });
+    // usePartyStore.setState({
+    //   departuresName: '내 위치',
+    //   departuresLocation: { longitude: pos.coords.longitude, latitude: pos.coords.latitude },
+    //   arrivalsLocation: { longitude: pos.coords.longitude, latitude: pos.coords.latitude },
+    // });
+
     // }
   }
 

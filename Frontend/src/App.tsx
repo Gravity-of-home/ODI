@@ -5,6 +5,7 @@ import queryClient from './utils/QueryClient.ts';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Layout } from './components/Layout.tsx';
 import router from './Router.tsx';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   return (
@@ -12,6 +13,18 @@ function App() {
       {/* <h1>OD! Welcome 🍀</h1> */}
       <QueryClientProvider client={queryClient}>
         <Layout>
+          <ToastContainer
+            position='top-center'
+            autoClose={2000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme='dark'
+          />
           <RouterProvider router={router} />
         </Layout>
         <ReactQueryDevtools initialIsOpen={false} />

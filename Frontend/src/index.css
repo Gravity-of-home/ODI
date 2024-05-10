@@ -15,6 +15,16 @@ body,
   display: none;
 }
 
+/* 구글 맵 약관, 단축키 지우기 */
+.gmnoprint a,
+.gmnoprint span,
+.gm-style-cc {
+  display: none;
+}
+.gmnoprint div {
+  background: none !important;
+}
+
 /* Adding Font Face */
 @font-face {
   font-family: 'Pretendard-Regular';

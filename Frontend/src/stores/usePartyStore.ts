@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import useLatLngAddStore from './useLatLngAddStore';
 
-interface ILocation {
+export interface ILocation {
   longitude: number;
   latitude: number;
 }
@@ -21,7 +21,7 @@ const usePartyStore = create(
     set => ({
       departuresName: '',
       departuresLocation: { longitude: 0.0, latitude: 0.0 },
-      arrivalsName: '',
+      arrivalsName: '도착지를 설정해 주세요.',
       arrivalsLocation: { longitude: 0.0, latitude: 0.0 },
       setDepartures: (name, location) =>
         set(() => ({ departuresName: name, departuresLocation: location })),

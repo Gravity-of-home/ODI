@@ -1,19 +1,19 @@
 import type { SVGProps } from 'react';
-const SvgGoInside = (props: SVGProps<SVGSVGElement>) => (
+const SvgGoBack = (props: SVGProps<SVGSVGElement>) => (
   <svg
-    width='7'
-    height='12'
+    width='10'
+    height='18'
     viewBox='0 0 7 12'
     fill='none'
     xmlns='http://www.w3.org/2000/svg'
     {...props}>
     <path
-      d='M1 1L6 6L1 11'
-      stroke='#A0A0A0'
-      strokeWidth='1.5'
+      d='M6 1L1 6L6 11'
+      stroke='white'
+      strokeWidth='2'
       strokeLinecap='round'
       strokeLinejoin='round'
     />
   </svg>
 );
-export default SvgGoInside;
+export default SvgGoBack;
