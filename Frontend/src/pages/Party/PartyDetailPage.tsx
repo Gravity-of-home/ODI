@@ -7,6 +7,7 @@ import BottomButton from './components/BottomButton';
 import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
 import TopNav from './components/TopNav';
+import StateBadge from './components/StateBadge';
 
 interface IInfo {
   id: number;
@@ -177,7 +178,19 @@ const PartyDetailPage = () => {
     fetchData();
   }, []);
 
-  //
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'long',
+      day: '2-digit',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    };
+    return new Intl.DateTimeFormat('ko-KR', options).format(date);
+  };
+
   function formatTimeDifference(createAt: string) {
     const now: Date = new Date();
     const createdTime: Date = new Date(createAt);
@@ -213,26 +226,20 @@ const PartyDetailPage = () => {
         role={info.role}
         state={info.state}
         partyId={partyId}
+        title={info.title}
         currentParticipants={info.currentParticipants}
         expectedCost={info.expectedCost}
         fetchData={fetchData}
       />
 
-      <div className='party-info p-4 mt-10'>
-        {/* 다른 컨텐츠는 TopNav에 가려지지 않도록 marginTop 조정 */}
-        <div className='flex gap-x-2 content-center items-center'>
-          <img src={hostInfo.profileImage} alt='파티장 사진' className='rounded-full w-8 h-8 ' />
-          <p className='font-bold'>{hostInfo.nickname}</p>
-          <p>{hostInfo.gender === 'F' ? '여' : '남'}</p>
-          <p>{formatTimeDifference(info.createAt)}</p>
-          <p>조회수: {info.viewCount}</p>
-        </div>
-        <div className='party-title mt-2 font-bold text-xl'>
-          <p>{info.title}</p>
-        </div>
+      <div className='party-info flex justify-between p-4 mt-14'>
+        <p className='font-bold text-xl'>{formatDate(info.departuresDate)}</p>
+        <StateBadge state={info.state} />
       </div>
-
-      <div className='path-map mt-2 p-4'>
+      <div className='divider m-0'></div>
+      {/* <p>{formatTimeDifference(info.createAt)}</p>
+      <p>조회수: {info.viewCount}</p> */}
+      <div className='path-map p-4'>
         <PathMap
           departuresName={info.departuresName}
           arrivalsName={info.arrivalsName}

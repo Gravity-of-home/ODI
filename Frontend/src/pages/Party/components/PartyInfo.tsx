@@ -77,6 +77,8 @@ const PartyInfo: React.FC<IPartyProps> = ({
           </span>
         </p>
       </div>
+      <div className='divider'></div>
+
       <div className='content mt-4'>
         <div className='chat chat-start'>
           <div className='chat-image avatar'>

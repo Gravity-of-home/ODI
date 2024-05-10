@@ -145,12 +145,54 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         <div className='flex justify-between'>
           <button
             onClick={GoChat}
+            className='btn btn-block bg-blue-500 hover:bg-blue-700 text-white font-bold '>
+            <p>팟 채팅</p>
+          </button>
+        </div>
+      );
+    } else if (role === null) {
+      buttonComponent = (
+        <div className=''>
+          <button className='btn btn-ghost btn-block no-animation btn-disabled'>모집마감</button>
+        </div>
+      );
+    }
+  } else if (state === 'SETTLING') {
+    if (role === 'ORGANIZER' || role === 'PARTICIPANT') {
+      buttonComponent = (
+        <div className='flex justify-between'>
+          <button
+            onClick={GoChat}
             className='btn  bg-blue-500 hover:bg-blue-700 text-white font-bold w-7/12'>
             <p>팟 채팅</p>
           </button>
-
-          <button className='btn btn-ghost btn-block no-animation btn-disabled w-5/12'>
-            모집마감
+          <button
+            onClick={GoChat}
+            className='btn btn-ghost btn-block no-animation btn-disabled w-4/12'>
+            <p>정산중</p>
+          </button>
+        </div>
+      );
+    } else if (role === null) {
+      buttonComponent = (
+        <div className=''>
+          <button className='btn btn-ghost btn-block no-animation btn-disabled'>모집마감</button>
+        </div>
+      );
+    }
+  } else if (state === 'SETTLED') {
+    if (role === 'ORGANIZER' || role === 'PARTICIPANT') {
+      buttonComponent = (
+        <div className='flex justify-between'>
+          <button
+            onClick={GoChat}
+            className='btn  bg-blue-500 hover:bg-blue-700 text-white font-bold w-7/12'>
+            <p>팟 채팅</p>
+          </button>
+          <button
+            onClick={GoChat}
+            className='btn btn-ghost btn-block no-animation btn-disabled w-4/12'>
+            <p>정산완료</p>
           </button>
         </div>
       );

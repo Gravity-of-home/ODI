@@ -82,7 +82,7 @@ const PathMap: React.FC<IPathMapProps> = ({
 
   return (
     <div className='container'>
-      <div id='map' className='w-full h-[200px] rounded-xl' />
+      <div id='map' className='w-full h-[150px] rounded-xl' />
       <div className='flex'>
         <ul className='steps steps-vertical'>
           <li data-content='●' className='step step-primary'></li>

@@ -87,6 +87,25 @@ const ChatDetailPage = () => {
         });
     };
   }
+  const organizer = (
+    <div className='flex justify-between'>
+      <div className='flex gap-x-2 items-center'>
+        <img className='rounded-full w-12 h-12' src={info?.organizer.profileImage} alt='' />
+        <p>{info?.organizer.nickname}</p>
+        <p>{info?.organizer.gender === 'M' ? '남' : '여'}</p>
+        <p>{info?.organizer.ageGroup}</p>
+      </div>
+      <div className='content-center'>
+        {info?.organizer.id !== info?.me.id && (
+          <button
+            onClick={Report(info?.organizer.id)}
+            className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
+            신고하기
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
   // 파티원 목록
   const participantsList = info?.participants.map(person => (
@@ -142,6 +161,7 @@ const ChatDetailPage = () => {
           <p className='font-bold text-xl'>
             참여자 <span className='ml-2 text-gray-200 text-lg'>{info?.currentParticipants}명</span>
           </p>
+          <div className='mt-4'>{organizer}</div>
           <div className='mt-4'>{participantsList}</div>
         </div>
       </div>
