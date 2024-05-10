@@ -8,6 +8,7 @@ import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
 import TopNav from './components/TopNav';
 import StateBadge from './components/StateBadge';
+import { WebSocketProvider } from '@/context/webSocketProvider';
 
 interface IInfo {
   id: number;
@@ -268,19 +269,21 @@ const PartyDetailPage = () => {
         />
       </div>
       <div className='h-5 bg-slate-100'></div>
-      <div className=''>
-        <MemberInfo
-          hostName={hostInfo.nickname}
-          hostGender={hostInfo.gender}
-          hostAge={hostInfo.ageGroup}
-          hostImgUrl={hostInfo.profileImage}
-          participants={info.participants}
-          guests={info.guests}
-          role={info.role}
-          partyId={partyId}
-          fetchData={fetchData}
-        />
-      </div>
+      <WebSocketProvider>
+        <div className=''>
+          <MemberInfo
+            hostName={hostInfo.nickname}
+            hostGender={hostInfo.gender}
+            hostAge={hostInfo.ageGroup}
+            hostImgUrl={hostInfo.profileImage}
+            participants={info.participants}
+            guests={info.guests}
+            role={info.role}
+            partyId={partyId}
+            fetchData={fetchData}
+          />
+        </div>
+      </WebSocketProvider>
       <div className='divider h-16'></div>
       <BottomButton
         state={info.state}

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import imageCompression from 'browser-image-compression';
+import { getCookie } from '@/utils/CookieUtil';
+import { useWebSocket } from '@/context/webSocketProvider';
 
 interface IUser {
   id: number;
@@ -21,6 +23,7 @@ interface INavBarProps {
   departuresDate: string;
   state: string;
   me: IUser;
+  roomId: string;
   fetchData: () => void;
 }
 
@@ -31,16 +34,38 @@ const NavBar: React.FC<INavBarProps> = ({
   departuresDate,
   state,
   me,
+  roomId,
   fetchData,
 }) => {
   const { partyId } = useParams();
   const navigate = useNavigate();
+  const { client, isConnected } = useWebSocket();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
   const [amount, setAmount] = useState<number>(0);
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
+
+  function sendSettlementMessage() {
+    console.log('hi');
+    if (client && client.connected) {
+      client.publish({
+        destination: `/pub/chat/message`,
+        body: JSON.stringify({
+          partyId: partyId,
+          roomId: roomId,
+          content: `${me.nickname} 님이 정산 요청을 보냈어요!`,
+          type: 'SETTLEMENT',
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
 
   async function handleImageUpload(event: File) {
     const imageFile = event;
@@ -119,20 +144,22 @@ const NavBar: React.FC<INavBarProps> = ({
       })
       .then(res => {
         console.log(res);
-        if (res.data.status) {
+        if (res.data.status === 204) {
           toast.success(res.data.message, {
             pauseOnFocusLoss: false,
             hideProgressBar: true,
             closeOnClick: true,
           });
+          sendSettlementMessage();
+          fetchData();
           toggleModal();
         }
       })
       .catch(err => {
         toast.error(err.response.data.reason);
+        fetchData();
         console.error(err);
       });
-    fetchData();
   };
 
   const chargeFee = () => {

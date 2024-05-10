@@ -121,12 +121,13 @@ const ChatPage = () => {
             departuresDate={info.departuresDate}
             state={info.state}
             me={info.me}
+            roomId={info.roomId}
             fetchData={fetchData}
           />
         )}
         <div className='divider mt-20'></div>
         <div className='mt-20'>
-          <Chat roomId={info?.roomId} />
+          <Chat roomId={info?.roomId} fetchData={fetchData} />
         </div>
       </div>
     </WebSocketProvider>

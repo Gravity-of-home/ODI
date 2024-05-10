@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useWebSocket } from '@/context/webSocketProvider';
 
 interface IMemberInfoProps {
   hostName: string;
@@ -35,6 +36,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   fetchData,
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
+  const { client, isConnected } = useWebSocket();
 
   useEffect(() => {
     const myData = localStorage.getItem('User');

@@ -14,9 +14,10 @@ interface IMessage {
 }
 interface ChatProps {
   roomId: string | undefined;
+  fetchData: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ roomId }) => {
+const Chat: React.FC<ChatProps> = ({ roomId, fetchData }) => {
   const { partyId } = useParams();
   const { client, isConnected } = useWebSocket();
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -42,7 +43,12 @@ const Chat: React.FC<ChatProps> = ({ roomId }) => {
         `/sub/chat/room/${roomId}`,
         message => {
           console.log(JSON.parse(message.body));
+
           const newMessage = JSON.parse(message.body);
+          console.log(newMessage.type);
+          if (['SETTLEMENT', 'ENTER', 'QUIT'].includes(newMessage.type)) {
+            fetchData();
+          }
           setMessages(prevMessages => [...prevMessages, newMessage]);
         },
         {
@@ -80,7 +86,7 @@ const Chat: React.FC<ChatProps> = ({ roomId }) => {
     <div className='flex flex-col'>
       <div className='h-96 overflow-y mb-12 p-4'>
         {messages.map(msg =>
-          msg.type === 'TALK' && msg.senderNickname === myNickName ? (
+          msg.senderNickname === myNickName ? (
             <div className='chat chat-end'>
               <div className='chat-header'>
                 <time className='text-xs opacity-50'>{msg.sendTime}</time>
