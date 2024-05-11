@@ -20,6 +20,8 @@ public class PartyResponseDTO {
 
     private Long id;
 
+    private String roomId;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createAt;
 
@@ -73,7 +75,7 @@ public class PartyResponseDTO {
     private String pathInfo;
 
     @Builder
-    private PartyResponseDTO(Long id, String title, LocalDateTime createAt, LocalDateTime modifiedAt,
+    private PartyResponseDTO(Long id, String roomId, String title, LocalDateTime createAt, LocalDateTime modifiedAt,
                              String departuresName, LocationPoint departuresLocation, String arrivalsName, LocationPoint arrivalsLocation,
                              LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants, CategoryType category,
                              GenderType genderRestriction, StateType state, String content,
@@ -81,6 +83,7 @@ public class PartyResponseDTO {
                              RoleType role, List<PartyMemberDTO> participants, List<PartyMemberDTO> guests, String pathInfo) {
 
         this.id = id;
+        this.roomId = roomId;
         this.title = title;
         this.createAt = createAt;
         this.modifiedAt = modifiedAt;
@@ -111,6 +114,7 @@ public class PartyResponseDTO {
 
         return PartyResponseDTO.builder()
                 .id(party.getId())
+                .roomId(party.getRoomId())
                 .createAt(party.getCreatedAt())
                 .modifiedAt(party.getModifiedAt())
                 .title(party.getTitle())
