@@ -65,6 +65,11 @@ public enum SuccessCode {
     PARTY_MATCH_STATE_UPDATE_SUCCESS(204, "동승 성사에 성공했습니다."),
     PARTY_STATE_UPDATE_TO_SETTLING_SUCCESS(204, "동승 정산 요청에 성공했습니다."),
     PARTY_STATE_UPDATE_TO_SETTLEMENT_SUCCESS(204, "동승 정산 요청에 성공했습니다."),
+
+    // Match
+    MATCH_SUCCESS(200, "매칭에 성공했습니다."),
+    MATCH_CANCEL_SUCCESS(204, "매칭 취소에 성공했습니다."),
+
     ;
 
     /**

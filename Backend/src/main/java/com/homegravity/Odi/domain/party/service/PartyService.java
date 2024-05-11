@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.party.service;
 
 import com.homegravity.Odi.domain.map.service.MapService;
+import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
 import com.homegravity.Odi.domain.party.dto.PartyDTO;
@@ -341,5 +342,14 @@ public class PartyService {
         List<PartyMemberDTO> participants = partyMemberRepository.findAllParticipant(party, member);
 
         return PartyChatInfoResponseDTO.of(party, me, organizer, participants);
+    }
+
+    // TODO: 매치 파티 생성
+    @Transactional
+    public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) {
+
+//        partyRepository.save(Party.of())
+
+        return null;
     }
 }

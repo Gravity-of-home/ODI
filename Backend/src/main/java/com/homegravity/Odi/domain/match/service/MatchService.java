@@ -1,7 +1,12 @@
 package com.homegravity.Odi.domain.match.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.member.entity.Member;
+import com.homegravity.Odi.domain.party.service.PartyService;
+import com.homegravity.Odi.global.response.error.ErrorCode;
+import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.*;
@@ -21,6 +26,8 @@ import java.util.stream.Collectors;
 public class MatchService {
 
     private final RedisTemplate<String, String> redisTemplate;
+    private final PartyService partyService;
+    private final ObjectMapper objectMapper;
 
     public long getNextSequence(String keyPrefix) {
         return redisTemplate.opsForValue().increment(keyPrefix + ":sequence", 1);
@@ -46,8 +53,14 @@ public class MatchService {
         log.info("redis 저장 : {}", memberInfo);
     }
 
+    // 사용자 요청 정보를 Redis에 추가하는 메서드
+    public void addRequest(String memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
+        String matchRequestJson = objectMapper.writeValueAsString(matchRequestDTO);
+        redisTemplate.opsForHash().put("match_requests", memberId, matchRequestJson);
+    }
+
     // 주어진 위치와 반경 내의 사용자를 찾는 메서드
-    public Long findNearbyTarget(String departuresKey, String arrivalsKey, MatchRequestDTO matchRequestDTO) {
+    public Long findNearbyTarget(String departuresKey, String arrivalsKey, String memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
 
         log.warn("매칭 시작!!");
 
@@ -113,22 +126,25 @@ public class MatchService {
         }
 
         // 가장 먼저 들어온 상대와 매칭
-        Optional<String> firstMember = depResult.stream()
-                .min((a, b) -> {
-                    int seqA = extractSequence(a);
-                    int seqB = extractSequence(b);
-                    return Integer.compare(seqA, seqB);
-                });
+        String firstMember = depResult.stream().min((a, b) -> {
+            int seqA = extractSequence(a);
+            int seqB = extractSequence(b);
+            return Integer.compare(seqA, seqB);
+        }).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, "매칭할 사용자가 없습니다."));
 
-        if (firstMember.isPresent()) {
-            log.info("가장 먼저 들어온 유저 {} 와 매칭", firstMember.get());
-            // TODO: 파티 생성
-        } else {
-            log.info("매칭할 사용자가 없습니다.");
-        }
+        log.info("가장 먼저 들어온 유저 {} 와 매칭", firstMember);
+        // TODO: 파티 생성
+        MatchRequestDTO firstMemberRequest = getRequestByMemberId(firstMember);
+        MatchRequestDTO memberRequest = getRequestByMemberId(memberId);
+        return partyService.createMatchParty(Long.parseLong(firstMember), Long.parseLong(memberId), firstMemberRequest, memberRequest);
+
+    }
 
 
-        return null;
+    // 멤버 ID로 MatchRequestDTO 가져오는 메서드
+    public MatchRequestDTO getRequestByMemberId(String memberId) throws JsonProcessingException {
+        String matchRequestJson = (String) redisTemplate.opsForHash().get("match_requests", memberId);
+        return objectMapper.readValue(matchRequestJson, MatchRequestDTO.class);
     }
 
     private int extractSequence(String memberInfo) {
@@ -137,7 +153,7 @@ public class MatchService {
         return Integer.parseInt(parts[1]); // 시퀀스 번호 추출
     }
 
-    public synchronized void enterMatch(MatchRequestDTO matchRequestDto, Member member) {
+    public synchronized void enterMatch(MatchRequestDTO matchRequestDto, Member member) throws JsonProcessingException {
 
         String memberKey = "member:" + member.getId();
         Boolean alreadyRequested = redisTemplate.opsForValue().setIfAbsent(memberKey, "active", 1, TimeUnit.HOURS);
@@ -154,7 +170,12 @@ public class MatchService {
         addLocation("departures", matchRequestDto.getDepLat(), matchRequestDto.getDepLon(), depMemberInfo);
         addLocation("arrivals", matchRequestDto.getArrLat(), matchRequestDto.getArrLon(), arrMemberInfo);
 
-        findNearbyTarget("departures", "arrivals", matchRequestDto);
+        // TODO : 요청 정보 저장
+        // 사용자 요청 정보를 Redis에 추가
+        addRequest(String.valueOf(member.getId()), matchRequestDto);
+
+        // 매칭
+        findNearbyTarget("departures", "arrivals", String.valueOf(member.getId()), matchRequestDto);
 
 
     }
@@ -179,16 +200,20 @@ public class MatchService {
         System.out.println("Party created for user " + userId + " with users: " + matchedUsers);
     }
 
-    // TODO: 기존 위치 정보 삭제
+    // TODO: 매칭 요청 삭제
     public void cancelMatch(Member member) {
 //        // 위치 정보를 조회합니다.
 //        List<Point> existingPoints = redisTemplate.opsForGeo().position(key, memberInfo);
 //
 //        // 이미 저장된 위치 정보가 있는 경우, 삭제하거나 업데이트 로직을 수행합니다.
 //        if (existingPoints != null && !existingPoints.isEmpty()) {
-//            // 기존 위치 정보 삭제
+//            // 기존 위치 정보 삭제 
 //            redisTemplate.opsForGeo().remove(key, memberInfo);
 //            log.info("기존 위치 정보 삭제 : {}", memberInfo);
 //        }
+
+        //TODO: 위치 정보 삭제
+        //TODO: 순서 삭제
+        //TODO: 요청 정보 삭제
     }
 }

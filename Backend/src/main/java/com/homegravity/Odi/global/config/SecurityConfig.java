@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -36,6 +37,9 @@ public class SecurityConfig {
 
     @Value("${FRONT_BASE_URL}")
     private String baseUrl;
+
+    @Value("${BACK_BASE_URL}")
+    private String backBaseUrl;
 
     @Value("${WHITE_LIST}")
     private String[] whiteList;
@@ -80,7 +84,7 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
 
             // FRONT 주소 허용
-            config.setAllowedOrigins(Collections.singletonList(baseUrl));
+            config.setAllowedOrigins(List.of(baseUrl, backBaseUrl));
 //            config.setAllowedOrigins(Collections.singletonList(baseUrlAI));
             // 모든 REST Method 허용
             config.setAllowedMethods(Collections.singletonList("*"));
