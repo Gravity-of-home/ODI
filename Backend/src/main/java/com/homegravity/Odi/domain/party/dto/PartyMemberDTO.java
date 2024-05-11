@@ -33,8 +33,11 @@ public class PartyMemberDTO {
     @Schema(description = "택시비 지불 유무")
     private Boolean isPaid;
 
+    @Schema(description = "매너 당도")
+    private Double brix;
+
     @Builder
-    private PartyMemberDTO(Long id, RoleType role, String nickname, String gender, String ageGroup, String profileImage, Boolean isPaid) {
+    private PartyMemberDTO(Long id, RoleType role, String nickname, String gender, String ageGroup, String profileImage, Boolean isPaid, Double brix) {
         this.id = id;
         this.role = role;
         this.nickname = nickname;
@@ -42,6 +45,7 @@ public class PartyMemberDTO {
         this.ageGroup = ageGroup;
         this.profileImage = profileImage;
         this.isPaid = isPaid;
+        this.brix = brix;
     }
 
     public static PartyMemberDTO from(PartyMember partyMember) {
@@ -54,7 +58,9 @@ public class PartyMemberDTO {
                 .ageGroup(partyMember.getMember().getAgeGroup())
                 .profileImage(partyMember.getMember().getImage())
                 .isPaid(partyMember.getIsPaid())
+                .brix(partyMember.getMember().getBrix())
                 .build();
+
     }
 
 }
