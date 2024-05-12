@@ -10,6 +10,7 @@ interface IButtonProps {
   state: string;
   role: string;
   partyId: string | undefined;
+  roomId: string;
   hostGender: string;
   genderRestriction: string;
 }
@@ -21,6 +22,7 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   state,
   role,
   partyId,
+  roomId,
   hostGender,
   genderRestriction,
   fetchData,
@@ -121,6 +123,20 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         console.log(res);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
+          if (role === 'PARTICIPANT') {
+            client?.publish({
+              destination: `/pub/chat/message`,
+              body: JSON.stringify({
+                partyId: partyId,
+                roomId: roomId,
+                content: `${myNickName}님이 파티에서 나갔습니다.`,
+                type: 'QUIT',
+              }),
+              headers: {
+                token: `${getCookie('Authorization')}`,
+              },
+            });
+          }
         }
         fetchData();
       })
@@ -158,7 +174,7 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
           <button
             onClick={CancelMatching}
             className='w-1/2 bg-gray-200 hover:bg-gray-700 text-purple font-bold py-2 px-4 rounded'>
-            <p>신청 취소하기</p>
+            <p>파티 나가기</p>
           </button>
         </div>
       );

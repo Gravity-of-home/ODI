@@ -33,6 +33,7 @@ export interface IPostParty {
 
 export interface IInfo {
   id: number;
+  roomId: string;
   createAt: string;
   modifiedAt: string;
   title: string;

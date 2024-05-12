@@ -73,21 +73,23 @@ const ChatPage = () => {
       </div>
     );
   return (
-    <div className='chat-page'>
+    <div className='chat-page max-h-full'>
       {info && (
-        <NavBar
-          title={info.title}
-          departuresName={info.departuresName}
-          arrivalsName={info.arrivalsName}
-          departuresDate={info.departuresDate}
-          state={info.state}
-          me={info.me}
-          roomId={info.roomId}
-          fetchData={fetchData}
-        />
+        <div className='fixed top-0 bg-white w-screen z-10 mb-48'>
+          <NavBar
+            title={info.title}
+            departuresName={info.departuresName}
+            arrivalsName={info.arrivalsName}
+            departuresDate={info.departuresDate}
+            state={info.state}
+            me={info.me}
+            roomId={info.roomId}
+            fetchData={fetchData}
+          />
+        </div>
       )}
       <div className='divider mt-20'></div>
-      <div className='mt-20'>
+      <div className='mt-10 overflow-y-auto' style={{ height: 'calc(100vh - 100px)' }}>
         {info && <Chat roomId={info.roomId} me={info.me} fetchData={fetchData} />}
       </div>
     </div>

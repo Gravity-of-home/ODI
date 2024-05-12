@@ -169,7 +169,7 @@ const NavBar: React.FC<INavBarProps> = ({
   };
 
   return (
-    <div className='fixed top-0 bg-white w-screen z-10'>
+    <div className=''>
       <div className='flex items-center justify-between'>
         <button onClick={goBack} className='btn btn-ghost btn-circle text-3xl'>
           {'<'}
@@ -198,16 +198,19 @@ const NavBar: React.FC<INavBarProps> = ({
           </p>
           <p>{departuresDate}</p>
         </div>
+        <div className='divider mb-10'></div>
       </div>
       <div className='mt-1'>
         {state === 'COMPLETED' && (
           <div onClick={toggleModal} className='btn btn-block btn-primary'>
             <p className='font-bold text-white'>1/N 정산요청하기</p>
+            <div className='divider mb-20'></div>
           </div>
         )}
         {state === 'SETTLING' && me.isPaid === false && (
           <div onClick={chargeFee} className='btn btn-block bg-red-500'>
             <p>1/N 정산하기</p>
+            <div className='divider mb-20'></div>
           </div>
         )}
       </div>

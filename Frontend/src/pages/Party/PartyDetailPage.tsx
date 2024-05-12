@@ -16,6 +16,7 @@ const PartyDetailPage = () => {
   const [error, setError] = useState('');
   const [info, setInfo] = useState<IInfo>({
     id: 0,
+    roomId: '',
     createAt: '',
     modifiedAt: '',
     title: 'OD!',
@@ -235,6 +236,7 @@ const PartyDetailPage = () => {
           guests={info.guests}
           role={info.role}
           partyId={partyId}
+          roomId={info.roomId}
           fetchData={fetchData}
         />
       </div>
@@ -244,6 +246,7 @@ const PartyDetailPage = () => {
         state={info.state}
         role={info.role}
         partyId={partyId}
+        roomId={info.roomId}
         fetchData={fetchData}
         hostGender={hostInfo.gender}
         genderRestriction={info.genderRestriction}
