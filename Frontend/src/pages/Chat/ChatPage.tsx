@@ -2,51 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
-import { WebSocketProvider } from '../../context/webSocketProvider';
 import NavBar from './components/NavBar';
 import Chat from './components/Chat';
-
-interface IInfo {
-  partyId: number;
-  roomId: string;
-  title: string;
-  currentParticipants: number;
-  departuresName: string;
-  arrivalsName: string;
-  departuresDate: string;
-  state: string;
-  me: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  };
-  organizer: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  };
-  participants: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  }[];
-}
+import { IChatInfo } from '@/types/Chat';
 
 const ChatPage = () => {
   const { partyId } = useParams();
-  const [info, setInfo] = useState<IInfo>();
+  const [info, setInfo] = useState<IChatInfo>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
 
@@ -111,9 +73,9 @@ const ChatPage = () => {
       </div>
     );
   return (
-    <WebSocketProvider>
-      <div className='chat-page'>
-        {info && (
+    <div className='chat-page max-h-full'>
+      {info && (
+        <div className='fixed top-0 bg-white w-screen z-10 mb-48'>
           <NavBar
             title={info.title}
             departuresName={info.departuresName}
@@ -121,15 +83,16 @@ const ChatPage = () => {
             departuresDate={info.departuresDate}
             state={info.state}
             me={info.me}
+            roomId={info.roomId}
             fetchData={fetchData}
           />
-        )}
-        <div className='divider mt-20'></div>
-        <div className='mt-20'>
-          <Chat roomId={info?.roomId} />
         </div>
+      )}
+      <div className='divider mt-20'></div>
+      <div className='mt-10 overflow-y-auto' style={{ height: 'calc(100vh - 100px)' }}>
+        {info && <Chat roomId={info.roomId} me={info.me} fetchData={fetchData} />}
       </div>
-    </WebSocketProvider>
+    </div>
   );
 };
 

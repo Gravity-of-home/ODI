@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useWebSocket } from '@/context/webSocketProvider';
+import { getCookie } from '@/utils/CookieUtil';
+import { IParticipant } from '@/types/Party';
 interface IMemberInfoProps {
   hostName: string;
   hostGender: string;
@@ -12,15 +14,7 @@ interface IMemberInfoProps {
   guests: any;
   role: string;
   partyId: string | undefined;
-}
-interface IParticipant {
-  id: number;
-  role: string;
-  nickname: string;
-  gender: string;
-  ageGroup: string;
-  profileImage: string;
-  isPaid: boolean;
+  roomId: string;
 }
 
 const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
@@ -32,9 +26,11 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   guests,
   role,
   partyId,
+  roomId,
   fetchData,
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
+  const { client, isConnected } = useWebSocket();
 
   useEffect(() => {
     const myData = localStorage.getItem('User');
@@ -45,13 +41,25 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   }, []);
 
   // 파티 신청 수락
-  const acceptEnterParty = (memberId: number) => () => {
+  const acceptEnterParty = (memberId: number, nickname: string) => () => {
     jwtAxios
       .put(`api/parties/${partyId}/${memberId}`, {})
       .then(res => {
         console.log(res.data);
         if (res.data.status === 201) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
+          client?.publish({
+            destination: `/pub/chat/message`,
+            body: JSON.stringify({
+              partyId: partyId,
+              roomId: roomId,
+              content: `${nickname}님이 파티에 입장하셨습니다`,
+              type: 'ENTER',
+            }),
+            headers: {
+              token: `${getCookie('Authorization')}`,
+            },
+          });
         }
         fetchData();
       })
@@ -77,13 +85,25 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   };
 
   // 파티원 추방
-  const banParticipant = (memberId: number) => () => {
+  const banParticipant = (memberId: number, nickname: string) => () => {
     jwtAxios
       .delete(`api/parties/${partyId}/${memberId}`, {})
       .then(res => {
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
+          client?.publish({
+            destination: `/pub/chat/message`,
+            body: JSON.stringify({
+              partyId: partyId,
+              roomId: roomId,
+              content: `${nickname}님이 파티에서 추방되었습니다.`,
+              type: 'QUIT',
+            }),
+            headers: {
+              token: `${getCookie('Authorization')}`,
+            },
+          });
         }
         fetchData();
       })
@@ -106,7 +126,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         <div>
           {role === 'ORGANIZER' && ( // role이 'ORGANIZER'일 때만 버튼 렌더링
             <button
-              onClick={banParticipant(person.id)}
+              onClick={banParticipant(person.id, person.nickname)}
               className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
               추방
             </button>
@@ -132,7 +152,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
       {role === 'ORGANIZER' && (
         <div>
           <button
-            onClick={acceptEnterParty(applicant.id)}
+            onClick={acceptEnterParty(applicant.id, applicant.nickname)}
             className='ml-2 py-1 px-3 rounded bg-green-500 text-white'>
             수락
           </button>

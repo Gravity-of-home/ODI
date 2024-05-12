@@ -17,6 +17,8 @@ import ChatListPage from './pages/Chat/ChatListPage';
 import ChatPage from './pages/Chat/ChatPage';
 import ChatDetailPage from './pages/Chat/ChatDetailPage';
 
+import { WebSocketProvider } from './context/webSocketProvider';
+
 type AuthWrapperProps = {
   children: React.ReactNode;
 };
@@ -36,7 +38,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     return <Navigate to='/login' replace={true} />;
   }
 
-  return <>{children}</>;
+  return <WebSocketProvider>{children}</WebSocketProvider>;
 };
 
 // const spinner = () => {

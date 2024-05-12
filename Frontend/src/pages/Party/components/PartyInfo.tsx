@@ -79,12 +79,10 @@ const PartyInfo: React.FC<IPartyProps> = ({
       </div>
       <div className='divider'></div>
 
-      <div className='content mt-4'>
+      <div className='content'>
         <div className='chat chat-start'>
-          <div className='chat-image avatar'>
-            <div className='w-10 rounded-full'>
-              <img alt='host' src={hostImgUrl} />
-            </div>
+          <div className='chat-image'>
+            <img className='h-10 w-10 rounded-full ' alt='host' src={hostImgUrl} />
           </div>
           <div className='chat-header'>{hostName}</div>
           <div className='chat-bubble chat-bubble-primary text-white'>{content}</div>

@@ -43,11 +43,12 @@ public class ChatService {
      * 채팅방에 메시지 발송
      */
     public void sendChatMessage(ChatMessageDTO chatMessage) {
-        if (MessageType.ENTER.equals(chatMessage.getType())) {
-            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 방에 입장했습니다.");
-        } else if (MessageType.QUIT.equals(chatMessage.getType())) {
-            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 방에서 나갔습니다.");
-        } else if (MessageType.DATE.equals(chatMessage.getType())) {
+//        if (MessageType.ENTER.equals(chatMessage.getType())) {
+//            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 방에 입장했습니다.");
+//        } else if (MessageType.QUIT.equals(chatMessage.getType())) {
+//            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 방에서 나갔습니다.");
+//        }
+         if (MessageType.DATE.equals(chatMessage.getType())) {
             chatMessage.setContent(chatMessage.getSendTime().toString());
         } else if (MessageType.SETTLEMENT.equals(chatMessage.getType())) {
             chatMessage.setContent(chatMessage.getSenderNickname() + "님이 정산을 요청하셨습니다.");
