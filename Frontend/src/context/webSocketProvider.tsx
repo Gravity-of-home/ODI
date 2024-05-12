@@ -40,7 +40,17 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       // debug: str => console.log('STOMP Debug:', str),
       onConnect: () => {
         console.log('Client CONNECT');
-        setIsConnected(true); // 연결 성공시 상태 업데이트
+        setIsConnected(true);
+        // TODO 개인별 알림 구독
+        client.subscribe(
+          '',
+          message => {
+            console.log(message);
+          },
+          {
+            token: `${getCookie('Authorization')}`,
+          },
+        );
       },
       onDisconnect: () => {
         console.log('WebSocket Disconnected');
