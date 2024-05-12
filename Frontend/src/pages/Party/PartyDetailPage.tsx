@@ -2,68 +2,22 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MemberInfo from './components/MemberInfo';
 import PartyInfo from './components/PartyInfo';
 import PathMap from './components/PathMap';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import BottomButton from './components/BottomButton';
 import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
 import TopNav from './components/TopNav';
-import './components/topnav.css';
-interface IInfo {
-  id: number;
-  createdAt: string;
-  modifiedAt: string;
-  title: string;
-  departuresName: string;
-  departuresLocation: {
-    latitude: number;
-    longitude: number;
-  };
-  arrivalsName: string;
-  arrivalsLocation: {
-    latitude: number;
-    longitude: number;
-  };
-  expectedCost: number;
-  expectedDuration: number;
-  departuresDate: string;
-  currentParticipants: number;
-  maxParticipants: number;
-  category: string;
-  genderRestriction: string;
-  state: string;
-  content: string;
-  viewCount: number;
-  requestCount: number;
-  role: string;
-  participants: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  }[];
-  guests: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  }[];
-  distance: number;
-  path: number[][];
-}
+import StateBadge from './components/StateBadge';
+import { IInfo } from '@/types/Party';
 
 const PartyDetailPage = () => {
   const { partyId } = useParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState<IInfo>({
-    id: 2,
-    createdAt: '',
+    id: 0,
+    roomId: '',
+    createAt: '',
     modifiedAt: '',
     title: 'OD!',
     departuresName: 'OD!',
@@ -107,7 +61,6 @@ const PartyDetailPage = () => {
         profileImage: '',
         isPaid: true,
       },
-      // 추가 참가자들...
     ],
 
     guests: [
@@ -134,10 +87,13 @@ const PartyDetailPage = () => {
     ageGroup: '',
     profileImage: '',
   });
+
+  // 파티 정보 에서 파티장 찾는거
   const FindHost = (participants: any) => {
     return participants.find((p: { role: string }) => p.role === 'ORGANIZER');
   };
 
+  // 파티 정보 조회
   const fetchData = async () => {
     await jwtAxios
       .get(`api/party-boards/${partyId}`, {
@@ -146,11 +102,11 @@ const PartyDetailPage = () => {
         },
       })
       .then(res => {
-        console.log(res);
+        console.log(res.data);
         const pathInfoObject = JSON.parse(res.data.data.pathInfo);
         const data = pathInfoObject.route.traoptimal[0].summary;
         const path = pathInfoObject.route.traoptimal[0].path;
-        console.log(pathInfoObject);
+
         setInfo(prevInfo => ({
           ...prevInfo,
           ...res.data.data,
@@ -175,17 +131,30 @@ const PartyDetailPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, []); // 이제 `fetchData`에 대한 의존성이 명시적
+  }, []);
 
-  function formatTimeDifference(createdAt: string) {
+  // 날짜형태변환 "2024-05-10 15:34" -> 5월 10일 (요일) 오후 03:34
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'long',
+      day: '2-digit',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    };
+    return new Intl.DateTimeFormat('ko-KR', options).format(date);
+  };
+
+  // 현재시간과 글 생성시간과의 차이
+  function formatTimeDifference(createAt: string) {
     const now: Date = new Date();
-    const createdTime: Date = new Date(createdAt);
-
-    const timeDifference: number = now.getTime() - createdTime.getTime(); // 현재 시간과 생성 시간의 차이 (밀리초 단위)
-
-    const minutesDifference = Math.floor(timeDifference / (1000 * 60)); // 분 단위로 변환
-    const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60)); // 시간 단위로 변환
-    const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24)); // 일 단위로 변환
+    const createdTime: Date = new Date(createAt);
+    const timeDifference: number = now.getTime() - createdTime.getTime();
+    const minutesDifference = Math.floor(timeDifference / (1000 * 60));
+    const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60));
+    const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
 
     if (daysDifference >= 1) {
       return `${daysDifference}일 전`;
@@ -210,31 +179,24 @@ const PartyDetailPage = () => {
   if (error) return <p>{error}에런디유? 다시 시도해봐유 </p>;
   return (
     <div className='container'>
-      <div className='mb-24'>
-        <TopNav
-          role={info.role}
-          state={info.state}
-          partyId={partyId}
-          currentParticipants={info.currentParticipants}
-          expectedCost={info.expectedCost}
-          fetchData={fetchData}
-        />
-      </div>
+      <TopNav
+        role={info.role}
+        state={info.state}
+        partyId={partyId}
+        title={info.title}
+        currentParticipants={info.currentParticipants}
+        expectedCost={info.expectedCost}
+        fetchData={fetchData}
+      />
 
-      <div className='party-info'>
-        <div className='flex gap-x-2 content-center items-center'>
-          <img src={hostInfo.profileImage} alt='파티장 사진' className='rounded-full w-8 h-8 ' />
-          <p className='font-bold'>{hostInfo.nickname}</p>
-          <p>{hostInfo.gender === 'F' ? '여' : '남'}</p>
-          <p>{formatTimeDifference(info.createdAt)}</p>
-          <p>조회수: {info.viewCount}</p>
-        </div>
-        <div className='party-title mt-2 font-bold text-xl'>
-          <p>{info.title}</p>
-        </div>
+      <div className='party-info flex justify-between p-4 mt-14'>
+        <p className='font-bold text-xl'>{formatDate(info.departuresDate)}</p>
+        <StateBadge state={info.state} />
       </div>
-
-      <div className='path-map mt-2 p-2'>
+      <div className='divider m-0'></div>
+      {/* <p>{formatTimeDifference(info.createAt)}</p>
+      <p>조회수: {info.viewCount}</p> */}
+      <div className='path-map p-4'>
         <PathMap
           departuresName={info.departuresName}
           arrivalsName={info.arrivalsName}
@@ -247,7 +209,7 @@ const PartyDetailPage = () => {
         />
       </div>
       <div className='h-5 bg-slate-100'></div>
-      <div>
+      <div className=''>
         <PartyInfo
           category={info.category}
           state={info.state}
@@ -258,9 +220,12 @@ const PartyDetailPage = () => {
           expectedTime={info.expectedDuration}
           content={info.content}
           genderRestriction={info.genderRestriction}
+          hostName={hostInfo.nickname}
+          hostImgUrl={hostInfo.profileImage}
         />
       </div>
       <div className='h-5 bg-slate-100'></div>
+
       <div className=''>
         <MemberInfo
           hostName={hostInfo.nickname}
@@ -271,18 +236,21 @@ const PartyDetailPage = () => {
           guests={info.guests}
           role={info.role}
           partyId={partyId}
+          roomId={info.roomId}
           fetchData={fetchData}
         />
-        <div className='h-1 bg-slate-100'></div>
-        <div className='request-btn text-center'>
-          <BottomButton
-            state={info.state}
-            role={info.role}
-            partyId={partyId}
-            fetchData={fetchData}
-          />
-        </div>
       </div>
+
+      <div className='divider h-16'></div>
+      <BottomButton
+        state={info.state}
+        role={info.role}
+        partyId={partyId}
+        roomId={info.roomId}
+        fetchData={fetchData}
+        hostGender={hostInfo.gender}
+        genderRestriction={info.genderRestriction}
+      />
     </div>
   );
 };

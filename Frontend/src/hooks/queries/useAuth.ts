@@ -5,8 +5,8 @@ import userStore from '@/stores/useUserStore';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { UseMutationCustomOptions, UseQueryCustomOptions } from '@/types/common';
 import { removeHeader, setHeader } from '@/utils/HeaderUtil';
+import { getCookie } from '@/utils/CookieUtil';
 import { IUser } from '@/types/User';
-// import queryClient from '@/utils/QueryClient';
 
 // const useLogin = (mutatuionOptions?: UseMutationCustomOptions) => {
 //   return useMutation({
@@ -27,10 +27,8 @@ const useGetRefreshToken = (queryOptions?: UseQueryCustomOptions) => {
   const { isSuccess, data, isError } = useQuery({
     queryKey: ['auth', 'getAccessToken'],
     queryFn: refreshJWT,
-    // staleTime: 12 * 60 * 60 * 1000, // 유지 시간 12시간
-    staleTime: 60 * 1000, // 유지 시간 12시간
-    // refetchInterval: 12 * 60 * 60 * 1000, // 12시간마다 재요청
-    refetchInterval: 60 * 1000, // 12시간마다 재요청
+    staleTime: 12 * 60 * 60 * 1000, // 유지 시간 1시간
+    refetchInterval: 1 * 60 * 60 * 1000, // 1시간마다 재요청
     refetchOnReconnect: true, // 다시 연결되는 경우 재요청
     refetchIntervalInBackground: true, // 백그라운드에서도 재요청
     ...queryOptions,
@@ -38,7 +36,7 @@ const useGetRefreshToken = (queryOptions?: UseQueryCustomOptions) => {
 
   useEffect(() => {
     if (isSuccess) {
-      setHeader('AUTHORIZATION', `Bearer ${data}`);
+      setHeader('AUTHORIZATION', `Bearer ${getCookie('Authorization')}`);
     }
   }, [isSuccess]);
 

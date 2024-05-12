@@ -13,5 +13,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByNicknameAndDeletedAtIsNull(String nickname);
 
+    Optional<Member> findByNicknameAndDeletedAtIsNull(String nickname);
+
 
 }

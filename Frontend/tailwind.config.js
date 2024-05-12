@@ -15,6 +15,15 @@ export default {
         OD_JORDYBLUE: '#8FB1E1',
         OD_PINK: '#FF70A3',
       },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+      },
+    },
+    animation: {
+      fadeIn: 'fadeIn 1s ease-out',
     },
   },
   plugins: [daisyui],

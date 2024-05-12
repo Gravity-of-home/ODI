@@ -34,6 +34,8 @@ public class SecurityConfig {
     private final RefreshRepository refreshRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final UserDetailsService userDetailsService;
+    private final JWTFilter jwtFilter;
+    private final CustomLogoutFilter logoutFilter;
 
     @Value("${FRONT_BASE_URL}")
     private String baseUrl;
@@ -44,7 +46,6 @@ public class SecurityConfig {
     @Value("${WHITE_LIST}")
     private String[] whiteList;
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -53,24 +54,25 @@ public class SecurityConfig {
                 .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 // csrf 설정 비활성화 -> jwt 방식을 사용하기 때문
                 .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 // cors 설정
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // Form 로그인 방식 비활성화
                 .formLogin(AbstractHttpConfigurer::disable)
                 // HTTP Basic 인증 방식 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers(whiteList).permitAll()
+                        .anyRequest().authenticated())
                 // OAuth
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig   // OAuth 2.0 인증 후 사용자 정보를 가져오는 엔드포인트
                                 .userService(customOAuth2UserService))
                         .successHandler(customSuccessHandler))  // OAuth 2.0 로그인 성공 후에 수행될 커스텀 핸들러
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(whiteList).permitAll()
-                        .anyRequest().authenticated())
                 // 로그인 후에 JWTFilter로 검증
-                .addFilterAfter(new JWTFilter(jwtUtil, userDetailsService), OAuth2LoginAuthenticationFilter.class)
+                .addFilterAfter(jwtFilter, OAuth2LoginAuthenticationFilter.class)
                 // 로그아웃
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
+                .addFilterBefore(logoutFilter, LogoutFilter.class)
                 // RESTful API
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

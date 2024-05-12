@@ -97,6 +97,7 @@ public class Member extends BaseTime implements UserDetails {
                 .role(role)
                 .provider(provider)
                 .isVerifired(false)
+                .brix(30.0)
                 .nickname(nickname)
                 .birth(LocalDate.parse(birthyear + "-" + birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .ageGroup(age + "대")
@@ -120,6 +121,8 @@ public class Member extends BaseTime implements UserDetails {
     public void updatePoint(int amount) {
         this.point += amount;
     }
+
+    public void updateBrix(double brix){ this.brix += brix; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

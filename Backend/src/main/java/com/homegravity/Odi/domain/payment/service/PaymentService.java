@@ -29,6 +29,8 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final WebClient tossPaymentWebClient;
 
+    private final PointService pointService;
+
     // 토스 결제 요청: 토스 PSP로 결제 요청 전 결제 서버에 등록
     public PaymentResponseDto requestTossPayment(Member member, PaymentRequestDto requestDto) {
 
@@ -47,7 +49,7 @@ public class PaymentService {
 
         // 결제정보 업데이트
         payment.updatePaymentSuccessInfo(payment.getPaymentKey());
-        payment.getCustomer().updatePoint(payment.getAmount());
+        pointService.chargePoint(payment);
 
         return responseDto;
     }

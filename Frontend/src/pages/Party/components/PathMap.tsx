@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
-import axios from 'axios';
-import end from '@/assets/image/icons/end.png';
+
 interface IPathMapProps {
   departuresName: string;
   departuresX: number;
@@ -59,41 +58,19 @@ const PathMap: React.FC<IPathMapProps> = ({
     if (!polylineRef.current) {
       polylineRef.current = new naver.maps.Polyline({
         path: path.map(coords => new naver.maps.LatLng(coords[1], coords[0])), // 경도, 위도 순서 주의
-        strokeColor: '#0FFFFF',
-        strokeOpacity: 0.8,
-        strokeStyle: 'solid',
-        strokeLineJoin: 'round',
-        endIcon: 1,
+        strokeColor: '#1463FD',
+        strokeOpacity: 1,
+        strokeStyle: 'shortdash',
+        strokeLineJoin: 'bevel',
+        startIcon: naver.maps.PointingIcon.CIRCLE,
+        startIconSize: 15,
+        endIcon: naver.maps.PointingIcon.BLOCK_ARROW,
         endIconSize: 20,
-        strokeWeight: 6,
+        strokeWeight: 4,
         map: mapRef.current,
       });
     } else {
       polylineRef.current.setMap(mapRef.current);
-    }
-    if (!markerRef.current) {
-      const arrivalPosition = new naver.maps.LatLng(
-        path[path.length - 1][1],
-        path[path.length - 1][0],
-      );
-      markerRef.current = new naver.maps.Marker({
-        position: arrivalPosition,
-        map: mapRef.current,
-        icon: {
-          url: `${end}`,
-          size: new naver.maps.Size(32, 32),
-          scaledSize: new naver.maps.Size(32, 32),
-        },
-        // 마커의 쌓임 순서
-        zIndex: 999,
-      });
-
-      // const infoWindow = new naver.maps.InfoWindow({
-      //   content: '<div style="padding:1px;">도착지</div>',
-      // });
-      // infoWindow.open(mapRef.current, markerRef.current);
-    } else {
-      markerRef.current.setMap(mapRef.current);
     }
 
     // 이전 지도 요소들을 정리
@@ -105,13 +82,22 @@ const PathMap: React.FC<IPathMapProps> = ({
 
   return (
     <div className='container'>
-      <div id='map' className='w-full h-[200px] rounded-xl' />
-
-      <div className='start'>
-        <p>출발지 : {departuresName}</p>
-      </div>
-      <div className='end'>
-        <p>도착지 : {arrivalsName}</p>
+      <div id='map' className='w-full h-[150px] rounded-xl' />
+      <div className='flex'>
+        <ul className='steps steps-vertical'>
+          <li data-content='●' className='step step-primary'></li>
+          <li data-content='▼' className='step step-primary'></li>
+        </ul>
+        <div>
+          <div className='mt-4'>
+            <p className='font-bold'>{departuresName}</p>
+            <p className=''>출발지</p>
+          </div>
+          <div className='mt-4'>
+            <p className='font-bold'>{arrivalsName}</p>
+            <p className=''>도착지</p>
+          </div>
+        </div>
       </div>
     </div>
   );

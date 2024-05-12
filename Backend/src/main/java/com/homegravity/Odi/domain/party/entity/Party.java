@@ -1,6 +1,7 @@
 package com.homegravity.Odi.domain.party.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.homegravity.Odi.domain.chat.entity.ChatMessage;
 import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.party.dto.LocationPoint;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
@@ -13,6 +14,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Entity
@@ -71,11 +73,18 @@ public class Party extends BaseBy {
     @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartySettlement partySettlement;
 
+    @Column(name = "room_Id")
+    private String roomId;
+
+    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL)
+    private List<ChatMessage> chatMessages;
+
     @Builder
     private Party(String title, String departuresName, Point departuresLocation,
                   String arrivalsName, Point arrivalsLocation,
                   LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants,
-                  CategoryType category, GenderType genderRestriction, String content) {
+                  CategoryType category, GenderType genderRestriction, String content,
+                  String roomId) {
 
         this.title = title;
         this.departuresName = departuresName;
@@ -89,7 +98,9 @@ public class Party extends BaseBy {
         this.genderRestriction = genderRestriction;
         this.state = StateType.GATHERING;
         this.content = content;
+        this.roomId = roomId;
     }
+
 
     public static Party of(MatchRequestDTO matchRequestDTO) {
 
@@ -110,7 +121,7 @@ public class Party extends BaseBy {
                 .build();
     }
 
-    public static Party of(PartyRequestDTO partyRequestDTO, String gender) {
+    public static Party of(PartyRequestDTO partyRequestDTO, String gender, String roomId) {
 
         GeometryFactory geometryFactory = new GeometryFactory();
         Point departuresLocation = geometryFactory.createPoint(new Coordinate(partyRequestDTO.getDeparturesLocation().getLongitude(), partyRequestDTO.getDeparturesLocation().getLatitude()));
@@ -139,6 +150,7 @@ public class Party extends BaseBy {
                 .category(CategoryType.valueOf(partyRequestDTO.getCategory()))
                 .genderRestriction(genderRestriction)
                 .content(partyRequestDTO.getContent())
+                .roomId(roomId)
                 .build();
     }
 

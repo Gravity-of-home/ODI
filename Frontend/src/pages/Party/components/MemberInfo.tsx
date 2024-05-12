@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import jwtAxios from '@/utils/JWTUtil';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useWebSocket } from '@/context/webSocketProvider';
+import { getCookie } from '@/utils/CookieUtil';
+import { IParticipant } from '@/types/Party';
 interface IMemberInfoProps {
   hostName: string;
   hostGender: string;
@@ -12,15 +14,7 @@ interface IMemberInfoProps {
   guests: any;
   role: string;
   partyId: string | undefined;
-}
-interface IParticipant {
-  id: number;
-  role: string;
-  nickname: string;
-  gender: string;
-  ageGroup: string;
-  profileImage: string;
-  isPaid: boolean;
+  roomId: string;
 }
 
 const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
@@ -32,9 +26,11 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   guests,
   role,
   partyId,
+  roomId,
   fetchData,
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
+  const { client, isConnected } = useWebSocket();
 
   useEffect(() => {
     const myData = localStorage.getItem('User');
@@ -45,13 +41,25 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   }, []);
 
   // 파티 신청 수락
-  const acceptEnterParty = (memberId: number) => () => {
+  const acceptEnterParty = (memberId: number, nickname: string) => () => {
     jwtAxios
       .put(`api/parties/${partyId}/${memberId}`, {})
       .then(res => {
         console.log(res.data);
         if (res.data.status === 201) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
+          client?.publish({
+            destination: `/pub/chat/message`,
+            body: JSON.stringify({
+              partyId: partyId,
+              roomId: roomId,
+              content: `${nickname}님이 파티에 입장하셨습니다`,
+              type: 'ENTER',
+            }),
+            headers: {
+              token: `${getCookie('Authorization')}`,
+            },
+          });
         }
         fetchData();
       })
@@ -77,13 +85,25 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   };
 
   // 파티원 추방
-  const banParticipant = (memberId: number) => () => {
+  const banParticipant = (memberId: number, nickname: string) => () => {
     jwtAxios
       .delete(`api/parties/${partyId}/${memberId}`, {})
       .then(res => {
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
+          client?.publish({
+            destination: `/pub/chat/message`,
+            body: JSON.stringify({
+              partyId: partyId,
+              roomId: roomId,
+              content: `${nickname}님이 파티에서 추방되었습니다.`,
+              type: 'QUIT',
+            }),
+            headers: {
+              token: `${getCookie('Authorization')}`,
+            },
+          });
         }
         fetchData();
       })
@@ -106,7 +126,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         <div>
           {role === 'ORGANIZER' && ( // role이 'ORGANIZER'일 때만 버튼 렌더링
             <button
-              onClick={banParticipant(person.id)}
+              onClick={banParticipant(person.id, person.nickname)}
               className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
               추방
             </button>
@@ -132,7 +152,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
       {role === 'ORGANIZER' && (
         <div>
           <button
-            onClick={acceptEnterParty(applicant.id)}
+            onClick={acceptEnterParty(applicant.id, applicant.nickname)}
             className='ml-2 py-1 px-3 rounded bg-green-500 text-white'>
             수락
           </button>
@@ -148,7 +168,6 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
 
   return (
     <div className='container p-2'>
-      <ToastContainer autoClose={1000} />
       <div className='host-info mb-5'>
         <p className='mb-4 font-bold text-xl'>팟장</p>
         <div className='flex justify-between content-center'>
@@ -159,7 +178,11 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
             <p>{hostAge}</p>
           </div>
 
-          {role !== 'ORGANIZER' && <button className='bg-slate-300 rounded p-2'>1:1채팅</button>}
+          {role !== 'ORGANIZER' && (
+            <p className=' rounded p-2' style={{ backgroundColor: '#A75DFC' }}>
+              당도자리
+            </p>
+          )}
           {role === 'ORGANIZER' && (
             <p className='content-center text-center w-10 rounded-full bg-blue-100'>나</p>
           )}
@@ -178,7 +201,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
 
         {/* 조회자가 팟장이고 파티신청자가 있으면 */}
         {applicantList && applicantList.length != 0 && (
-          <div className='mt-4'>
+          <div className='mt-4 mb-20'>
             <div>
               <p className='font-bold text-xl'>파티 신청자 목록</p>
             </div>
