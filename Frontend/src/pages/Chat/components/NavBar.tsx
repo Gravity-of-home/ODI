@@ -5,16 +5,7 @@ import { toast } from 'react-toastify';
 import imageCompression from 'browser-image-compression';
 import { getCookie } from '@/utils/CookieUtil';
 import { useWebSocket } from '@/context/webSocketProvider';
-
-interface IUser {
-  id: number;
-  role: string;
-  nickname: string;
-  gender: string;
-  ageGroup: string;
-  profileImage: string;
-  isPaid: boolean;
-}
+import { IUser } from '@/types/Chat';
 
 interface INavBarProps {
   title: string;
@@ -48,7 +39,6 @@ const NavBar: React.FC<INavBarProps> = ({
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
 
   function sendSettlementMessage() {
-    console.log('hi');
     if (client && client.connected) {
       client.publish({
         destination: `/pub/chat/message`,
@@ -216,7 +206,7 @@ const NavBar: React.FC<INavBarProps> = ({
           </div>
         )}
         {state === 'SETTLING' && me.isPaid === false && (
-          <div onClick={chargeFee} className='btn btn-block'>
+          <div onClick={chargeFee} className='btn btn-block bg-red-500'>
             <p>1/N 정산하기</p>
           </div>
         )}

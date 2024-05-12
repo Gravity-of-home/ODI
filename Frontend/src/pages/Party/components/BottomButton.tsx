@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useWebSocket } from '@/context/webSocketProvider';
+import { getCookie } from '@/utils/CookieUtil';
 
 interface IButtonProps {
   state: string;
@@ -24,11 +26,58 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   fetchData,
 }) => {
   const nav = useNavigate();
+  const { client, isConnected } = useWebSocket();
   const [gender, setGender] = useState<string | undefined>();
+  const [myNickName, setMyNickName] = useState('');
+  const [myId, setMyID] = useState(0);
+  useEffect(() => {
+    const userDataJSON = localStorage.getItem('User');
+
+    if (userDataJSON) {
+      const userData = JSON.parse(userDataJSON);
+      const nickname = userData?.state?.nickname;
+      const id = userData?.state?.id;
+      setMyNickName(nickname);
+      setMyID(id);
+    }
+  }, []);
+  const handleSendMessage = (type: string) => {
+    if (client && client.connected) {
+      if (type === 'RequestMatching') {
+        client.publish({
+          destination: `/pub/chat/message`,
+          body: JSON.stringify({
+            partyId: partyId,
+            // roomId: 방장알림아이디,
+            content: `${myNickName}님이 파티 참여를 요청했어요!`,
+            type: 'TALK',
+          }),
+          headers: {
+            token: `${getCookie('Authorization')}`,
+          },
+        });
+      }
+      // else if (type === 'RequestMatching'){
+      //   client.publish({
+      //     destination: `/pub/chat/message`,
+      //     body: JSON.stringify({
+      //       // roomId: 방장개인알림아이디,
+      //       content: `${myNickName}님이 파티 참여를 요청했어요!`,
+      //       type: 'TALK',
+      //     }),
+      //     headers: {
+      //       token: `${getCookie('Authorization')}`,
+      //     },
+      //   });
+      // }
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
 
   function RequestDisplay() {
     return (
-      <div className=' bg-white'>
+      <div className=''>
         <div className=' '>
           <p>매칭 신청 완료</p>
           <p>팟장에게 매칭 신청 알림을 보냈어요</p>
@@ -56,6 +105,7 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 201) {
           toast(<RequestDisplay />, { autoClose: false });
+          handleSendMessage('RequestMatching');
         }
         fetchData();
       })

@@ -3,39 +3,19 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWebSocket } from '@/context/webSocketProvider';
 import { getCookie } from '@/utils/CookieUtil';
+import { IUser, IMessage } from '@/types/Chat';
 
-interface IMessage {
-  senderNickname: string;
-  content: string;
-  timestamp: string; // 메시지 수신 또는 발신 시간
-  senderImage: string;
-  sendTime: string;
-  type: string;
-}
 interface ChatProps {
-  roomId: string | undefined;
+  roomId: string;
+  me: IUser;
   fetchData: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ roomId, fetchData }) => {
+const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
   const { partyId } = useParams();
   const { client, isConnected } = useWebSocket();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [myNickName, setMyNickName] = useState('');
-  const [myId, setMyID] = useState(0);
-
-  useEffect(() => {
-    const userDataJSON = localStorage.getItem('User');
-
-    if (userDataJSON) {
-      const userData = JSON.parse(userDataJSON);
-      const nickname = userData?.state?.nickname;
-      const id = userData?.state?.id;
-      setMyNickName(nickname);
-      setMyID(id);
-    }
-  }, []);
 
   useEffect(() => {
     if (client && client.connected) {
@@ -49,6 +29,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, fetchData }) => {
           if (['SETTLEMENT', 'ENTER', 'QUIT'].includes(newMessage.type)) {
             fetchData();
           }
+
           setMessages(prevMessages => [...prevMessages, newMessage]);
         },
         {
@@ -86,19 +67,33 @@ const Chat: React.FC<ChatProps> = ({ roomId, fetchData }) => {
     <div className='flex flex-col'>
       <div className='h-96 overflow-y mb-12 p-4'>
         {messages.map(msg =>
-          msg.senderNickname === myNickName ? (
-            <div className='chat chat-end'>
-              <div className='chat-header'>
-                <time className='text-xs opacity-50'>{msg.sendTime}</time>
+          msg.type === 'TALK' ? (
+            msg.senderNickname === me.nickname ? (
+              <div className='chat chat-end' key={msg.timestamp}>
+                <div className='chat-header'>
+                  <time className='text-xs opacity-50'>{msg.sendTime}</time>
+                </div>
+                <div className='chat-bubble'>{msg.content}</div>
               </div>
-              <div className='chat-bubble'>{msg.content}</div>
-              {/* <div className='chat-footer opacity-50'>Seen at 12:46</div> */}
-            </div>
+            ) : (
+              <div className='chat chat-start' key={msg.timestamp}>
+                <div className='chat-image avatar'>
+                  <div className='w-10 rounded-full'>
+                    <img alt='User avatar' src={msg.senderImage} />
+                  </div>
+                </div>
+                <div className='chat-header'>
+                  {msg.senderNickname}
+                  <time className='text-xs opacity-50'>{msg.sendTime}</time>
+                </div>
+                <div className='chat-bubble'>{msg.content}</div>
+              </div>
+            )
           ) : (
-            <div className='chat chat-start'>
+            <div className='chat chat-start' key={msg.timestamp}>
               <div className='chat-image avatar'>
                 <div className='w-10 rounded-full'>
-                  <img alt='Tailwind CSS chat bubble component' src={msg.senderImage} />
+                  <img alt='User avatar' src={msg.senderImage} />
                 </div>
               </div>
               <div className='chat-header'>

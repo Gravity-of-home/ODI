@@ -4,48 +4,11 @@ import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
 import NavBar from './components/NavBar';
 import Chat from './components/Chat';
-
-interface IInfo {
-  partyId: number;
-  roomId: string;
-  title: string;
-  currentParticipants: number;
-  departuresName: string;
-  arrivalsName: string;
-  departuresDate: string;
-  state: string;
-  me: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  };
-  organizer: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  };
-  participants: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  }[];
-}
+import { IChatInfo } from '@/types/Chat';
 
 const ChatPage = () => {
   const { partyId } = useParams();
-  const [info, setInfo] = useState<IInfo>();
+  const [info, setInfo] = useState<IChatInfo>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
 
@@ -125,7 +88,7 @@ const ChatPage = () => {
       )}
       <div className='divider mt-20'></div>
       <div className='mt-20'>
-        <Chat roomId={info?.roomId} fetchData={fetchData} />
+        {info && <Chat roomId={info.roomId} me={info.me} fetchData={fetchData} />}
       </div>
     </div>
   );

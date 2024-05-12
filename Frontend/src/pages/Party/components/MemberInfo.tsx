@@ -3,7 +3,8 @@ import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useWebSocket } from '@/context/webSocketProvider';
-
+import { getCookie } from '@/utils/CookieUtil';
+import { IParticipant } from '@/types/Party';
 interface IMemberInfoProps {
   hostName: string;
   hostGender: string;
@@ -13,15 +14,6 @@ interface IMemberInfoProps {
   guests: any;
   role: string;
   partyId: string | undefined;
-}
-interface IParticipant {
-  id: number;
-  role: string;
-  nickname: string;
-  gender: string;
-  ageGroup: string;
-  profileImage: string;
-  isPaid: boolean;
 }
 
 const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
@@ -47,13 +39,25 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   }, []);
 
   // 파티 신청 수락
-  const acceptEnterParty = (memberId: number) => () => {
+  const acceptEnterParty = (memberId: number, nickname: string) => () => {
     jwtAxios
       .put(`api/parties/${partyId}/${memberId}`, {})
       .then(res => {
         console.log(res.data);
         if (res.data.status === 201) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
+          client?.publish({
+            destination: `/pub/chat/message`,
+            body: JSON.stringify({
+              partyId: partyId,
+              roomId: '69d88bd6-3dd2-4823-a205-94bc522956d4',
+              content: `${nickname}님이 파티에 입장하셨습니다`,
+              type: 'ENTER',
+            }),
+            headers: {
+              token: `${getCookie('Authorization')}`,
+            },
+          });
         }
         fetchData();
       })
@@ -134,7 +138,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
       {role === 'ORGANIZER' && (
         <div>
           <button
-            onClick={acceptEnterParty(applicant.id)}
+            onClick={acceptEnterParty(applicant.id, applicant.nickname)}
             className='ml-2 py-1 px-3 rounded bg-green-500 text-white'>
             수락
           </button>
