@@ -55,6 +55,9 @@ const MapRef = () => {
       lng: pos.coords.longitude,
     });
 
+    setDepartures?.('내 위치', { latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+    setDepartName('내 위치');
+
     if (map && marker) {
       map!.setZoom(17);
       // 지도를 이동 시킨다.
@@ -86,10 +89,18 @@ const MapRef = () => {
       console.log('지번 주소 : ', res.data.data.jibunAddress);
       console.log('도로명 주소 : ', res.data.data.roadNameAddress);
       setDepartName(
-        res.data.data.placeName === null ? res.data.data.buildingName : res.data.data.placeName,
+        res.data.data.placeName === null
+          ? res.data.data.buildingName === null
+            ? '장소 또는 건물 이름 없음'
+            : res.data.data.buildingName
+          : res.data.data.placeName,
       );
       setDepartures?.(
-        res.data.data.placeName === null ? res.data.data.buildingName : res.data.data.placeName,
+        res.data.data.placeName === null
+          ? res.data.data.buildingName === null
+            ? '장소 또는 건물 이름 없음'
+            : res.data.data.buildingName
+          : res.data.data.placeName,
         { longitude: lng, latitude: lat },
       );
       successReq();

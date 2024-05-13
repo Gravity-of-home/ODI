@@ -76,6 +76,11 @@ public enum SuccessCode {
     MATCH_SUCCESS(200, "매칭에 성공했습니다."),
     MATCH_CANCEL_SUCCESS(204, "매칭 취소에 성공했습니다."),
 
+    // Notification
+    NOTIFICATION_GET_SUCCESS(200, "알림 목록 조회에 성공했습니다."),
+    NOTIFICATION_UPDATE_SUCCESS(204, "알림 읽음 처리에 성공했습니다."),
+    NOTIFICATION_DELETE_SUCCESS(204, "알림 삭제에 성공했습니다."),
+
     ;
 
     /**

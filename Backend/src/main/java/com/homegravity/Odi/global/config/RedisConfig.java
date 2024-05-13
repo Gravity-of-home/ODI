@@ -59,8 +59,13 @@ public class RedisConfig {
      * 단일 Topic 사용을 위한 Bean 설정
      */
     @Bean
-    public ChannelTopic channelTopic() {
+    public ChannelTopic chatTopic() {
         return new ChannelTopic("chatroom");
+    }
+
+    @Bean
+    public ChannelTopic notificationTopic() {
+        return new ChannelTopic("notification");
     }
 
     /**
@@ -68,11 +73,14 @@ public class RedisConfig {
      */
     @Bean
     public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory,
-                                                              MessageListenerAdapter listenerAdapter,
-                                                              ChannelTopic channelTopic) {
+                                                              MessageListenerAdapter chatListenerAdapter,
+                                                              MessageListenerAdapter notificationListenerAdapter,
+                                                              ChannelTopic chatTopic,
+                                                              ChannelTopic notificationTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(listenerAdapter, channelTopic);
+        container.addMessageListener(chatListenerAdapter, chatTopic);
+        container.addMessageListener(notificationListenerAdapter, notificationTopic);
         return container;
     }
 
@@ -80,7 +88,13 @@ public class RedisConfig {
      * 실제 메시지를 처리하는 subscriber 설정 추가
      */
     @Bean
-    public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
+    public MessageListenerAdapter chatListenerAdapter(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
+
+    @Bean
+    public MessageListenerAdapter notificationListenerAdapter(RedisSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendNotification");
+    }
+
 }
