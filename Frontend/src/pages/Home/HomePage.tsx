@@ -5,11 +5,11 @@ import { Layout } from '@/components/Layout';
 import watchPositionHook from '@/hooks/useRefreshLocation';
 
 const HomePage = () => {
+  console.log(window.innerWidth, window.innerHeight);
   watchPositionHook();
   return (
     <Layout>
       <Map />
-      {/* TODO : Bottom Sheet 만든것 넣기 */}
     </Layout>
   );
 };

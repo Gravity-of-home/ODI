@@ -29,7 +29,13 @@ const SearchDepartureItem = (item: IPlaceInfo) => {
         <div className='modal-box w-11/12'>
           <h3 className='font-bold text-[20px]'>출발지로 설정하시겠습니까?</h3>
           <div className='mt-1 border border-gray-500'></div>
-          <h4 className='mt-3 text-lg'>{item.placeName}</h4>
+          <h4 className='mt-3 text-lg'>
+            {item.placeName === null
+              ? item.buildingName === null
+                ? '장소 또는 건물명 미제공'
+                : item.buildingName
+              : item.placeName}
+          </h4>
 
           <div className='modal-action'>
             <form method='dialog'>
