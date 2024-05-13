@@ -1,7 +1,6 @@
 package com.homegravity.Odi.domain.place.repository;
 
 import co.elastic.clients.elasticsearch._types.InlineScript;
-import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.json.JsonData;
 import com.homegravity.Odi.domain.place.entity.PlaceDocument;
@@ -16,7 +15,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
-import org.springframework.data.elasticsearch.core.query.*;
+import org.springframework.data.elasticsearch.core.query.GeoDistanceOrder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Repository;
 
@@ -78,16 +77,8 @@ public class PlaceDocumentNativeQueryRepository {
     public PlaceDocument getNearestPlace(GeoPoint geoPoint) {
 
         Query query = NativeQuery.builder()
-                .withQuery(
-                        q -> q.geoDistance(
-                                g -> g.distance(PLACE_MAX_DISTANCE)
-                                        .field("location-geopoint").
-                                        location(loc -> loc.latlon(Queries.latLon(geoPoint)))
-                        )
-                )
-                .withSort(Sort.by(
-                        new GeoDistanceOrder("location-geopoint", geoPoint)
-                ))
+                .withQuery(QueryBuilders.geoDistance(gd -> gd.distance(PLACE_MAX_DISTANCE).field("location-geopoint").location(loc -> loc.latlon(Queries.latLon(geoPoint)))))
+                .withSort(Sort.by(new GeoDistanceOrder("location-geopoint", geoPoint)))
                 .withMaxResults(1)
                 .build();
 
