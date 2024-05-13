@@ -18,6 +18,7 @@ import ChatPage from './pages/Chat/ChatPage';
 import ChatDetailPage from './pages/Chat/ChatDetailPage';
 
 import { WebSocketProvider } from './context/webSocketProvider';
+import MatchPage from './pages/Match/MatchPage';
 
 type AuthWrapperProps = {
   children: React.ReactNode;
@@ -151,6 +152,14 @@ const router = createBrowserRouter([
     element: (
       <AuthWrapper>
         <ChatDetailPage></ChatDetailPage>
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: '/matchtest',
+    element: (
+      <AuthWrapper>
+        <MatchPage></MatchPage>
       </AuthWrapper>
     ),
   },
