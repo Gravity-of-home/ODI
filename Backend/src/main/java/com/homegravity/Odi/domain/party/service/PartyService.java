@@ -334,7 +334,7 @@ public class PartyService {
         Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
 
         // 조회 요청자 정보
-        PartyMemberDTO me = PartyMemberDTO.from(partyMemberRepository.findByPartyAndMember(party, member)
+        PartyMemberDTO me = PartyMemberDTO.fromMe(partyMemberRepository.findByPartyAndMember(party, member)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage())));
 
         // 파티장 정보
