@@ -50,16 +50,19 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
         {},
         {
           params: {
-            expected_cost: expectedCost / currentParticipants,
+            expected_cost: expectedCost,
           },
         },
       )
       .then(res => {
         console.log(res.data);
         if (res.data.status === 204) {
-          toast.success(`${res.data.message} 선 차감된 금액: ${res.data.data.prepaidCost}`, {
-            position: 'top-center',
-          });
+          toast.success(
+            `${res.data.message} 선 차감된 금액: ${res.data.data.prepaidCost / currentParticipants}`,
+            {
+              position: 'top-center',
+            },
+          );
         }
         fetchData();
       })
