@@ -1,47 +1,33 @@
 package com.homegravity.Odi.domain.chat.controller;
 
-import com.homegravity.Odi.domain.chat.dto.ChatMessageDTO;
-import com.homegravity.Odi.domain.chat.service.ChatService;
+import com.homegravity.Odi.domain.chat.dto.ChatRoomDTO;
+import com.homegravity.Odi.domain.chat.repository.ChatRoomRepository;
 import com.homegravity.Odi.domain.member.entity.Member;
-import com.homegravity.Odi.domain.member.repository.MemberRepository;
-import com.homegravity.Odi.global.jwt.util.JWTUtil;
-import com.homegravity.Odi.global.response.error.ErrorCode;
-import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-@Slf4j
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/chat")
 public class ChatController {
 
-    private final ChatService chatService;
-    private final MemberRepository memberRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
-    private final JWTUtil jwtUtil;
-
-    /**
-     * websocket "/pub/chat/message"로 들어오는 메시징을 처리한다.
-     */
-    @MessageMapping("/chat/message")
-    public void message(ChatMessageDTO message, @Header("token") String token) {
-        Member sender = memberRepository.findById(Long.valueOf(jwtUtil.getId(token)))
-                .orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
-        log.info("{}", sender.getNickname());
-        String nickname = sender.getNickname();
-        String image = sender.getImage();
-        // 로그인 회원 정보로 대화명 설정
-        message.setSenderNickname(nickname);
-        message.setSenderImage(image);
-        message.setSendTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-        // Websocket에 발행된 메시지를 redis로 발행(publish)
-        log.info("pub!!!!!!!!!! {}", message.getSendTime());
-        chatService.sendChatMessage(message);
+    // 모든 채팅방 목록 반환
+    @GetMapping("/rooms")
+    @ResponseBody
+    public List<ChatRoomDTO> room(@AuthenticationPrincipal Member member) {
+        return chatRoomRepository.findAllRoomByMember(member);
     }
+
+    // 특정 채팅방 조회
+    @GetMapping("/room/{room-id}")
+    @ResponseBody
+    public ChatRoomDTO roomInfo(@PathVariable(value = "room-id") String roomId) {
+        return chatRoomRepository.findRoomById(roomId);
+    }
+
 }

@@ -25,19 +25,8 @@ public class ChatService {
     private final MemberRepository memberRepository;
     private final PartyRepository partyRepository;
 
-    private final ChannelTopic channelTopic;
+    private final ChannelTopic chatTopic;
     private final RedisTemplate redisTemplate;
-
-    /**
-     * destination정보에서 roomId 추출
-     */
-    public String getRoomId(String destination) {
-        int lastIndex = destination.lastIndexOf('/');
-        if (lastIndex != -1)
-            return destination.substring(lastIndex + 1);
-        else
-            return "";
-    }
 
     /**
      * 채팅방에 메시지 발송
@@ -54,7 +43,7 @@ public class ChatService {
             chatMessage.setContent(chatMessage.getSenderNickname() + "님이 정산을 요청하셨습니다.");
         }
         log.info("시간어떻게들어오니??? {}",chatMessage.getSendTime());
-        redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+        redisTemplate.convertAndSend(chatTopic.getTopic(), chatMessage);
         log.info("@@@@@@@@@@@@@@@@@@ {}",chatMessage.getRoomId());
         // 메세지 닉네임 기반으로 유저 조회
         Member sender = memberRepository.findByNicknameAndDeletedAtIsNull(chatMessage.getSenderNickname())
@@ -68,6 +57,6 @@ public class ChatService {
                         .party(party)
                         .messageType(chatMessage.getType())
                 .build());
-        log.info("저장저장저장저장저장저장");
+        log.info("채팅저장저장저장저장저장");
     }
 }
