@@ -102,6 +102,7 @@ public class Party extends BaseBy {
     }
 
 
+    // 자동매칭시 생성
     public static Party of(MatchRequestDTO matchRequestDTO) {
 
         GeometryFactory geometryFactory = new GeometryFactory();
@@ -110,6 +111,7 @@ public class Party extends BaseBy {
 
         return Party.builder()
                 .title("[자동 매칭]")
+                .category(CategoryType.MATCHING)
                 .departuresName(matchRequestDTO.getDepName())
                 .departuresLocation(departuresLocation)
                 .arrivalsName(matchRequestDTO.getArrName())
