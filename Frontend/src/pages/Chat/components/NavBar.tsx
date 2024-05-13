@@ -40,7 +40,7 @@ const NavBar: React.FC<INavBarProps> = ({
   const toggleModal = () => setIsModalOpen(!isModalOpen);
   const toggleSettleCheckModal = () => setIsSettleCheckModalOpen(!isSettleCheckModalOpen);
   const toggleSettleFailModal = () => setIsSettleFailModalOpen(!isSettleFailModalOpen);
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<string>('');
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
 
   const stateComponents = {
@@ -90,8 +90,12 @@ const NavBar: React.FC<INavBarProps> = ({
       console.log(error);
     }
   }
-  const handleAmountChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(Number(event.target.value));
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    if (value === '' || /^\d+$/.test(value)) {
+      // 입력값이 빈 문자열이거나 숫자만 포함하는 경우에만 상태 업데이트
+      setAmount(value);
+    }
   };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,11 +239,13 @@ const NavBar: React.FC<INavBarProps> = ({
                 <span className='label-text'>금액</span>
               </label>
               <input
-                type='number'
+                type='text' // 숫자만 입력받도록 type을 'text'로 설정
                 value={amount}
                 onChange={handleAmountChange}
                 placeholder='금액 입력'
                 className='input input-bordered input-primary w-full max-w-xs'
+                inputMode='numeric' // 모바일 환경에서 숫자 키보드를 띄움
+                pattern='\d*' // 모바일에서도 숫자만 입력받도록 제한
               />
             </div>
             <div className='form-control mt-4'>
@@ -266,8 +272,8 @@ const NavBar: React.FC<INavBarProps> = ({
       )}
       {isSettleCheckModalOpen && (
         <SettlementCheckModal
-          beforeCharge={10000}
-          now={1000}
+          paidAmount={me.paidAmount}
+          settleAmount={me.settleAmount}
           onClose={() => setIsSettleCheckModalOpen(false)}
           chargeFee={chargeFee}
         />
