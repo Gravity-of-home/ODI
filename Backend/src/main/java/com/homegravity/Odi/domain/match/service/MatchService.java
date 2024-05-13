@@ -15,7 +15,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.domain.geo.GeoLocation;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -49,20 +48,24 @@ public class MatchService {
 //        }
 
         // 저장
+        log.warn("[start] =========== 위치 저장 시작 ================ ");
         redisTemplate.opsForGeo().add(key, new Point(lon, lat), memberInfo);
-        log.info("redis 저장 : {}", memberInfo);
+        log.warn("[end] =========== 위치 저장 종료 ================ ");
+
     }
 
     // 사용자 요청 정보를 Redis에 추가하는 메서드
     public void addRequest(String memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
+        log.warn("[start] =========== addRequest:: 요청 정보 저장 시작 ================ ");
         String matchRequestJson = objectMapper.writeValueAsString(matchRequestDTO);
         redisTemplate.opsForHash().put("match_requests", memberId, matchRequestJson);
+        log.warn("[end] =========== addRequest:: 요청 정보 저장 종료 ================ ");
     }
 
     // 주어진 위치와 반경 내의 사용자를 찾는 메서드
     public Long findNearbyTarget(String departuresKey, String arrivalsKey, String memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
 
-        log.warn("매칭 시작!!");
+        log.warn("[start] ============= findNearByTarget:: {}의 매칭 시작!! =============", memberId);
 
         // 출발지에서 근접한 사용자 검색 결과 저장
 //        GeoResults<RedisGeoCommands.GeoLocation<String>> depResult = redisTemplate.opsForGeo()
@@ -121,6 +124,7 @@ public class MatchService {
         depResult.retainAll(arrResult);
         log.info("교집합 계산 했나요? : {}", depResult.size());
 
+
         for (String memberInfo : depResult) {
             log.info("{}랑 매칭해줄게? ", memberInfo);
         }
@@ -133,9 +137,17 @@ public class MatchService {
         }).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, "매칭할 사용자가 없습니다."));
 
         log.info("가장 먼저 들어온 유저 {} 와 매칭", firstMember);
+
         // TODO: 파티 생성
         MatchRequestDTO firstMemberRequest = getRequestByMemberId(firstMember);
         MatchRequestDTO memberRequest = getRequestByMemberId(memberId);
+
+        // TODO: Redis에서 정보 삭제
+        cancelMatch(memberId);
+
+        log.warn("[end] =========== findNearByTarget 종료 ================ ");
+
+
         return partyService.createMatchParty(Long.parseLong(firstMember), Long.parseLong(memberId), firstMemberRequest, memberRequest);
 
     }
@@ -154,6 +166,8 @@ public class MatchService {
     }
 
     public synchronized void enterMatch(MatchRequestDTO matchRequestDto, Member member) throws JsonProcessingException {
+
+        log.warn("[start] =========== enterMatch 시작 ================ ");
 
         String memberKey = "member:" + member.getId();
         Boolean alreadyRequested = redisTemplate.opsForValue().setIfAbsent(memberKey, "active", 1, TimeUnit.HOURS);
@@ -177,31 +191,14 @@ public class MatchService {
         // 매칭
         findNearbyTarget("departures", "arrivals", String.valueOf(member.getId()), matchRequestDto);
 
+        log.warn("[end] =========== enterMatch 종료 ================ ");
+
 
     }
 
-
-    // 매칭된 사용자에게 매칭 제안하고 수락 여부 확인 후 파티 형성
-    public boolean createPartyIfAccepted(String userId, Set<String> matchedUsers) {
-        // 매칭 제안 로직 (실제 구현 필요)
-        // 이 예시에서는 모든 매칭이 수락된다고 가정
-        if (matchedUsers.contains(userId)) {
-            // 매칭 정보를 다른 데이터 구조에 저장
-            savePartyDetails(userId, matchedUsers);
-            return true;
-        }
-        return false;
-    }
-
-    // 파티 정보 저장 (상세 구현 필요)
-    private void savePartyDetails(String userId, Set<String> matchedUsers) {
-        // 파티 정보 저장 로직
-        // 예: Redis or any other database
-        System.out.println("Party created for user " + userId + " with users: " + matchedUsers);
-    }
 
     // TODO: 매칭 요청 삭제
-    public void cancelMatch(Member member) {
+    public void cancelMatch(String memberId) {
 //        // 위치 정보를 조회합니다.
 //        List<Point> existingPoints = redisTemplate.opsForGeo().position(key, memberInfo);
 //
@@ -212,8 +209,58 @@ public class MatchService {
 //            log.info("기존 위치 정보 삭제 : {}", memberInfo);
 //        }
 
-        //TODO: 위치 정보 삭제
-        //TODO: 순서 삭제
-        //TODO: 요청 정보 삭제
+        log.warn("[start] =========== 매칭 정보 삭제 시작 ================ ");
+
+        // Redis에서 매칭 요청 정보 삭제
+        redisTemplate.opsForHash().delete("match_requests", memberId);
+        log.info("매칭 요청 정보 삭제: {}", memberId);
+
+        // Redis에서 위치 정보 삭제
+        String depKey = "departures";
+        String arrKey = "arrivals";
+        Long count1 = redisTemplate.opsForGeo().remove(depKey, memberId);
+        log.info("출발지에서 {}의 위치 삭제 : {}", memberId, count1);
+
+        Long count2 = redisTemplate.opsForGeo().remove(arrKey, memberId);
+        log.info("도착지에서 {}의 위치 삭제 : {}", memberId, count2);
+
+        // Redis에서 순서 정보 삭제
+        String sequenceKey = "member_sequence";
+        redisTemplate.delete(sequenceKey + ":" + memberId);
+        log.info("순서 정보 삭제: {}", sequenceKey + ":" + memberId);
+
+        log.warn("[end] =========== 매칭 정보 삭제 종료 ================ ");
+
     }
+
+    // 위치 정보를 Redis에서 삭제하는 메소드
+//    private void removeLocation(String key, String memberId) {
+//
+//        // memberId를 기반으로 실제 위치 정보 키를 생성하는 로직 필요
+//        // 예시: memberId를 포함하는 모든 위치 정보 삭제
+//        Set<String> keysToRemove = redisTemplate.opsForSet().members(key + ":" + memberId);
+//        if (keysToRemove != null && !keysToRemove.isEmpty()) {
+//            redisTemplate.opsForGeo().remove(key, String.valueOf(keysToRemove));
+//            log.info("위치 정보 삭제: {} -> {}", key, keysToRemove);
+//        }
+//    }
+
+    //    // 매칭된 사용자에게 매칭 제안하고 수락 여부 확인 후 파티 형성
+//    public boolean createPartyIfAccepted(String userId, Set<String> matchedUsers) {
+//        // 매칭 제안 로직 (실제 구현 필요)
+//        // 이 예시에서는 모든 매칭이 수락된다고 가정
+//        if (matchedUsers.contains(userId)) {
+//            // 매칭 정보를 다른 데이터 구조에 저장
+//            savePartyDetails(userId, matchedUsers);
+//            return true;
+//        }
+//        return false;
+//    }
+//
+//    // 파티 정보 저장 (상세 구현 필요)
+//    private void savePartyDetails(String userId, Set<String> matchedUsers) {
+//        // 파티 정보 저장 로직
+//        // 예: Redis or any other database
+//        System.out.println("Party created for user " + userId + " with users: " + matchedUsers);
+//    }
 }

@@ -14,11 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "매칭", description = "조건이 같은 사용자끼리 매칭해줍니다.")
 @Slf4j
@@ -31,13 +27,11 @@ public class MatchController {
     private final MatchService matchService;
     private final MemberRepository memberRepository;
 
-    @MessageMapping("/match/{member-id}/enter")
+    @MessageMapping("/match/{member-id}")
 //    @SendTo("/topic/matchResult")
-    public ApiResponse<Void> enterMatch(@DestinationVariable(value = "member-id") Long memberId, @RequestBody MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
+    public ApiResponse<Void> enterMatch(@DestinationVariable(value = "member-id") Long memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
 
-        log.warn("소켓 연결? {}", memberId);
-
-        Member requestMember = memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, "없음요"));
+        Member requestMember = memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, "없는 사용자입니다."));
 
         matchService.enterMatch(matchRequestDTO, requestMember);
         return ApiResponse.of(SuccessCode.MATCH_SUCCESS);
