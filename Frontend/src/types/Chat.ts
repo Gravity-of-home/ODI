@@ -15,6 +15,8 @@ export interface IChatInfo {
     ageGroup: string;
     profileImage: string;
     isPaid: boolean;
+    paidAmount: number | null;
+    settleAmount: number | null;
   };
   organizer: {
     id: number;
@@ -43,6 +45,8 @@ export interface IUser {
   ageGroup: string;
   profileImage: string;
   isPaid: boolean;
+  paidAmount: number | null;
+  settleAmount: number | null;
 }
 
 export interface IMessage {

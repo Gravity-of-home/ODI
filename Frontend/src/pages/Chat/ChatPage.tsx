@@ -25,7 +25,7 @@ const ChatPage = () => {
         },
       })
       .then(res => {
-        // console.log(res);
+        console.log(res);
         setInfo(res.data.data);
       })
       .catch(err => {
@@ -73,9 +73,9 @@ const ChatPage = () => {
       </div>
     );
   return (
-    <div className='chat-page max-h-full'>
+    <div className='chat-page max-h-full flex flex-col'>
       {info && (
-        <div className='fixed top-0 bg-white w-screen z-10 mb-48'>
+        <div className='fixed top-0 bg-white w-screen z-10'>
           <NavBar
             title={info.title}
             departuresName={info.departuresName}
@@ -88,10 +88,10 @@ const ChatPage = () => {
           />
         </div>
       )}
-      <div className='divider mt-20'></div>
-      <div className='mt-10 overflow-y-auto' style={{ height: 'calc(100vh - 100px)' }}>
+      <div className='flex-grow overflow-y-auto' style={{ paddingTop: '10rem' }}>
         {info && <Chat roomId={info.roomId} me={info.me} fetchData={fetchData} />}
       </div>
+      <div className='divider'></div>
     </div>
   );
 };
