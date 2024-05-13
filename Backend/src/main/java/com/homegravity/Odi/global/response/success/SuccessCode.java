@@ -71,7 +71,11 @@ public enum SuccessCode {
     PARTY_STATE_UPDATE_TO_SETTLING_SUCCESS(204, "동승 정산 요청에 성공했습니다."),
     PARTY_STATE_UPDATE_TO_SETTLEMENT_SUCCESS(204, "동승 정산 요청에 성공했습니다."),
     PARTY_MEMBER_CREATE_BRIX_SUCCESS(201, "동승자 평가 저장에 성공했습니다."),
-    ;
+
+    // Notification
+    NOTIFICATION_GET_SUCCESS(200, "알림 목록 조회에 성공했습니다."),
+    NOTIFICATION_UPDATE_SUCCESS(204, "알림 읽음 처리에 성공했습니다."),
+    NOTIFICATION_DELETE_SUCCESS(204, "알림 삭제에 성공했습니다.");
 
     /**
      * ******************************* Success Code Field ***************************************
