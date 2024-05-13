@@ -62,7 +62,7 @@ public enum SuccessCode {
     PAYMENT_REQUEST_SUCCESS(201, "결제 요청에 성공했습니다."),
     PAYMENT_CONFIRM_SUCCESS(201, "결제 승인에 성공했습니다."),
     PAYMENT_FAIL_UPDATE_SUCCESS(204, "결제 실패 업데이트에 성공했습니다."),
-    
+
     // Point
     POINT_HISTORY_GET_SUCCESS(200, "포인트 내역 조회에 성공했습니다."),
 
@@ -71,6 +71,11 @@ public enum SuccessCode {
     PARTY_STATE_UPDATE_TO_SETTLING_SUCCESS(204, "동승 정산 요청에 성공했습니다."),
     PARTY_STATE_UPDATE_TO_SETTLEMENT_SUCCESS(204, "동승 정산 요청에 성공했습니다."),
     PARTY_MEMBER_CREATE_BRIX_SUCCESS(201, "동승자 평가 저장에 성공했습니다."),
+
+    // Match
+    MATCH_SUCCESS(200, "매칭에 성공했습니다."),
+    MATCH_CANCEL_SUCCESS(204, "매칭 취소에 성공했습니다."),
+
     ;
 
     /**

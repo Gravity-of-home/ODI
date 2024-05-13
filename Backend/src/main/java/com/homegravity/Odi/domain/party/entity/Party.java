@@ -2,6 +2,7 @@ package com.homegravity.Odi.domain.party.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.homegravity.Odi.domain.chat.entity.ChatMessage;
+import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.party.dto.LocationPoint;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
 import com.homegravity.Odi.global.entity.BaseBy;
@@ -98,6 +99,26 @@ public class Party extends BaseBy {
         this.state = StateType.GATHERING;
         this.content = content;
         this.roomId = roomId;
+    }
+
+
+    public static Party of(MatchRequestDTO matchRequestDTO) {
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point departuresLocation = geometryFactory.createPoint(new Coordinate(matchRequestDTO.getDepLon(), matchRequestDTO.getDepLat()));
+        Point arrivalsLocation = geometryFactory.createPoint(new Coordinate(matchRequestDTO.getArrLon(), matchRequestDTO.getArrLat()));
+
+        return Party.builder()
+                .title("[자동 매칭]")
+                .departuresName(matchRequestDTO.getDepName())
+                .departuresLocation(departuresLocation)
+                .arrivalsName(matchRequestDTO.getArrName())
+                .arrivalsLocation(arrivalsLocation)
+                .maxParticipants(2)
+                .currentParticipants(2)
+                .genderRestriction(GenderType.ANY)
+                .content("자동매칭에 성공했습니다.")
+                .build();
     }
 
     public static Party of(PartyRequestDTO partyRequestDTO, String gender, String roomId) {
