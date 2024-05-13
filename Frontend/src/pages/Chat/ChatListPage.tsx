@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ViteConfig } from '@/apis/ViteConfig';
+
 import jwtAxios from '@/utils/JWTUtil';
 
 const ChatListPage = () => {
-  const BASE_URI = ViteConfig.VITE_BASE_URL;
   const [error, setError] = useState(false);
   const [chatList, setChatList] = useState([]);
   const nav = useNavigate();
@@ -12,7 +11,7 @@ const ChatListPage = () => {
   // TODO : chatlist 데이터 어떻게 들어오는지 보고 리스트 보여주기
   function fetchData() {
     const response = jwtAxios
-      .post(`${BASE_URI}/api/chats`)
+      .post(`/api/chats`)
       .then(res => {
         console.log(res.data);
         setChatList(res.data.data);

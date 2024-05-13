@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import userStore from '@/stores/useUserStore';
 import { removeCookie } from '@/utils/CookieUtil';
+import SvgGoBack from '@/assets/svg/SvgGoBack';
 
 const ProfilePage = () => {
   const nav = useNavigate();
@@ -17,7 +18,19 @@ const ProfilePage = () => {
 
   return (
     <>
-      <div className='flex flex-col justify-center items-center w-full h-screen'>
+      <div className='fixed w-[100%] h-[5%] bg-black z-10 flex items-center'>
+        <div
+          className='px-4 z-10'
+          onClick={() => {
+            nav('/home', { replace: true });
+          }}>
+          <SvgGoBack />
+        </div>
+        <div className='fixed w-[100%] flex justify-center text-[18px] font-semibold text-white'>
+          MY PAGE
+        </div>
+      </div>
+      <div className='flex flex-col justify-center items-center w-[100%] h-[100%]'>
         <div className='font-["Pretendard-Bold"] text-[30px]'>userStore 테스트</div>
         <div className='w-[80%] h-[70%] flex flex-col items-center'>
           <div>

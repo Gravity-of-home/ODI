@@ -3,16 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import imageCompression from 'browser-image-compression';
-
-interface IUser {
-  id: number;
-  role: string;
-  nickname: string;
-  gender: string;
-  ageGroup: string;
-  profileImage: string;
-  isPaid: boolean;
-}
+import { getCookie } from '@/utils/CookieUtil';
+import { useWebSocket } from '@/context/webSocketProvider';
+import { IUser } from '@/types/Chat';
+import SettlementFailModal from './SettlementFailModal';
+import SettlementCheckModal from './SettlementCheckModal';
 
 interface INavBarProps {
   title: string;
@@ -21,6 +16,7 @@ interface INavBarProps {
   departuresDate: string;
   state: string;
   me: IUser;
+  roomId: string;
   fetchData: () => void;
 }
 
@@ -31,21 +27,54 @@ const NavBar: React.FC<INavBarProps> = ({
   departuresDate,
   state,
   me,
+  roomId,
   fetchData,
 }) => {
   const { partyId } = useParams();
   const navigate = useNavigate();
+  const { client, isConnected } = useWebSocket();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettleCheckModalOpen, setIsSettleCheckModalOpen] = useState(false);
+  const [isSettleFailModalOpen, setIsSettleFailModalOpen] = useState(false);
   const toggleModal = () => setIsModalOpen(!isModalOpen);
-
-  const [amount, setAmount] = useState<number>(0);
+  const toggleSettleCheckModal = () => setIsSettleCheckModalOpen(!isSettleCheckModalOpen);
+  const toggleSettleFailModal = () => setIsSettleFailModalOpen(!isSettleFailModalOpen);
+  const [amount, setAmount] = useState<string>('');
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
+
+  const stateComponents = {
+    GATHERING: <div className='badge badge-primary badge-outline'>모집중</div>,
+    SETTLING: <div className='badge badge-primary badge-outline'>정산중</div>,
+    COMPLETED: <div className='badge badge-error badge-outline'>모집마감</div>,
+    SETTLED: <div className='badge badge-error badge-outline'>정산완료</div>,
+  };
+
+  let stateComponent = stateComponents[state as keyof typeof stateComponents];
+
+  function sendSettlementMessage() {
+    if (client && client.connected) {
+      client.publish({
+        destination: `/pub/chat/message`,
+        body: JSON.stringify({
+          partyId: partyId,
+          roomId: roomId,
+          content: `${me.nickname} 님이 정산 요청을 보냈어요!`,
+          type: 'SETTLEMENT',
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
 
   async function handleImageUpload(event: File) {
     const imageFile = event;
-    console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
-    console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+    // console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
+    // console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
 
     const options = {
       maxSizeMB: 1,
@@ -54,15 +83,19 @@ const NavBar: React.FC<INavBarProps> = ({
     };
     try {
       const compressedFile = await imageCompression(imageFile, options);
-      console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
-      console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
+      // console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
+      // console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
       return compressedFile;
     } catch (error) {
       console.log(error);
     }
   }
-  const handleAmountChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(Number(event.target.value));
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    if (value === '' || /^\d+$/.test(value)) {
+      // 입력값이 빈 문자열이거나 숫자만 포함하는 경우에만 상태 업데이트
+      setAmount(value);
+    }
   };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,16 +117,6 @@ const NavBar: React.FC<INavBarProps> = ({
       setImageFile(undefined);
     }
   };
-  let stateComponent;
-  if (state === 'GATHERING') {
-    stateComponent = <div className='badge badge-primary badge-outline'>모집중</div>;
-  } else if (state === 'SETTLING') {
-    stateComponent = <div className='badge badge-primary badge-outline'>정산중</div>;
-  } else if (state === 'COMPLETED') {
-    stateComponent = <div className='badge badge-error badge-outline'>모집마감</div>;
-  } else if (state === 'SETTLED') {
-    stateComponent = <div className='badge badge-error badge-outline'>정산완료</div>;
-  }
   function goDetail() {
     navigate(`/chat/detail/${partyId}`);
   }
@@ -119,20 +142,22 @@ const NavBar: React.FC<INavBarProps> = ({
       })
       .then(res => {
         console.log(res);
-        if (res.data.status) {
+        if (res.data.status === 204) {
           toast.success(res.data.message, {
             pauseOnFocusLoss: false,
             hideProgressBar: true,
             closeOnClick: true,
           });
+          sendSettlementMessage();
+          fetchData();
           toggleModal();
         }
       })
       .catch(err => {
         toast.error(err.response.data.reason);
+        fetchData();
         console.error(err);
       });
-    fetchData();
   };
 
   const chargeFee = () => {
@@ -145,14 +170,19 @@ const NavBar: React.FC<INavBarProps> = ({
         }
       })
       .catch(err => {
-        toast.error(err.response.data.message);
         console.error(err);
+        if (err.response.data.status === 402) {
+          console.log(isSettleFailModalOpen);
+          toggleSettleFailModal();
+        } else {
+          toast.error(err.response.data.message);
+        }
       });
     fetchData();
   };
 
   return (
-    <div className='fixed top-0 bg-white w-screen z-10'>
+    <div className=''>
       <div className='flex items-center justify-between'>
         <button onClick={goBack} className='btn btn-ghost btn-circle text-3xl'>
           {'<'}
@@ -181,19 +211,21 @@ const NavBar: React.FC<INavBarProps> = ({
           </p>
           <p>{departuresDate}</p>
         </div>
+        <div className='divider mb-2'></div>
       </div>
-      <div className='mt-1'>
-        {state === 'COMPLETED' && (
-          <div onClick={toggleModal} className='btn btn-block btn-primary'>
-            <p className='font-bold text-white'>1/N 정산요청하기</p>
-          </div>
-        )}
-        {state === 'SETTLING' && me.isPaid === false && (
-          <div onClick={chargeFee} className='btn btn-block'>
-            <p>1/N 정산하기</p>
-          </div>
-        )}
-      </div>
+
+      {state === 'COMPLETED' && (
+        <div onClick={toggleModal} className='mt-1 btn btn-block btn-primary'>
+          <p className='font-bold text-white'>1/N 정산요청하기</p>
+          <div className='divider'></div>
+        </div>
+      )}
+      {state === 'SETTLING' && me.isPaid === false && (
+        <div onClick={toggleSettleCheckModal} className='mt-1 btn btn-block btn-accent'>
+          <p className='font-bold text-xl text-white'>정산하기</p>
+          <div className='divider'></div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className='modal modal-open'>
@@ -207,11 +239,13 @@ const NavBar: React.FC<INavBarProps> = ({
                 <span className='label-text'>금액</span>
               </label>
               <input
-                type='number'
+                type='text' // 숫자만 입력받도록 type을 'text'로 설정
                 value={amount}
                 onChange={handleAmountChange}
                 placeholder='금액 입력'
                 className='input input-bordered input-primary w-full max-w-xs'
+                inputMode='numeric' // 모바일 환경에서 숫자 키보드를 띄움
+                pattern='\d*' // 모바일에서도 숫자만 입력받도록 제한
               />
             </div>
             <div className='form-control mt-4'>
@@ -232,6 +266,17 @@ const NavBar: React.FC<INavBarProps> = ({
             </div>
           </div>
         </div>
+      )}
+      {isSettleFailModalOpen && (
+        <SettlementFailModal onClose={() => setIsSettleFailModalOpen(false)} />
+      )}
+      {isSettleCheckModalOpen && (
+        <SettlementCheckModal
+          paidAmount={me.paidAmount}
+          settleAmount={me.settleAmount}
+          onClose={() => setIsSettleCheckModalOpen(false)}
+          chargeFee={chargeFee}
+        />
       )}
     </div>
   );

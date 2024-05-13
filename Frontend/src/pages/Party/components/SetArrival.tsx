@@ -19,8 +19,7 @@ import { toast } from 'react-toastify';
 const MapRef = () => {
   const ref = useRef<HTMLDivElement>(null);
   const nav = useNavigate();
-  const { currentLat, currentLng } = LatLngAddStore();
-  const { setArrivals, arrivalsName, departuresLocation, arrivalsLocation } = partyStore();
+  const { setArrivals, arrivalsName, arrivalsLocation } = partyStore();
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
   const [mapCenter, setMapCenter] = useState<google.maps.LatLng>(
@@ -55,6 +54,9 @@ const MapRef = () => {
       lng: pos.coords.longitude,
     });
 
+    setArrivals?.('내 위치', { latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+    setArrName('내 위치');
+
     if (map && marker) {
       map!.setZoom(17);
       // 지도를 이동 시킨다.
@@ -86,10 +88,18 @@ const MapRef = () => {
       console.log('지번 주소 : ', res.data.data.jibunAddress);
       console.log('도로명 주소 : ', res.data.data.roadNameAddress);
       setArrName(
-        res.data.data.placeName === null ? res.data.data.buildingName : res.data.data.placeName,
+        res.data.data.placeName === null
+          ? res.data.data.buildingName === null
+            ? '장소 또는 건물 이름 없음'
+            : res.data.data.buildingName
+          : res.data.data.placeName,
       );
       setArrivals?.(
-        res.data.data.placeName === null ? res.data.data.buildingName : res.data.data.placeName,
+        res.data.data.placeName === null
+          ? res.data.data.buildingName === null
+            ? '장소 또는 건물 이름 없음'
+            : res.data.data.buildingName
+          : res.data.data.placeName,
         { longitude: lng, latitude: lat },
       );
       successReq();
@@ -104,6 +114,7 @@ const MapRef = () => {
     if (ref.current) {
       const initialMap = new window.google.maps.Map(ref.current, {
         center: mapCenter,
+        clickableIcons: false,
         disableDefaultUI: true,
         styles: DarkModeStyle,
         zoom: 16,
@@ -131,7 +142,7 @@ const MapRef = () => {
         icon: {
           url: ARRIVAL,
           scaledSize: new window.google.maps.Size(32, 42),
-        }
+        },
         draggable: true,
         zIndex: 10,
         animation: google.maps.Animation.DROP,
@@ -230,7 +241,7 @@ const SetArrival = () => {
     }
     try {
       const res = await jwtAxios.get(
-        `${ViteConfig.VITE_BASE_URL}/api/places?query=${searchValue}&latitude=${departuresLocation!.latitude}&longitude=${departuresLocation!.longitude}`,
+        `/api/places?query=${searchValue}&latitude=${departuresLocation!.latitude}&longitude=${departuresLocation!.longitude}`,
       );
       console.log(res.data.data.content);
       setSearchData(res.data.data.content);
