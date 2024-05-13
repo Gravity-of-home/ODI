@@ -191,7 +191,11 @@ const MapRef = () => {
           <div className='px-2 z-10' onClick={() => {}}>
             <SvgNotification />
           </div>
-          <div className='px-2 z-10' onClick={() => {}}>
+          <div
+            className='px-2 z-10'
+            onClick={() => {
+              nav('/profile');
+            }}>
             <SvgProfile />
           </div>
         </div>
