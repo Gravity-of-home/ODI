@@ -7,6 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class MatchRequestDTO {
 
     @Schema(description = "출발지명")

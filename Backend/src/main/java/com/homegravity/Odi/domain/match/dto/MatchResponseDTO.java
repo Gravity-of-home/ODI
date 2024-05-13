@@ -8,43 +8,28 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MatchResponseDTO {
 
-    @Schema(description = "멤버 id")
-    private Long id;
+    @Schema(description = "멤버1 id")
+    private Long memberId1;
 
-    @Schema(description = "출발지와의 거리 차이")
-    private Double depDistance;
+    @Schema(description = "멤버2 id")
+    private Long memberId2;
 
-    @Schema(description = "출발지명")
-    private String depName;
-
-    @Schema(description = "출발지 경도 / longitude")
-    private double depLon;
-
-    @Schema(description = "출발지 위도 / latitude")
-    private double depLat;
-
-    @Schema(description = "도착지와의 거리 차이")
-    private Double arrDistance;
-
-    @Schema(description = "도착지명")
-    private String arrName;
-
-    @Schema(description = "도착지 경도 / longitude")
-    private double arrLon;
-
-    @Schema(description = "도착지 위도 / latitude")
-    private double arrLat;
+    @Schema(description = "생성된 파티 id")
+    private Long partyId;
 
     @Builder
-    private MatchResponseDTO(Long id, Double depDistance, String depName, double depLon, double depLat, Double arrDistance, String arrName, double arrLon, double arrLat) {
-        this.id = id;
-        this.depDistance = depDistance;
-        this.depName = depName;
-        this.depLon = depLon;
-        this.depLat = depLat;
-        this.arrDistance = arrDistance;
-        this.arrName = arrName;
-        this.arrLon = arrLon;
-        this.arrLat = arrLat;
+    private MatchResponseDTO(Long memberId1, Long memberId2, Long partyId) {
+        this.memberId1 = memberId1;
+        this.memberId2 = memberId2;
+        this.partyId = partyId;
     }
+
+    public static MatchResponseDTO of(Long memberId1, Long memberId2, Long partyId) {
+        return builder()
+                .memberId1(memberId1)
+                .memberId2(memberId2)
+                .partyId(partyId)
+                .build();
+    }
+
 }

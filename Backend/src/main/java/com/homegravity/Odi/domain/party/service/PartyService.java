@@ -352,6 +352,7 @@ public class PartyService {
     public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) {
 
         Party party = partyRepository.save(Party.of(requestDTO1));
+//        partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
 
         Member organizer = memberRepository.findById(member1).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
         Member participant = memberRepository.findById(member2).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
@@ -361,7 +362,8 @@ public class PartyService {
         partyMemberRepository.save(PartyMember.of(RoleType.PARTICIPANT, false, party, participant));
 
         // party board stats 저장
-        partyBoardStatsRepository.save(PartyBoardStats.of(0, 0));
+        PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0);
+        partyBoardStats.updateParty(party);
 
         return party.getId();
     }
