@@ -7,12 +7,13 @@ import SvgGoBack from '@/assets/svg/SvgGoBack';
 import SvgGoInside from '@/assets/svg/SvgGoInside';
 import { IUser } from '@/types/User';
 import { IAPIResponse } from '@/types/APIResponse';
+import ProgressBar from '@/components/ProgressBar';
 
 const ProfilePage = () => {
   useEffect(() => {
     const getUserData = async () => {
-      const userInfo = await getUserInfo();
-      // loginUser(userInfo);
+      const { data } = await getUserInfo();
+      loginUser(data);
     };
 
     getUserData();
@@ -27,6 +28,7 @@ const ProfilePage = () => {
     gender,
     image,
     brix,
+    point,
     logoutUser,
     loginUser,
     Logout,
@@ -55,19 +57,13 @@ const ProfilePage = () => {
           <div className='absolute w-[100%] flex justify-center text-[18px] font-semibold text-white'>
             MY PAGE
           </div>
-          {/* <div
-            className='absolute w-[15%] h-[80%] right-0 mx-4 bg-OD_PURPLE rounded-lg flex justify-center items-center font-semibold text-white hover:text-OD_YELLOW'
-            onClick={() => {}}>
-            수정
-          </div> */}
         </div>
-
         <div className='w-[100%] h-[95%] flex flex-col items-center'>
           <div className='w-[100%] h-[20%] flex justify-between items-center px-5 mt-5'>
-            <div className='w-[30%] flex justify-center items-center rounded-full border border-slate-500 overflow-hidden'>
+            <div className='w-[150px] h-[150px] flex justify-center items-center rounded-full border border-slate-500 overflow-hidden'>
               <img src={image} alt='프로필 사진' />
             </div>
-            <div className='w-[55%] h-[100%] flex flex-col justify-center'>
+            <div className='w-[40%] h-[100%] flex flex-col justify-center'>
               <div className='h-[15%] flex items-center text-gray-400'>닉네임</div>
               <div className='h-[30%] flex items-center text-white text-[20px]'>{nickname}</div>
               <div className='h-[15%] flex items-center text-gray-400'>이름</div>
@@ -78,19 +74,48 @@ const ProfilePage = () => {
               onClick={() => {
                 /* 자세한 프로필 내역 및 수정하기! */
               }}>
-              <SvgGoInside style={{ width: '50%', height: '30%' }} />
+              <SvgGoInside style={{ width: '24px', height: '24px' }} />
             </div>
           </div>
-          {/* <div>이메일 : {email}</div>
-          <div>나이 : {ageGroup}</div>
-          <div>성별 : {gender === 'M' ? '남자' : '여자'}</div>
-          <div>당도 : {brix}</div> */}
           <div className='w-[90%] border-b-2 border-gray-500 mx-5'></div>
-          <div>
-            <div>내 포인트</div>
+          <div className='w-[100%] h-[10%] flex flex-col justify-evenly my-3 px-5'>
+            <div className='font-semibold text-white text-[20px]'>나의 당도</div>
+            <div className='font-semibold text-white text-[18px] flex justify-end'>
+              <ProgressBar targetValue={brix as number} />
+            </div>
           </div>
+          <div className='w-[90%] border-b-2 border-gray-500 mx-5'></div>
+          <div className='w-[100%] h-[15%] flex flex-col justify-evenly my-3 px-5'>
+            <div className='font-semibold text-white text-[20px]'>내 포인트</div>
+            <div className='font-semibold text-white text-[18px] flex justify-end'>
+              {point}
+              <span className='text-slate-500 px-2'>오디</span>
+            </div>
+            <button
+              className='w-[60%] h-[30%] flex justify-center items-center bg-OD_YELLOW self-end rounded-xl text-black font-semibold text-[18px]'
+              onClick={() => {
+                /* 충전하기 페이지 */
+              }}>
+              충전하기
+            </button>
+          </div>
+          <div className='w-[90%] border-b-2 border-gray-500 mx-5'></div>
+          <div className='w-[100%] h-[10%] flex flex-col justify-evenly my-3 px-5'>
+            <div className='font-semibold text-white text-[20px]'>이용 내역</div>
+            <div className='font-semibold text-white flex justify-end'>
+              <SvgGoInside style={{ width: '24px', height: '24px' }} />
+            </div>
+          </div>
+          <div className='w-[90%] border-b-2 border-gray-500 mx-5'></div>
+          <div className='w-[100%] h-[10%] flex flex-col justify-evenly my-3 px-5'>
+            <div className='font-semibold text-white text-[20px]'>결제 내역</div>
+            <div className='font-semibold text-white flex justify-end'>
+              <SvgGoInside style={{ width: '24px', height: '24px' }} />
+            </div>
+          </div>
+          <div className='w-[90%] border-b-2 border-gray-500 mx-5'></div>
           <button
-            className='btn btn-outline rounded-full py-3 px-8 font-bold hover:bg-[#A93BFF]'
+            className='btn btn-outline w-[80%] rounded-full mt-12 py-3 px-8 font-bold text-[20px] text-white bg-slate-500 hover:bg-[#A93BFF] hover:text-white'
             onClick={logout}>
             로그아웃
           </button>
