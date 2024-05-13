@@ -3,16 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import imageCompression from 'browser-image-compression';
-
-interface IUser {
-  id: number;
-  role: string;
-  nickname: string;
-  gender: string;
-  ageGroup: string;
-  profileImage: string;
-  isPaid: boolean;
-}
+import { getCookie } from '@/utils/CookieUtil';
+import { useWebSocket } from '@/context/webSocketProvider';
+import { IUser } from '@/types/Chat';
 
 interface INavBarProps {
   title: string;
@@ -21,6 +14,7 @@ interface INavBarProps {
   departuresDate: string;
   state: string;
   me: IUser;
+  roomId: string;
   fetchData: () => void;
 }
 
@@ -31,16 +25,37 @@ const NavBar: React.FC<INavBarProps> = ({
   departuresDate,
   state,
   me,
+  roomId,
   fetchData,
 }) => {
   const { partyId } = useParams();
   const navigate = useNavigate();
+  const { client, isConnected } = useWebSocket();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
   const [amount, setAmount] = useState<number>(0);
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
+
+  function sendSettlementMessage() {
+    if (client && client.connected) {
+      client.publish({
+        destination: `/pub/chat/message`,
+        body: JSON.stringify({
+          partyId: partyId,
+          roomId: roomId,
+          content: `${me.nickname} 님이 정산 요청을 보냈어요!`,
+          type: 'SETTLEMENT',
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
 
   async function handleImageUpload(event: File) {
     const imageFile = event;
@@ -119,20 +134,22 @@ const NavBar: React.FC<INavBarProps> = ({
       })
       .then(res => {
         console.log(res);
-        if (res.data.status) {
+        if (res.data.status === 204) {
           toast.success(res.data.message, {
             pauseOnFocusLoss: false,
             hideProgressBar: true,
             closeOnClick: true,
           });
+          sendSettlementMessage();
+          fetchData();
           toggleModal();
         }
       })
       .catch(err => {
         toast.error(err.response.data.reason);
+        fetchData();
         console.error(err);
       });
-    fetchData();
   };
 
   const chargeFee = () => {
@@ -152,7 +169,7 @@ const NavBar: React.FC<INavBarProps> = ({
   };
 
   return (
-    <div className='fixed top-0 bg-white w-screen z-10'>
+    <div className=''>
       <div className='flex items-center justify-between'>
         <button onClick={goBack} className='btn btn-ghost btn-circle text-3xl'>
           {'<'}
@@ -181,16 +198,19 @@ const NavBar: React.FC<INavBarProps> = ({
           </p>
           <p>{departuresDate}</p>
         </div>
+        <div className='divider mb-10'></div>
       </div>
       <div className='mt-1'>
         {state === 'COMPLETED' && (
           <div onClick={toggleModal} className='btn btn-block btn-primary'>
             <p className='font-bold text-white'>1/N 정산요청하기</p>
+            <div className='divider mb-20'></div>
           </div>
         )}
         {state === 'SETTLING' && me.isPaid === false && (
-          <div onClick={chargeFee} className='btn btn-block'>
+          <div onClick={chargeFee} className='btn btn-block bg-red-500'>
             <p>1/N 정산하기</p>
+            <div className='divider mb-20'></div>
           </div>
         )}
       </div>

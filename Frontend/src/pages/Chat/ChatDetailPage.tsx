@@ -96,7 +96,7 @@ const ChatDetailPage = () => {
         <p>{info?.organizer.ageGroup}</p>
       </div>
       <div className='content-center'>
-        {info?.organizer.id !== info?.me.id && (
+        {info?.organizer.id && info?.organizer.id !== info?.me.id && (
           <button
             onClick={Report(info?.organizer.id)}
             className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>

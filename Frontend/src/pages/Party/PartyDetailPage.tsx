@@ -8,55 +8,7 @@ import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
 import TopNav from './components/TopNav';
 import StateBadge from './components/StateBadge';
-
-interface IInfo {
-  id: number;
-  createAt: string;
-  modifiedAt: string;
-  title: string;
-  departuresName: string;
-  departuresLocation: {
-    latitude: number;
-    longitude: number;
-  };
-  arrivalsName: string;
-  arrivalsLocation: {
-    latitude: number;
-    longitude: number;
-  };
-  expectedCost: number;
-  expectedDuration: number;
-  departuresDate: string;
-  currentParticipants: number;
-  maxParticipants: number;
-  category: string;
-  genderRestriction: string;
-  state: string;
-  content: string;
-  viewCount: number;
-  requestCount: number;
-  role: string;
-  participants: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  }[];
-  guests: {
-    id: number;
-    role: string;
-    nickname: string;
-    gender: string;
-    ageGroup: string;
-    profileImage: string;
-    isPaid: boolean;
-  }[];
-  distance: number;
-  path: number[][];
-}
+import { IInfo } from '@/types/Party';
 
 const PartyDetailPage = () => {
   const { partyId } = useParams();
@@ -64,6 +16,7 @@ const PartyDetailPage = () => {
   const [error, setError] = useState('');
   const [info, setInfo] = useState<IInfo>({
     id: 0,
+    roomId: '',
     createAt: '',
     modifiedAt: '',
     title: 'OD!',
@@ -108,7 +61,6 @@ const PartyDetailPage = () => {
         profileImage: '',
         isPaid: true,
       },
-      // 추가 참가자들...
     ],
 
     guests: [
@@ -135,10 +87,13 @@ const PartyDetailPage = () => {
     ageGroup: '',
     profileImage: '',
   });
+
+  // 파티 정보 에서 파티장 찾는거
   const FindHost = (participants: any) => {
     return participants.find((p: { role: string }) => p.role === 'ORGANIZER');
   };
 
+  // 파티 정보 조회
   const fetchData = async () => {
     await jwtAxios
       .get(`api/party-boards/${partyId}`, {
@@ -178,6 +133,7 @@ const PartyDetailPage = () => {
     fetchData();
   }, []);
 
+  // 날짜형태변환 "2024-05-10 15:34" -> 5월 10일 (요일) 오후 03:34
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const options: Intl.DateTimeFormatOptions = {
@@ -191,13 +147,14 @@ const PartyDetailPage = () => {
     return new Intl.DateTimeFormat('ko-KR', options).format(date);
   };
 
+  // 현재시간과 글 생성시간과의 차이
   function formatTimeDifference(createAt: string) {
     const now: Date = new Date();
     const createdTime: Date = new Date(createAt);
-    const timeDifference: number = now.getTime() - createdTime.getTime(); // 현재 시간과 생성 시간의 차이 (밀리초 단위)
-    const minutesDifference = Math.floor(timeDifference / (1000 * 60)); // 분 단위로 변환
-    const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60)); // 시간 단위로 변환
-    const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24)); // 일 단위로 변환
+    const timeDifference: number = now.getTime() - createdTime.getTime();
+    const minutesDifference = Math.floor(timeDifference / (1000 * 60));
+    const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60));
+    const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
 
     if (daysDifference >= 1) {
       return `${daysDifference}일 전`;
@@ -268,6 +225,7 @@ const PartyDetailPage = () => {
         />
       </div>
       <div className='h-5 bg-slate-100'></div>
+
       <div className=''>
         <MemberInfo
           hostName={hostInfo.nickname}
@@ -278,14 +236,17 @@ const PartyDetailPage = () => {
           guests={info.guests}
           role={info.role}
           partyId={partyId}
+          roomId={info.roomId}
           fetchData={fetchData}
         />
       </div>
+
       <div className='divider h-16'></div>
       <BottomButton
         state={info.state}
         role={info.role}
         partyId={partyId}
+        roomId={info.roomId}
         fetchData={fetchData}
         hostGender={hostInfo.gender}
         genderRestriction={info.genderRestriction}

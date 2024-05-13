@@ -1,48 +1,55 @@
 // Chat.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWebSocket } from '@/context/webSocketProvider';
 import { getCookie } from '@/utils/CookieUtil';
+import { IUser, IMessage } from '@/types/Chat';
+import jwtAxios from '@/utils/JWTUtil';
 
-interface IMessage {
-  senderNickname: string;
-  content: string;
-  timestamp: string; // 메시지 수신 또는 발신 시간
-  senderImage: string;
-  sendTime: string;
-  type: string;
-}
 interface ChatProps {
-  roomId: string | undefined;
+  roomId: string;
+  me: IUser;
+  fetchData: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ roomId }) => {
+const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
   const { partyId } = useParams();
   const { client, isConnected } = useWebSocket();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [myNickName, setMyNickName] = useState('');
-  const [myId, setMyID] = useState(0);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-  useEffect(() => {
-    const userDataJSON = localStorage.getItem('User');
-
-    if (userDataJSON) {
-      const userData = JSON.parse(userDataJSON);
-      const nickname = userData?.state?.nickname;
-      const id = userData?.state?.id;
-      setMyNickName(nickname);
-      setMyID(id);
-    }
-  }, []);
+  useEffect(scrollToBottom, [messages]);
+  function fetchMessages() {
+    jwtAxios
+      .get(`api/chat/room/${roomId}`)
+      .then(res => {
+        const beforeChat = res.data.chatMessages;
+        console.log(beforeChat);
+        setMessages(prevMessages => [...prevMessages, ...beforeChat]); // 배열을 펼쳐서 추가
+      })
+      .catch(error => {
+        console.error('Error fetching messages:', error);
+      });
+  }
 
   useEffect(() => {
     if (client && client.connected) {
+      fetchMessages();
       const subscription = client.subscribe(
         `/sub/chat/room/${roomId}`,
         message => {
           console.log(JSON.parse(message.body));
+
           const newMessage = JSON.parse(message.body);
+          console.log(newMessage.type);
+          if (['SETTLEMENT', 'ENTER', 'QUIT'].includes(newMessage.type)) {
+            fetchData();
+          }
+
           setMessages(prevMessages => [...prevMessages, newMessage]);
         },
         {
@@ -78,31 +85,24 @@ const Chat: React.FC<ChatProps> = ({ roomId }) => {
 
   return (
     <div className='flex flex-col'>
-      <div className='h-96 overflow-y mb-12 p-4'>
-        {messages.map(msg =>
-          msg.type === 'TALK' && msg.senderNickname === myNickName ? (
-            <div className='chat chat-end'>
+      <div className='mb-12 p-4 flex-grow'>
+        {messages.map((msg, index) =>
+          msg.type === 'TALK' ? (
+            <div
+              key={index}
+              className={msg.senderNickname === me.nickname ? 'chat chat-end' : 'chat chat-start'}>
               <div className='chat-header'>
                 <time className='text-xs opacity-50'>{msg.sendTime}</time>
               </div>
               <div className='chat-bubble'>{msg.content}</div>
-              {/* <div className='chat-footer opacity-50'>Seen at 12:46</div> */}
             </div>
           ) : (
-            <div className='chat chat-start'>
-              <div className='chat-image avatar'>
-                <div className='w-10 rounded-full'>
-                  <img alt='Tailwind CSS chat bubble component' src={msg.senderImage} />
-                </div>
-              </div>
-              <div className='chat-header'>
-                {msg.senderNickname}
-                <time className='text-xs opacity-50'>{msg.sendTime}</time>
-              </div>
-              <div className='chat-bubble'>{msg.content}</div>
+            <div key={index} className='flex justify-center my-4'>
+              <span className='badge badge-lg'>{msg.content}</span>
             </div>
           ),
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className='fixed bottom-0 bg-white flex w-screen'>

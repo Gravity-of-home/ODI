@@ -1,4 +1,9 @@
-const StateBadge = (state: any) => {
+import React from 'react';
+interface IStateBadge {
+  state: string;
+}
+
+const StateBadge: React.FC<IStateBadge> = ({ state }) => {
   return (
     <div
       className={`py-3 badge flex justify-center rounded ${state === 'GATHERING' ? 'bg-blue-100 text-blue-500' : 'bg-red-100 text-red-500'} font-bold`}>

@@ -36,8 +36,14 @@ public class PartyMemberDTO {
     @Schema(description = "매너 당도")
     private Double brix;
 
+    @Schema(description = "이미 지불한 금액(선불 금액)")
+    private Integer paidAmount;
+
+    @Schema(description = "정산해야 할 금액")
+    private Integer settleAmount;
+
     @Builder
-    private PartyMemberDTO(Long id, RoleType role, String nickname, String gender, String ageGroup, String profileImage, Boolean isPaid, Double brix) {
+    private PartyMemberDTO(Long id, RoleType role, String nickname, String gender, String ageGroup, String profileImage, Boolean isPaid, Double brix, Integer paidAmount, Integer settleAmount) {
         this.id = id;
         this.role = role;
         this.nickname = nickname;
@@ -46,6 +52,8 @@ public class PartyMemberDTO {
         this.profileImage = profileImage;
         this.isPaid = isPaid;
         this.brix = brix;
+        this.paidAmount = paidAmount;
+        this.settleAmount = settleAmount;
     }
 
     public static PartyMemberDTO from(PartyMember partyMember) {
@@ -59,6 +67,23 @@ public class PartyMemberDTO {
                 .profileImage(partyMember.getMember().getImage())
                 .isPaid(partyMember.getIsPaid())
                 .brix(partyMember.getMember().getBrix())
+                .build();
+
+    }
+
+    public static PartyMemberDTO fromMe(PartyMember partyMember) {
+
+        return PartyMemberDTO.builder()
+                .id(partyMember.getMember().getId())
+                .role(partyMember.getRole())
+                .nickname(partyMember.getMember().getNickname())
+                .gender(partyMember.getMember().getGender())
+                .ageGroup(partyMember.getMember().getAgeGroup())
+                .profileImage(partyMember.getMember().getImage())
+                .isPaid(partyMember.getIsPaid())
+                .brix(partyMember.getMember().getBrix())
+                .paidAmount(partyMember.getPaidAmount())
+                .settleAmount(partyMember.getSettleAmount())
                 .build();
 
     }
