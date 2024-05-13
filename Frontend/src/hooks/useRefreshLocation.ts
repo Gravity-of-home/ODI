@@ -1,5 +1,5 @@
 import LatLngAddstore from '@/stores/useLatLngAddStore';
-import usePartyStore from '@/stores/usePartyStore';
+import { toast } from 'react-toastify';
 // import { distance } from '../Pages/util/calc';
 
 interface PositionOptions {
@@ -43,7 +43,7 @@ function watchPositionHook() {
   }
 
   function error(err: { code: number; message: string }) {
-    alert('ERROR(' + err.code + '): ' + err.message);
+    console.log('ERROR(' + err.code + '): ' + err.message);
   }
 
   const options: Options | undefined = {
@@ -54,7 +54,7 @@ function watchPositionHook() {
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(success, error, options);
   } else {
-    alert('위치정보 사용 불가능');
+    toast.error('현위치 조회에 실패했습니다.');
   }
 }
 

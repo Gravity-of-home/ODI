@@ -6,16 +6,18 @@ import AIRPORT from '@/assets/image/icons/AIRPORT.png';
 import TRAVEL from '@/assets/image/icons/TRAVEL.png';
 import RESERVIST from '@/assets/image/icons/RESERVIST.png';
 
-// NOTE :  바텀시트가 최대로 높이 올라갔을 때의 y 값
-export const MIN_Y = 64 - 53;
 // NOTE : 바텀시트가 최소로 내려갔을 때의 y 값
-export const MAX_Y = window.innerHeight - 215;
+// export const BOTTOM_SHEET_MIN_Y = 64 - 53;
+// NOTE :  바텀시트가 최대로 높이 올라갔을 때의 y 값
+// export const BOTTOM_SHEET_MAX_Y = window.innerHeight - 215;
 // NOTE 바텀시트의 세로 길이
-export const BOTTOM_SHEET_HEIGHT = window.innerHeight + 200;
+// export const BOTTOM_SHEET_HEIGHT = window.innerHeight + 200;
 // NOTE : 윈도우의 높이
-export const WINDOWHEIGHT = window.innerHeight;
+export const WINDOW_HEIGHT = window.innerHeight;
 // NOTE : 상단 헤더의 높이
 export const HEADER_HEIGHT = 64;
+
+export const DRAWER_HEIGHT = 200;
 // NOTE : 카테고리 모음
 export const Category = [
   {
