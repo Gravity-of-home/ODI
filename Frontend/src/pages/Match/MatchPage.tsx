@@ -8,10 +8,19 @@ const MatchPage: React.FC = () => {
   //   const [messges, setMessages] = useState([]);
   const { id, name, nickname, email, ageGroup, gender, image, brix, logoutUser, Logout } =
     userStore();
+  
+    // 상태 생성
+    const [depName, setDepName] = useState('');
+    const [depLon, setDepLon] = useState('');
+    const [depLat, setDepLat] = useState('');
+    const [arrName, setArrName] = useState('');
+    const [arrLon, setArrLon] = useState('');
+    const [arrLat, setArrLat] = useState('');
+
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(
-        `/sub/matchResult`,
+        `/sub/matchResult/${id}`,
         message => {
           console.log(JSON.parse(message.body));
 
@@ -30,16 +39,14 @@ const MatchPage: React.FC = () => {
   const handleSendMessage = () => {
     if (client && client.connected) {
       client.publish({
-        destination: `/pub/match/3`,
+        destination: `/pub/match/${id}`,
         body: JSON.stringify({
-          content: {
-            depName: '미사역',
-            depLon: '127.19267443618465',
-            depLat: '37.563028890747944',
-            arrName: '하남스타필드',
-            arrLon: '127.22375912402354',
-            arrLat: '37.54550375661386',
-          },
+          depName,
+          depLon,
+          depLat,
+          arrName,
+          arrLon,
+          arrLat,
         }),
         headers: {
           token: `${getCookie('Authorization')}`,
@@ -52,8 +59,14 @@ const MatchPage: React.FC = () => {
 
   return (
     <div className='flex flex-col'>
-      <button onClick={handleSendMessage}>PUB 하기</button>
-    </div>
+    <input type="text" value={depName} onChange={e => setDepName(e.target.value)} placeholder="출발지 이름" />
+    <input type="text" value={depLon} onChange={e => setDepLon(e.target.value)} placeholder="출발지 경도" />
+    <input type="text" value={depLat} onChange={e => setDepLat(e.target.value)} placeholder="출발지 위도" />
+    <input type="text" value={arrName} onChange={e => setArrName(e.target.value)} placeholder="도착지 이름" />
+    <input type="text" value={arrLon} onChange={e => setArrLon(e.target.value)} placeholder="도착지 경도" />
+    <input type="text" value={arrLat} onChange={e => setArrLat(e.target.value)} placeholder="도착지 위도" />
+    <button onClick={handleSendMessage}>PUB 하기</button>
+  </div>
   );
 };
 
