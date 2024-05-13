@@ -72,7 +72,7 @@ public class MatchService {
 
         Set<String> depResult = redisTemplate.opsForGeo()
                 .radius(departuresKey,
-                        new Circle(new Point(matchRequestDTO.getDepLon(), matchRequestDTO.getDepLat()), new Distance(1, Metrics.KILOMETERS)),
+                        new Circle(new Point(matchRequestDTO.getDepLon(), matchRequestDTO.getDepLat()), new Distance(1.0, Metrics.KILOMETERS)),
                         RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
                                 .includeDistance()
                                 .includeCoordinates())
@@ -92,7 +92,7 @@ public class MatchService {
 
         Set<String> arrResult = redisTemplate.opsForGeo()
                 .radius(arrivalsKey,
-                        new Circle(new Point(matchRequestDTO.getArrLon(), matchRequestDTO.getArrLat()), new Distance(1, Metrics.KILOMETERS)),
+                        new Circle(new Point(matchRequestDTO.getArrLon(), matchRequestDTO.getArrLat()), new Distance(1.0, Metrics.KILOMETERS)),
                         RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
                                 .includeDistance()
                                 .includeCoordinates())
@@ -219,7 +219,7 @@ public class MatchService {
         Long count1 = redisTemplate.opsForGeo().remove(depKey, memberSequence);
         log.info("출발지에서 {}의 위치 삭제 : {}", memberSequence, count1);
 
-        Long count2 = redisTemplate.opsForGeo().remove(arrKey, memberId);
+        Long count2 = redisTemplate.opsForGeo().remove(arrKey, memberSequence);
         log.info("도착지에서 {}의 위치 삭제 : {}", memberId, count2);
 
         // Redis에서 순서 정보 삭제
