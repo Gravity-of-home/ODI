@@ -6,6 +6,8 @@ import imageCompression from 'browser-image-compression';
 import { getCookie } from '@/utils/CookieUtil';
 import { useWebSocket } from '@/context/webSocketProvider';
 import { IUser } from '@/types/Chat';
+import SettlementFailModal from './SettlementFailModal';
+import SettlementCheckModal from './SettlementCheckModal';
 
 interface INavBarProps {
   title: string;
@@ -33,10 +35,22 @@ const NavBar: React.FC<INavBarProps> = ({
   const { client, isConnected } = useWebSocket();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettleCheckModalOpen, setIsSettleCheckModalOpen] = useState(false);
+  const [isSettleFailModalOpen, setIsSettleFailModalOpen] = useState(false);
   const toggleModal = () => setIsModalOpen(!isModalOpen);
-
+  const toggleSettleCheckModal = () => setIsSettleCheckModalOpen(!isSettleCheckModalOpen);
+  const toggleSettleFailModal = () => setIsSettleFailModalOpen(!isSettleFailModalOpen);
   const [amount, setAmount] = useState<number>(0);
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
+
+  const stateComponents = {
+    GATHERING: <div className='badge badge-primary badge-outline'>모집중</div>,
+    SETTLING: <div className='badge badge-primary badge-outline'>정산중</div>,
+    COMPLETED: <div className='badge badge-error badge-outline'>모집마감</div>,
+    SETTLED: <div className='badge badge-error badge-outline'>정산완료</div>,
+  };
+
+  let stateComponent = stateComponents[state as keyof typeof stateComponents];
 
   function sendSettlementMessage() {
     if (client && client.connected) {
@@ -59,8 +73,8 @@ const NavBar: React.FC<INavBarProps> = ({
 
   async function handleImageUpload(event: File) {
     const imageFile = event;
-    console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
-    console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+    // console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
+    // console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
 
     const options = {
       maxSizeMB: 1,
@@ -69,8 +83,8 @@ const NavBar: React.FC<INavBarProps> = ({
     };
     try {
       const compressedFile = await imageCompression(imageFile, options);
-      console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
-      console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
+      // console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
+      // console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
       return compressedFile;
     } catch (error) {
       console.log(error);
@@ -99,16 +113,6 @@ const NavBar: React.FC<INavBarProps> = ({
       setImageFile(undefined);
     }
   };
-  let stateComponent;
-  if (state === 'GATHERING') {
-    stateComponent = <div className='badge badge-primary badge-outline'>모집중</div>;
-  } else if (state === 'SETTLING') {
-    stateComponent = <div className='badge badge-primary badge-outline'>정산중</div>;
-  } else if (state === 'COMPLETED') {
-    stateComponent = <div className='badge badge-error badge-outline'>모집마감</div>;
-  } else if (state === 'SETTLED') {
-    stateComponent = <div className='badge badge-error badge-outline'>정산완료</div>;
-  }
   function goDetail() {
     navigate(`/chat/detail/${partyId}`);
   }
@@ -162,8 +166,13 @@ const NavBar: React.FC<INavBarProps> = ({
         }
       })
       .catch(err => {
-        toast.error(err.response.data.message);
         console.error(err);
+        if (err.response.data.status === 402) {
+          console.log(isSettleFailModalOpen);
+          toggleSettleFailModal();
+        } else {
+          toast.error(err.response.data.message);
+        }
       });
     fetchData();
   };
@@ -198,22 +207,21 @@ const NavBar: React.FC<INavBarProps> = ({
           </p>
           <p>{departuresDate}</p>
         </div>
-        <div className='divider mb-10'></div>
+        <div className='divider mb-2'></div>
       </div>
-      <div className='mt-1'>
-        {state === 'COMPLETED' && (
-          <div onClick={toggleModal} className='btn btn-block btn-primary'>
-            <p className='font-bold text-white'>1/N 정산요청하기</p>
-            <div className='divider mb-20'></div>
-          </div>
-        )}
-        {state === 'SETTLING' && me.isPaid === false && (
-          <div onClick={chargeFee} className='btn btn-block bg-red-500'>
-            <p>1/N 정산하기</p>
-            <div className='divider mb-20'></div>
-          </div>
-        )}
-      </div>
+
+      {state === 'COMPLETED' && (
+        <div onClick={toggleModal} className='mt-1 btn btn-block btn-primary'>
+          <p className='font-bold text-white'>1/N 정산요청하기</p>
+          <div className='divider'></div>
+        </div>
+      )}
+      {state === 'SETTLING' && me.isPaid === false && (
+        <div onClick={toggleSettleCheckModal} className='mt-1 btn btn-block btn-accent'>
+          <p className='font-bold text-xl text-white'>정산하기</p>
+          <div className='divider'></div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className='modal modal-open'>
@@ -252,6 +260,17 @@ const NavBar: React.FC<INavBarProps> = ({
             </div>
           </div>
         </div>
+      )}
+      {isSettleFailModalOpen && (
+        <SettlementFailModal onClose={() => setIsSettleFailModalOpen(false)} />
+      )}
+      {isSettleCheckModalOpen && (
+        <SettlementCheckModal
+          beforeCharge={10000}
+          now={1000}
+          onClose={() => setIsSettleCheckModalOpen(false)}
+          chargeFee={chargeFee}
+        />
       )}
     </div>
   );
