@@ -99,7 +99,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/party-boards',
+    path: '/party',
     element: (
       <AuthWrapper>
         <PartyCreatePage />
@@ -107,7 +107,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: 'party-boards/departure',
+    path: 'party/departure',
     element: (
       <AuthWrapper>
         <SetDeparture />
@@ -115,7 +115,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: 'party-boards/arrival',
+    path: 'party/arrival',
     element: (
       <AuthWrapper>
         <SetArrival />

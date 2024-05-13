@@ -190,7 +190,7 @@ const MapRef = () => {
           <div
             className='w-[80%] h-[70%] bg-OD_PURPLE flex justify-center items-center font-semibold text-[20px] text-white rounded-xl hover:bg-OD_GREEN hover:text-black'
             onClick={() => {
-              nav('/party-boards', { replace: true });
+              nav('/party', { replace: true });
             }}>
             설정완료
           </div>

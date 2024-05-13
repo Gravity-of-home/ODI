@@ -28,7 +28,7 @@ const MapRef = () => {
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
 
   const goCreateParty = () => {
-    nav('/party-boards');
+    nav('/party');
   };
 
   const successReq = () => {
