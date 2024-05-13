@@ -6,6 +6,7 @@ import com.homegravity.Odi.global.jwt.handler.CustomSuccessHandler;
 import com.homegravity.Odi.global.jwt.repository.RefreshRepository;
 import com.homegravity.Odi.global.jwt.util.JWTUtil;
 import com.homegravity.Odi.global.oauth2.service.CustomOAuth2UserService;
+import com.homegravity.Odi.global.security.filter.PathFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +20,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.util.Collections;
 
@@ -34,6 +37,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final UserDetailsService userDetailsService;
     private final JWTFilter jwtFilter;
+    private final PathFilter pathFilter;
     private final CustomLogoutFilter logoutFilter;
 
     @Value("${FRONT_BASE_URL}")
@@ -67,6 +71,8 @@ public class SecurityConfig {
                         .successHandler(customSuccessHandler))  // OAuth 2.0 로그인 성공 후에 수행될 커스텀 핸들러
                 // 로그인 후에 JWTFilter로 검증
                 .addFilterAfter(jwtFilter, OAuth2LoginAuthenticationFilter.class)
+                //
+                .addFilterAfter(pathFilter, BasicAuthenticationFilter.class)
                 // 로그아웃
                 .addFilterBefore(logoutFilter, LogoutFilter.class)
                 // RESTful API
