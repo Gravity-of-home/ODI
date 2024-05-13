@@ -25,7 +25,9 @@ const render = (status: Status) => {
 
 const GoogleMap = () => {
   return (
-    <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
+    <>
+      <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
+    </>
   );
 };
 

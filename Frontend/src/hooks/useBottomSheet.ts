@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { MIN_Y, MAX_Y } from '@/constants/constants.ts';
+// import { BOTTOM_SHEET_MIN_Y, BOTTOM_SHEET_MAX_Y } from '@/constants/constants.ts';
 
 interface BottomSheetMetrics {
   touchStart: {
@@ -14,6 +14,11 @@ interface BottomSheetMetrics {
 }
 
 export default function useBottomSheet() {
+  // let MIN_Y = BOTTOM_SHEET_MIN_Y;
+  let MIN_Y = window.innerHeight * 0.2;
+  // let MAX_Y = BOTTOM_SHEET_MAX_Y;
+  let MAX_Y = window.innerHeight * 0.9;
+
   const sheet = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);
 
@@ -30,19 +35,23 @@ export default function useBottomSheet() {
   });
 
   useEffect(() => {
-    // 컨텐츠 영역 터치시 바텀시트가 올라가지 않도록
+    // NOTE : 사용자가 BottomSheet를 움직일 수 있는지 판단하는 함수
     const canUserMoveBottomSheet = () => {
       const { touchMove, isContentAreaTouched } = metrics.current;
-
-      if (isContentAreaTouched) {
+      // NOTE : ScrollTop이란 컨텐츠 영역의 스크롤 위치를 나타냄
+      const scrollTop = content.current!.scrollTop;
+      // NOTE : 바텀시트에서 컨텐츠 영역이 아닌 부분을 터치하면 바텀시트를 움직인다
+      if (isContentAreaTouched && scrollTop > 0) {
         return false;
       }
 
       if (sheet.current!.getBoundingClientRect().y !== MIN_Y) {
+        console.log('Y', touchMove.movingDirection);
         return true;
       }
 
       if (touchMove.movingDirection === 'down') {
+        console.log('L', content.current!.scrollTop);
         return content.current!.scrollTop <= 0;
       }
       return false;
@@ -63,11 +72,12 @@ export default function useBottomSheet() {
       }
 
       if (touchMove.prevTouchY === 0) {
-        // 맨 처음 앱 시작하고 시작시
+        // NOTE : 맨 처음 홈 화면 진입시
         touchMove.prevTouchY = touchStart.touchY;
       }
 
-      // 방향 설정
+      // NOTE : 사용자가 어느 방향으로 움직이는지 판단
+      // NOTE : 사용자가 아래로 내리면 down, 위로 올리면 up
       if (touchMove.prevTouchY < currentTouch.clientY) {
         touchMove.movingDirection = 'down';
       }
@@ -77,7 +87,7 @@ export default function useBottomSheet() {
       }
 
       if (canUserMoveBottomSheet()) {
-        // e.preventDefault();
+        e.preventDefault();
         const touchOffset = currentTouch.clientY - touchStart.touchY;
         let nextSheetY = touchStart.sheetY + touchOffset;
 
@@ -104,7 +114,7 @@ export default function useBottomSheet() {
 
       if (currentSheetY !== MIN_Y) {
         if (touchMove.movingDirection === 'down' && content.current!.scrollTop <= 0) {
-          sheet.current!.style.setProperty('transform', 'translateY(0)');
+          sheet.current!.style.setProperty('transform', `translateY(${0}px)`);
         }
 
         if (touchMove.movingDirection === 'up') {
@@ -156,6 +166,22 @@ export default function useBottomSheet() {
     };
   };
 
+  const handleDown = () => {
+    sheet.current!.style.setProperty('transform', `translateY(${MAX_Y}px)`);
+    // metrics 초기화.
+    metrics.current = {
+      touchStart: {
+        sheetY: 0,
+        touchY: 0,
+      },
+      touchMove: {
+        prevTouchY: 0,
+        movingDirection: 'none',
+      },
+      isContentAreaTouched: false,
+    };
+  };
+
   useEffect(() => {
     const handleTouchStart = () => {
       metrics.current!.isContentAreaTouched = true;
@@ -166,5 +192,5 @@ export default function useBottomSheet() {
     };
   }, []);
 
-  return { sheet, content, handleUp };
+  return { sheet, content, handleUp, handleDown };
 }
