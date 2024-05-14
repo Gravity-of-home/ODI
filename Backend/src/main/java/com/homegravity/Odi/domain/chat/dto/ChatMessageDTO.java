@@ -36,8 +36,8 @@ public class ChatMessageDTO {
 
     @Builder
     public ChatMessageDTO(Long partyId, String roomId, String senderImage, String senderNickname, String content, String sendTime, MessageType type) {
-        this.partyId=partyId;
-        this.roomId=roomId;
+        this.partyId = partyId;
+        this.roomId = roomId;
         this.senderImage = senderImage;
         this.senderNickname = senderNickname;
         this.content = content;

@@ -13,7 +13,7 @@ const useUserStore = create(
   persist<IUserState>(
     set => ({
       isLogin: false,
-      id: '',
+      id: 0,
       name: '',
       gender: '',
       email: '',
@@ -54,7 +54,7 @@ const useUserStore = create(
         }),
       logoutUser: () => {
         set({
-          id: '',
+          id: 0,
           name: '',
           gender: '',
           email: '',

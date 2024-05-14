@@ -82,3 +82,9 @@ cloud:
       auto: false
     stack:
       auto: false
+
+# Websocket 로그
+logging:
+  level:
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG

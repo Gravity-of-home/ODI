@@ -1,8 +1,8 @@
 package com.homegravity.Odi.domain.party.service;
 
-import com.homegravity.Odi.domain.chat.dto.ChatRoomDTO;
 import com.homegravity.Odi.domain.chat.repository.ChatRoomRepository;
 import com.homegravity.Odi.domain.map.service.MapService;
+import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
 import com.homegravity.Odi.domain.party.dto.PartyDTO;
@@ -291,7 +291,7 @@ public class PartyService {
         if (!partyRequestDTO.getContent().equals("")) {
             party.updateContent(partyRequestDTO.getContent());
         }
-        
+
         partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
         return party.getId();
     }
@@ -314,7 +314,7 @@ public class PartyService {
         }
 
         // 정산완료 여부 확인
-        if(party.getState() != StateType.SETTLED && party.getState() != StateType.GATHERING ) {
+        if (party.getState() != StateType.SETTLED && party.getState() != StateType.GATHERING) {
             throw new BusinessException(ErrorCode.PARTY_SETTLEMENT_NOT_COMPLETED, "삭제할 수 없는 파티입니다.");
         }
 
@@ -339,11 +339,32 @@ public class PartyService {
 
         // 파티장 정보
         PartyMemberDTO organizer = PartyMemberDTO.from(partyMemberRepository.findOrganizer(party)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage())));
-        
+                .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage())));
+
         // 파티원 정보
         List<PartyMemberDTO> participants = partyMemberRepository.findAllParticipant(party, member);
 
         return PartyChatInfoResponseDTO.of(party, me, organizer, participants);
+    }
+
+    // TODO: 매치 파티 생성
+    @Transactional
+    public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) {
+
+        Party party = partyRepository.save(Party.of(requestDTO1));
+//        partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
+
+        Member organizer = memberRepository.findById(member1).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+        Member participant = memberRepository.findById(member2).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+
+        // partyMember 저장
+        partyMemberRepository.save(PartyMember.of(RoleType.ORGANIZER, false, party, organizer));
+        partyMemberRepository.save(PartyMember.of(RoleType.PARTICIPANT, false, party, participant));
+
+        // party board stats 저장
+        PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0);
+        partyBoardStats.updateParty(party);
+
+        return party.getId();
     }
 }

@@ -86,7 +86,11 @@ public enum ErrorCode {
     // Settlement
     PARTY_STATE_TYPE_ERROR(400, "요청에 부합하지 않는 파티 상태 입니다."),
     POINT_LACK_ERROR(402, "포인트가 부족합니다."),
-    PARTY_SETTLEMENT_NOT_COMPLETED(400, "파티 정산이 완료되지 않았습니다.")
+    PARTY_SETTLEMENT_NOT_COMPLETED(400, "파티 정산이 완료되지 않았습니다."),
+
+    // Match
+    MATCH_ALREADY_EXIST(200, "이미 진행 중인 매칭이 있습니다."),
+
     ;
     /**
      * ******************************* Error Code Field ***************************************
