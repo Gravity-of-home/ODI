@@ -9,6 +9,8 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import static com.homegravity.Odi.domain.member.entity.QMember.member;
+
 @Slf4j
 @Repository
 @RequiredArgsConstructor
@@ -17,9 +19,14 @@ public class MatchRepository {
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
 
+    // 요청 순서를 Redis에 추가
+    public void addOrders(String memberId, String sequence) {
+        redisTemplate.opsForHash().put("match_orders", memberId, sequence);
+    }
+
     // 위치 정보를 Redis에 추가
-    public void addLocation(String key, double lat, double lon, String memberInfo) {
-        redisTemplate.opsForGeo().add(key, new Point(lon, lat), memberInfo);
+    public void addLocation(String key, double lat, double lon, String memberId) {
+        redisTemplate.opsForGeo().add(key, new Point(lon, lat), memberId);
     }
 
     // 사용자 요청 정보를 Redis에 추가
@@ -34,23 +41,32 @@ public class MatchRepository {
         return objectMapper.readValue(matchRequestJson, MatchRequestDTO.class);
     }
 
-    // 매칭 요청 삭제
-    public void removeMatch(String memberSequence) {
+    public Long getOrders(String memberId) {
+        return (Long) redisTemplate.opsForHash().get("match_orders", memberId);
+    }
 
-        String memberId = memberSequence.split("_")[0];
+    // 매칭 요청 삭제
+    public void removeMatch(String memberId) {
+
+//        String memberId = memberSequence.split("_")[0];
 
         // Redis에서 매칭 요청 정보 삭제
-        redisTemplate.opsForHash().delete("match_requests", memberId);
+        Long a = redisTemplate.opsForHash().delete("match_requests", memberId);
+
 
         // Redis에서 위치 정보 삭제
         String depKey = "departures";
         String arrKey = "arrivals";
-        redisTemplate.opsForGeo().remove(depKey, memberSequence);
-        redisTemplate.opsForGeo().remove(arrKey, memberSequence);
+        Long b = redisTemplate.opsForGeo().remove(depKey, memberId);
+        Long c = redisTemplate.opsForGeo().remove(arrKey, memberId);
 
         // Redis에서 순서 정보 삭제
-        String sequenceKey = "member_sequence";
-        redisTemplate.delete(sequenceKey + ":" + memberId);
+        Boolean d = redisTemplate.delete("member:" + memberId);
+
+        // Redis에서 요청 순서 정보 삭제
+        Long e = redisTemplate.opsForHash().delete("match_orders", memberId);
+
+        log.info("삭제 로직 확인 === dto 삭제 : {}, 위치정보 삭제 {}, {}, 시퀀스 삭제: {}, 순서 정보 삭제: {}", a, b, c, d, e);
 
     }
 
