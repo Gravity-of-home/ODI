@@ -225,6 +225,23 @@ const MapRef = () => {
           console.log(JSON.parse(message.body));
           const newMessage = JSON.parse(message.body);
           console.log(newMessage.type);
+
+          switch (newMessage.type) {
+            case 'MATCH_SUCCESS':
+              console.log(newMessage);
+              setIsLoading(false);
+              break;
+            case 'MATCH_NOT_FOUND':
+              // 아무것도 안온다 찾는중 띄우기 로..딩~
+              break;
+            case 'ALREADY_REQUEST':
+              // 아무것도 안온다. 이미 요청했을때 온다.
+              // 1. 브라우저 다르게 들어가면, 아이디 지우기 보내기
+              // 2. 이미 요청했다고 알림창 띄우기
+              // 매칭 페이지 끄기
+              closeAutoMatchModal();
+              break;
+          }
         },
         {
           token: `${getCookie('Authorization')}`,
