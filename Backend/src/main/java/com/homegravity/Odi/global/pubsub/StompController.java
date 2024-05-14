@@ -53,12 +53,13 @@ public class StompController {
      * websocket "/pub/notification/{receiver-id}"로 들어오는 메시징을 처리한다.
      */
     @MessageMapping("/notification/{receiver-id}")
-    public void message(@PathVariable(value = "receiver-id") Long receiverId, NotificationDTO message) {
-        Member receiver = memberRepository.findById(receiverId)
+    public void message(@PathVariable(value = "receiver-id") Long receiverId, NotificationDTO message, @Header("token") String token) {
+        Member sender = memberRepository.findById(Long.valueOf(jwtUtil.getId(token)))
                 .orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
-        log.info("{}", receiver.getNickname());
-        // 로그인 회원 정보로 대화명 설정
+        // 알림 받는 사람 설정
         message.setReceiverId(receiverId);
+        // 알림 보낸 사람 설정
+        message.setSenderNickname(sender.getNickname());
         message.setSendTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         // Websocket에 발행된 메시지를 redis로 발행(publish)
         log.info("알림pub!!!!!!!!!! {}", message.getSendTime());
