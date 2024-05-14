@@ -49,25 +49,17 @@ const PartyDetailPage = () => {
         nickname: '',
         gender: '',
         ageGroup: '',
+        brix: 30,
         profileImage: '',
         isPaid: false,
       },
-      {
-        id: 0,
-        role: '',
-        nickname: '',
-        gender: '',
-        ageGroup: '',
-        profileImage: '',
-        isPaid: true,
-      },
     ],
-
     guests: [
       {
         id: 0,
         role: '0',
         nickname: '',
+        brix: 30,
         gender: '0',
         ageGroup: '',
         profileImage: '',
@@ -82,6 +74,8 @@ const PartyDetailPage = () => {
   });
 
   const [hostInfo, setHostInfo] = useState({
+    id: 0,
+    brix: 30,
     nickname: '',
     gender: '',
     ageGroup: '',
@@ -249,6 +243,7 @@ const PartyDetailPage = () => {
         roomId={info.roomId}
         fetchData={fetchData}
         hostGender={hostInfo.gender}
+        hostId={hostInfo.id}
         genderRestriction={info.genderRestriction}
       />
     </div>

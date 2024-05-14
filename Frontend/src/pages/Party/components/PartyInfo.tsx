@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // axios 설치 필요
 
 interface IPartyProps {
   category: string;

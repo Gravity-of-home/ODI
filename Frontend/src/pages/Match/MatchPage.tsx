@@ -60,9 +60,8 @@ const MatchPage: React.FC = () => {
   const testPub = () => {
     if (client && client.connected) {
       client.publish({
-        destination: `/pub/notification/`,
+        destination: `/pub/notification/2`,
         body: JSON.stringify({
-          receiverId: 1,
           partyId: 1,
           content: '방씀다 ^^',
           type: 'APPLY',

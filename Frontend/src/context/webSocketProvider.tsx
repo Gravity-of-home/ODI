@@ -4,7 +4,8 @@ import { Client } from '@stomp/stompjs';
 import { getCookie } from '@/utils/CookieUtil';
 import { ViteConfig } from '@/apis/ViteConfig';
 import userStore from '@/stores/useUserStore';
-
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 // 타입 정의
 interface WebSocketContextType {
   client: Client | null;
@@ -24,6 +25,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   const BASE_URI = ViteConfig.VITE_BASE_URL;
   const broker = ViteConfig.VITE_SOCK_URL;
   const { id } = userStore();
+  const nav = useNavigate();
+
+  function GoPartyPage(id: number) {
+    nav(`/party/${id}`);
+  }
+
   useEffect(() => {
     const token = getCookie('Authorization');
     if (!token) {
@@ -47,9 +54,17 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         setIsConnected(true);
         // TODO 개인별 알림 구독
         client.subscribe(
-          `/sub/notification/1`,
-          message => {
-            console.log(JSON.parse(message.body));
+          `/sub/notification/${id}`,
+          msg => {
+            console.log(JSON.parse(msg.body));
+            const message = JSON.parse(msg.body);
+            if (message.type === 'APPLY') {
+              toast.info(`${message.content}`, { onClick: () => GoPartyPage(message.partyId) });
+            } else if (message.type === 'ACCEPT') {
+              toast.info(`${message.content}`, { onClick: () => GoPartyPage(message.partyId) });
+            } else {
+              toast.info(`${message.content}`, {});
+            }
           },
           {
             token: `${getCookie('Authorization')}`,

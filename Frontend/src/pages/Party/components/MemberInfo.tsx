@@ -40,6 +40,23 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
     }
   }, []);
 
+  const handleSendMessage = (type: string, id: number) => {
+    if (client && client.connected) {
+      client.publish({
+        destination: `/pub/notification/${id}`,
+        body: JSON.stringify({
+          partyId: partyId,
+          type: type,
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+
   // 파티 신청 수락
   const acceptEnterParty = (memberId: number, nickname: string) => () => {
     jwtAxios
@@ -60,6 +77,8 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
               token: `${getCookie('Authorization')}`,
             },
           });
+
+          handleSendMessage('ACCEPT', memberId);
         }
         fetchData();
       })
@@ -76,6 +95,18 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
+          client?.publish({
+            destination: `/pub/notification/${memberId}`,
+            body: JSON.stringify({
+              partyId: partyId,
+              // content: `${nickname}님이 파티에 입장하셨습니다`,
+              type: 'REJECT',
+            }),
+            headers: {
+              token: `${getCookie('Authorization')}`,
+            },
+          });
+          handleSendMessage('REJECT', memberId);
         }
         fetchData();
       })
@@ -104,6 +135,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
               token: `${getCookie('Authorization')}`,
             },
           });
+          handleSendMessage('KICK', memberId);
         }
         fetchData();
       })
@@ -122,6 +154,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
           <p>{person.nickname}</p>
           <p>{person.gender === 'M' ? '남' : '여'}</p>
           <p>{person.ageGroup}</p>
+          <p>{person.brix}</p>
         </div>
         <div>
           {role === 'ORGANIZER' && ( // role이 'ORGANIZER'일 때만 버튼 렌더링
@@ -148,6 +181,9 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         <div>{applicant.nickname}</div>
         <div>{applicant.gender === 'M' ? '남' : '여'}</div>
         <div>{applicant.ageGroup}</div>
+        <p className=' rounded p-2' style={{ backgroundColor: '#A75DFC' }}>
+          {applicant.brix}
+        </p>
       </div>
       {role === 'ORGANIZER' && (
         <div>
@@ -169,23 +205,26 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   return (
     <div className='container p-2'>
       <div className='host-info mb-5'>
-        <p className='mb-4 font-bold text-xl'>팟장</p>
-        <div className='flex justify-between content-center'>
-          <div className='flex gap-x-2 items-center'>
-            <img className='rounded-full w-10 h-10' src={hostImgUrl} alt='팟장 이미지' />
-            <p>{hostName}</p>
-            <p>{hostGender === 'M' ? '남' : '여'}</p>
-            <p>{hostAge}</p>
-          </div>
-
-          {role !== 'ORGANIZER' && (
-            <p className=' rounded p-2' style={{ backgroundColor: '#A75DFC' }}>
-              당도자리
-            </p>
-          )}
+        <p className='mb-4 font-bold text-xl'>
+          팟장{' '}
           {role === 'ORGANIZER' && (
-            <p className='content-center text-center w-10 rounded-full bg-blue-100'>나</p>
+            <span className='content-center text-center w-10 rounded-full bg-blue-100'>나</span>
           )}
+        </p>
+
+        <div className='stats shadow'>
+          <div className='stat'>
+            <div className='stat-figure '>
+              <div className='stat-value'>{hostName}</div>
+              <div className='stat-title '>{hostAge}</div>
+              <div className='stat-desc'>{hostGender}</div>
+            </div>
+            <div className='avatar'>
+              <div className='w-16 rounded-full'>
+                <img src={hostImgUrl} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div className='members'>
