@@ -84,19 +84,21 @@ const MapRef = () => {
   // TODO  : 자동 매칭 신청 함수
   const reqAutoMatch = () => {
     setIsLoading(true);
-    setAutoMatchData({
+    const data = {
       depName: departuresName,
       depLon: departuresLocation!.longitude,
       depLat: departuresLocation!.latitude,
       arrName: arrivalsName,
       arrLon: arrivalsLocation!.longitude,
       arrLat: arrivalsLocation!.latitude,
-    });
+    };
+    setAutoMatchData(data);
     try {
       if (matchClient && matchClient.connected) {
+        console.log(data);
         matchClient.publish({
           destination: `/pub/match/${id}`,
-          body: JSON.stringify(autoMatchData),
+          body: JSON.stringify(data),
           headers: {
             token: `${getCookie('Authorization')}`,
           },
