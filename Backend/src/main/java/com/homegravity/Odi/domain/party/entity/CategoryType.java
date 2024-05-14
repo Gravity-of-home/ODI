@@ -7,7 +7,8 @@ public enum CategoryType {
     CONCERT("콘서트"),
     AIRPORT("공항"),
     TRAVEL("여행"),
-    RESERVIST("예비군");
+    RESERVIST("예비군"),
+    MATCHING("자동매칭");
 
     private final String description;
 
