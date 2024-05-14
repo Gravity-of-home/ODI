@@ -15,25 +15,52 @@ import PartyMap from '@/pages/Party/components/PartyMap';
 import SvgDepartureMarker from '@/assets/svg/SvgDepartureMarker';
 import SvgArrivalMarker from '@/assets/svg/SvgArrivalMarker';
 import Front from '@/assets/image/icons/Front.png';
-import SetArrival from '@/pages/Party/components/SetArrival';
+import userStore from '@/stores/useUserStore';
+import { getCookie } from '@/utils/CookieUtil';
+import { useMatchSocket } from '@/context/matchSocketProvider';
+
+interface IAutoMatchData {
+  depName?: string;
+  depLon?: number;
+  depLat?: number;
+  arrName?: string;
+  arrLon?: number;
+  arrLat?: number;
+}
 
 const MapRef = () => {
   const ref = useRef<HTMLDivElement>(null);
   const nav = useNavigate();
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const { currentAdd, currentLat, currentLng } = latLngAddStore();
-  const { departuresName, setDepartures, arrivalsName, setArrivals } = partyStore();
+  const {
+    departuresName,
+    departuresLocation,
+    setDepartures,
+    arrivalsName,
+    arrivalsLocation,
+    setArrivals,
+  } = partyStore();
   const [curLocAdd, setCurLocAdd] = useState<string>('내 위치');
   const autoMatchModalRef = useRef<HTMLDialogElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   // NOTE : 자동 매칭 데이터
-  const [autoMatchData, setAutoMatchData] = useState<any>(null);
+  const { id } = userStore();
+  const [autoMatchData, setAutoMatchData] = useState<IAutoMatchData>({
+    depName: '',
+    depLon: 0,
+    depLat: 0,
+    arrName: '',
+    arrLon: 0,
+    arrLat: 0,
+  });
   const [mapCenter, setMapCenter] = useState<google.maps.LatLng>(
     new google.maps.LatLng({ lat: currentLat, lng: currentLng }),
   );
   const [curMarker, setCurMarker] = useState<google.maps.Marker | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
+  const { matchClient, isMatchConnected, disconnectMatch } = useMatchSocket();
 
   const goCreateParty = () => {
     nav('/party');
@@ -55,15 +82,30 @@ const MapRef = () => {
   };
 
   // TODO  : 자동 매칭 신청 함수
-  const reqAutoMatch = async () => {
+  const reqAutoMatch = () => {
     setIsLoading(true);
+    setAutoMatchData({
+      depName: departuresName,
+      depLon: departuresLocation!.longitude,
+      depLat: departuresLocation!.latitude,
+      arrName: arrivalsName,
+      arrLon: arrivalsLocation!.longitude,
+      arrLat: arrivalsLocation!.latitude,
+    });
     try {
-      // const response = jwtAxios.post('/api/party/auto-match', {});
-      setAutoMatchData?.({});
-      setIsLoading(false);
+      if (matchClient && matchClient.connected) {
+        matchClient.publish({
+          destination: `/pub/match/${id}`,
+          body: JSON.stringify(autoMatchData),
+          headers: {
+            token: `${getCookie('Authorization')}`,
+          },
+        });
+      }
+      // setIsLoading(false);
       setDepartures?.('내 위치', { latitude: currentLat, longitude: currentLng });
       setArrivals?.('도착지를 설정해 주세요.', { latitude: 0, longitude: 0 });
-      closeAutoMatchModal();
+      // closeAutoMatchModal();
     } catch (error) {}
   };
 
@@ -174,6 +216,24 @@ const MapRef = () => {
       setCurMarker(markerInstance);
     }
   }, [ref, mapCenter, map]);
+
+  useEffect(() => {
+    if (matchClient && matchClient.connected) {
+      const subscription = matchClient.subscribe(
+        `/sub/matchResult/${id}`,
+        message => {
+          console.log(JSON.parse(message.body));
+          const newMessage = JSON.parse(message.body);
+          console.log(newMessage.type);
+        },
+        {
+          token: `${getCookie('Authorization')}`,
+        },
+      );
+
+      return () => subscription.unsubscribe();
+    }
+  }, [matchClient, isMatchConnected]);
 
   let autoMatchModal = (
     <>

@@ -15,6 +15,7 @@ import { IPlaceInfo } from '@/types/Party';
 import jwtAxios from '@/utils/JWTUtil';
 import SearchDepartureItem from './SearchDepartureItem';
 import { toast } from 'react-toastify';
+import usePreviousPath from '@/hooks/usePreviousPath';
 
 const MapRef = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -27,6 +28,8 @@ const MapRef = () => {
     new google.maps.LatLng({ lat: currentLat, lng: currentLng }),
   );
   const [departName, setDepartName] = useState<string>('내 위치');
+  // const previousPath = usePreviousPath();
+  // console.log(`Previous path: ${previousPath}`);
 
   const successReq = () => {
     return toast.success('출발지가 설정되었습니다.');

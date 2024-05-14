@@ -21,9 +21,9 @@ interface WebSocketProviderProps {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false); // 연결 상태를 추적하는 상태
+  const { id } = userStore();
   const BASE_URI = ViteConfig.VITE_BASE_URL;
   const broker = ViteConfig.VITE_SOCK_URL;
-  const { id } = userStore();
 
   useEffect(() => {
     const token = getCookie('Authorization');
@@ -60,26 +60,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       onDisconnect: async () => {
         console.log('WebSocket Disconnected');
         setIsConnected(false); // 연결 해제시 상태 업데이트
-        /**
-         * @description
-         * onDisconnect: 연결이 끊어진 경우 호출되는 콜백 함수
-         * 1. 서버 또는 네트워크 문제로 인해 연결이 끊어질 때 호출
-         * 2. 클라이언트에서 명시적으로 연결을 종료할 때
-         * deactivate() 메서드와의 관계
-         * 1. deactivate() 메서드를 호출하면 onDisconnect() 콜백 함수가 호출
-         */
-        try {
-          // QUESTION: 자동 매칭이 아닌 다른 곳에서 요청에도 실행된다.
-          const response = await axios.delete(`${ViteConfig.VITE_BASE_URL}/api/matches/${id}`, {
-            headers: {
-              AUTHORIZATION: `Bearer ${token}`,
-            },
-          });
-
-          console.log(response);
-        } catch (err) {
-          console.error(err);
-        }
       },
       onStompError: frame => {
         console.error('Stomp Error:', frame.headers['message']);
