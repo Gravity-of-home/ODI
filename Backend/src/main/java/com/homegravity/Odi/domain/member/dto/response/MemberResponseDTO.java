@@ -33,8 +33,11 @@ public class MemberResponseDTO {
     @Schema(description = "매너온도")
     private Double brix; //매너온도
 
+    @Schema(description = "포인트")
+    private Integer point;
+
     @Builder
-    private MemberResponseDTO(Long id, String email, String ageGroup, String name, String nickname, String image, String gender, Double brix) {
+    public MemberResponseDTO(Long id, String email, String ageGroup, String name, String nickname, String image, String gender, Double brix, Integer point) {
         this.id = id;
         this.email = email;
         this.ageGroup = ageGroup;
@@ -43,6 +46,7 @@ public class MemberResponseDTO {
         this.image = image;
         this.gender = gender;
         this.brix = brix;
+        this.point = point;
     }
 
     public static MemberResponseDTO from(Member member) {
@@ -55,6 +59,7 @@ public class MemberResponseDTO {
                 .image(member.getImage())
                 .gender(member.getGender())
                 .brix(member.getBrix())
+                .point(member.getPoint())
                 .build();
     }
 }

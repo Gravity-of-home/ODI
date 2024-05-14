@@ -19,6 +19,7 @@
     "@types/sockjs-client": "^1.5.4",
     "axios": "^1.6.8",
     "browser-image-compression": "^2.0.2",
+    "framer-motion": "^11.1.9",
     "react": "^18.2.0",
     "react-cookie": "^7.1.4",
     "react-dom": "^18.2.0",
