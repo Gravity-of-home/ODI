@@ -22,7 +22,7 @@ const MapRef = () => {
       disableDefaultUI: true,
       styles: DarkModeStyle,
       zoom: 16,
-      minZoom: 10,
+      minZoom: 5,
       maxZoom: 18,
       draggable: false,
       restriction: {
