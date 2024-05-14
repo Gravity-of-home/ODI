@@ -47,6 +47,19 @@ spring:
     password: ${ELASTIC_PASSWORD}
     uris: ${ELASTIC_URL}:${ELASTIC_PORT}
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
 springdoc:
   api-docs:
     path: /api/api-docs
@@ -88,3 +101,4 @@ logging:
   level:
     org.springframework.web.socket: DEBUG
     org.springframework.messaging: DEBUG
+
