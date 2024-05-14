@@ -83,19 +83,44 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
     }
   };
 
+  function NewTimeFormat(time: string) {
+    const date = new Date(time);
+    const hour = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    const newTimeString = `${hour}:${minutes}`;
+
+    return newTimeString;
+  }
+
   return (
     <div className='flex flex-col'>
       <div className='mb-12 p-4 flex-grow'>
         {messages.map((msg, index) =>
           msg.type === 'TALK' ? (
-            <div
-              key={index}
-              className={msg.senderNickname === me.nickname ? 'chat chat-end' : 'chat chat-start'}>
-              <div className='chat-header'>
-                <time className='text-xs opacity-50'>{msg.sendTime}</time>
+            msg.senderNickname === me.nickname ? (
+              <div className='chat chat-end'>
+                <div className='chat-header'>{msg.senderNickname}</div>
+                <div className='chat-bubble'>{msg.content}</div>
+                <time className='chat-footer opacity-50'>{NewTimeFormat(msg.sendTime)}</time>
+                {/* <div className='chat-footer opacity-50'>{msg.sendTime}</div> */}
               </div>
-              <div className='chat-bubble'>{msg.content}</div>
-            </div>
+            ) : (
+              <div className='chat chat-start'>
+                <div className='chat-image avatar'>
+                  <div className='w-10 rounded-full'>
+                    <img alt='img' src={msg.senderImage} />
+                  </div>
+                </div>
+                <div className='chat-header'>
+                  {msg.senderNickname}
+                  {/* <time className='text-xs opacity-50'>{msg.sendTime}</time> */}
+                </div>
+                <div className='chat-bubble'>{msg.content}</div>
+                <time className='chat-footer opacity-50'>{NewTimeFormat(msg.sendTime)}</time>
+                {/* <div className='chat-footer opacity-50'>Delivered</div> */}
+              </div>
+            )
           ) : (
             <div key={index} className='flex justify-center my-4'>
               <span className='badge badge-lg'>{msg.content}</span>
