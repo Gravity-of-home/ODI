@@ -3,6 +3,7 @@ package com.homegravity.Odi.domain.match.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.match.dto.MatchResponseDTO;
+import com.homegravity.Odi.domain.match.dto.ResultType;
 import com.homegravity.Odi.domain.match.repository.MatchRepository;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
@@ -43,7 +44,8 @@ public class MatchService {
         // 중복 매칭 검사
         if (Boolean.FALSE.equals(alreadyRequested)) {
             log.info("이미 활성화된 요청이 있습니다: {}", memberId);
-            throw new BusinessException(ErrorCode.MATCH_ALREADY_EXIST, ErrorCode.MATCH_ALREADY_EXIST.getMessage());
+            return MatchResponseDTO.of(ResultType.ALREADY_REQUEST, null, null, null);
+//            throw new BusinessException(ErrorCode.MATCH_ALREADY_EXIST, ErrorCode.MATCH_ALREADY_EXIST.getMessage());
         }
 
         long sequence = getNextSequence("member");
@@ -124,7 +126,7 @@ public class MatchService {
         // 파티 생성
         Long partyId = partyService.createMatchParty(Long.parseLong(firstMember), Long.parseLong(memberId), firstMemberRequest, memberRequest);
 
-        return MatchResponseDTO.of(Long.parseLong(firstMember), Long.parseLong(memberId), partyId);
+        return MatchResponseDTO.of(ResultType.MATCH_SUCCESS, Long.parseLong(firstMember), Long.parseLong(memberId), partyId);
     }
 
     // 사용자 요청 순서 정리

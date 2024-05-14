@@ -8,6 +8,9 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MatchResponseDTO {
 
+    @Schema(description = "결과 타입")
+    private ResultType type;
+
     @Schema(description = "멤버1 id")
     private Long memberId1;
 
@@ -18,18 +21,19 @@ public class MatchResponseDTO {
     private Long partyId;
 
     @Builder
-    private MatchResponseDTO(Long memberId1, Long memberId2, Long partyId) {
+    private MatchResponseDTO(ResultType type, Long memberId1, Long memberId2, Long partyId) {
+        this.type = type;
         this.memberId1 = memberId1;
         this.memberId2 = memberId2;
         this.partyId = partyId;
     }
 
-    public static MatchResponseDTO of(Long memberId1, Long memberId2, Long partyId) {
+    public static MatchResponseDTO of(ResultType type, Long memberId1, Long memberId2, Long partyId) {
         return builder()
+                .type(type)
                 .memberId1(memberId1)
                 .memberId2(memberId2)
                 .partyId(partyId)
                 .build();
     }
-
 }
