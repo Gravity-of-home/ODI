@@ -27,8 +27,8 @@ public class WebSockConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws-stomp").setAllowedOriginPatterns("*")
                 .withSockJS();
 
-//        registry.addEndpoint("/matching").setAllowedOriginPatterns("*")
-//                .withSockJS(); // 자동 매칭 웹소켓 엔드포인트
+        registry.addEndpoint("/matching").setAllowedOriginPatterns("*")
+                .withSockJS(); // 자동 매칭 웹소켓 엔드포인트
     }
 
     @Override
