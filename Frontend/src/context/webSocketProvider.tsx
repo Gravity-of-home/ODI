@@ -3,6 +3,8 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { getCookie } from '@/utils/CookieUtil';
 import { ViteConfig } from '@/apis/ViteConfig';
+import userStore from '@/stores/useUserStore';
+
 // 타입 정의
 interface WebSocketContextType {
   client: Client | null;
@@ -21,6 +23,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   const [isConnected, setIsConnected] = useState(false); // 연결 상태를 추적하는 상태
   const BASE_URI = ViteConfig.VITE_BASE_URL;
   const broker = ViteConfig.VITE_SOCK_URL;
+  const { id } = userStore();
   useEffect(() => {
     const token = getCookie('Authorization');
     if (!token) {
@@ -44,9 +47,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         setIsConnected(true);
         // TODO 개인별 알림 구독
         client.subscribe(
-          '',
+          `/sub/notification/1`,
           message => {
-            console.log(message);
+            console.log(JSON.parse(message.body));
           },
           {
             token: `${getCookie('Authorization')}`,
