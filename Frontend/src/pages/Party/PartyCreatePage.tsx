@@ -219,7 +219,7 @@ const PartyCreatePage = () => {
           <SvgGoBack />
         </div>
         <div className='absolute w-[100%] flex justify-center text-[18px] font-semibold text-white'>
-          출발지 설정
+          파티 생성
         </div>
         <div
           className='absolute w-[15%] h-[80%] right-0 mx-4 bg-OD_PURPLE rounded-lg flex justify-center items-center font-semibold text-white hover:text-OD_YELLOW'

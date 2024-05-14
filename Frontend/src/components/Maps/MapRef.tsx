@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import LatLngAddStore from '@/stores/useLatLngAddStore';
+import latLngAddStore from '@/stores/useLatLngAddStore';
 import DarkModeStyle from './DarkModeStyle';
 import { useNavigate } from 'react-router-dom';
-import { Category, categoryIcons } from '@/constants/constants';
-import SvgGoBack from '@/assets/svg/SvgGoBack';
 import BottomSheet from '@/components/BottomSheet/BottomSheet';
 import partyStore from '@/stores/usePartyStore';
 import CURLOCMARKER from '@/assets/image/icons/CURLOCMARKER.png';
@@ -13,14 +11,24 @@ import jwtAxios from '@/utils/JWTUtil';
 import SvgChat from '@/assets/svg/SvgChat.tsx';
 import SvgNotification from '@/assets/svg/SvgNotification';
 import SvgProfile from '@/assets/svg/SvgProfile';
+import PartyMap from '@/pages/Party/components/PartyMap';
+import SvgDepartureMarker from '@/assets/svg/SvgDepartureMarker';
+import SvgArrivalMarker from '@/assets/svg/SvgArrivalMarker';
+import Front from '@/assets/image/icons/Front.png';
+import SetArrival from '@/pages/Party/components/SetArrival';
 
 const MapRef = () => {
   const ref = useRef<HTMLDivElement>(null);
   const nav = useNavigate();
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const { currentLat, currentLng } = LatLngAddStore();
-  const { setDepartures } = partyStore();
+  const { currentAdd, currentLat, currentLng } = latLngAddStore();
+  const { departuresName, setDepartures, arrivalsName, setArrivals } = partyStore();
   const [curLocAdd, setCurLocAdd] = useState<string>('내 위치');
+  const autoMatchModalRef = useRef<HTMLDialogElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  // NOTE : 자동 매칭 데이터
+  const [autoMatchData, setAutoMatchData] = useState<any>(null);
   const [mapCenter, setMapCenter] = useState<google.maps.LatLng>(
     new google.maps.LatLng({ lat: currentLat, lng: currentLng }),
   );
@@ -29,6 +37,42 @@ const MapRef = () => {
 
   const goCreateParty = () => {
     nav('/party');
+  };
+
+  const openAutoMatchModal = () => {
+    if (autoMatchModalRef.current) {
+      setIsOpen(true);
+      autoMatchModalRef.current.showModal();
+    }
+  };
+
+  // TODO : 자동 매칭 이후 사용
+  const closeAutoMatchModal = () => {
+    if (autoMatchModalRef.current) {
+      setIsOpen(false);
+      autoMatchModalRef.current.close();
+    }
+  };
+
+  // TODO  : 자동 매칭 신청 함수
+  const reqAutoMatch = async () => {
+    setIsLoading(true);
+    try {
+      // const response = jwtAxios.post('/api/party/auto-match', {});
+      setAutoMatchData?.({});
+      setIsLoading(false);
+      setDepartures?.('내 위치', { latitude: currentLat, longitude: currentLng });
+      setArrivals?.('도착지를 설정해 주세요.', { latitude: 0, longitude: 0 });
+      closeAutoMatchModal();
+    } catch (error) {}
+  };
+
+  const goSetDeparture = () => {
+    nav('/party/departure');
+  };
+
+  const goSetArrival = () => {
+    nav('/party/arrival');
   };
 
   const successReq = () => {
@@ -131,6 +175,74 @@ const MapRef = () => {
     }
   }, [ref, mapCenter, map]);
 
+  let autoMatchModal = (
+    <>
+      <dialog
+        ref={autoMatchModalRef}
+        id='my_modal_4'
+        className={`modal ${isOpen ? 'open' : 'close'}`}>
+        <div className='modal-box w-11/12 h-[60%] bg-black'>
+          <h3 className='font-bold text-white text-[20px]'>자동 매칭</h3>
+          <div className='mt-1 border border-gray-500'></div>
+          {isLoading === false ? (
+            <>
+              <div className='h-[40%] mx-8 mt-5 border border-gray-500 rounded-xl flex flex-col items-center justify-center overflow-hidden'>
+                <PartyMap />
+              </div>
+              <div className='h-[30%] mx-8 mt-5'>
+                <div className='w-[100%] h-[50%] flex justify-between'>
+                  <div className='w-[8%] h-[100%]'>
+                    <SvgDepartureMarker width={'100%'} height={'100%'} />
+                  </div>
+                  <div className='w-[85%]' onClick={goSetDeparture}>
+                    <div className='flex justify-between'>
+                      <div className='font-bold mb-1 text-[17px]'>
+                        {!!departuresName ? departuresName : currentAdd}
+                      </div>
+                      <div className='w-[10%] flex justify-center items-center'>
+                        <img src={Front} alt='출발지 설정' />
+                      </div>
+                    </div>
+                    <div className='text-gray-500'>출발지</div>
+                  </div>
+                </div>
+                <div className='w-[100%] h-[50%] flex justify-between'>
+                  <div className='w-[8%] h-[100%]'>
+                    <SvgArrivalMarker width={'100%'} height={'35px'} />
+                  </div>
+                  <div className='w-[85%]' onClick={goSetArrival}>
+                    <div className='flex justify-between'>
+                      <div className='font-bold mb-1 text-[17px]'>{arrivalsName}</div>
+                      <div className='w-[10%] flex justify-center items-center'>
+                        <img src={Front} alt='도착지 설정' />
+                      </div>
+                    </div>
+                    <div className='text-gray-500'>도착지</div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className='w-[100%] h-[100%] flex justify-center items-center'>
+                <span className='loading loading-dots loading-lg'></span>
+              </div>
+            </>
+          )}
+
+          <div className='modal-action'>
+            <form method='dialog'>
+              <button className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5'>✕</button>
+            </form>
+          </div>
+          <button className='btn bg-OD_PURPLE text-white' onClick={reqAutoMatch}>
+            설정하기
+          </button>
+        </div>
+      </dialog>
+    </>
+  );
+
   // NOTE : 서버 데이터로부터 마커 생성하기
   // useEffect(() => {
   //   if (map) {
@@ -211,11 +323,10 @@ const MapRef = () => {
         onClick={goCreateParty}>
         파티 생성
       </button>
+      {'자동 매칭 모달' && autoMatchModal}
       <button
         className='absolute btn z-10 w-[15%] h-[5%] bottom-[20%] right-[3%] bg-black text-white hover:text-OD_GREEN'
-        onClick={() => {
-          console.log('자동 매칭');
-        }}>
+        onClick={openAutoMatchModal}>
         자동 매칭
       </button>
       <BottomSheet />
