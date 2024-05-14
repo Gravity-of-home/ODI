@@ -50,7 +50,7 @@ public class StompController {
     }
 
     /**
-     * websocket "/pub/notification"로 들어오는 메시징을 처리한다.
+     * websocket "/pub/notification/{receiver-id}"로 들어오는 메시징을 처리한다.
      */
     @MessageMapping("/notification/{receiver-id}")
     public void message(@PathVariable(name = "receiver-id") Long receiverId, NotificationDTO message) {
