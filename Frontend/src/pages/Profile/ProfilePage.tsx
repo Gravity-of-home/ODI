@@ -94,20 +94,28 @@ const ProfilePage = () => {
             <button
               className='w-[60%] h-[30%] flex justify-center items-center bg-OD_YELLOW self-end rounded-xl text-black font-semibold text-[18px]'
               onClick={() => {
-                /* 충전하기 페이지 */
+                nav('payments');
               }}>
               충전하기
             </button>
           </div>
           <div className='w-[90%] border-b-2 border-gray-500 mx-5'></div>
-          <div className='w-[100%] h-[10%] flex flex-col justify-evenly my-3 px-5'>
+          <div
+            className='w-[100%] h-[10%] flex flex-col justify-evenly my-3 px-5'
+            onClick={() => {
+              nav('party/history');
+            }}>
             <div className='font-semibold text-white text-[20px]'>이용 내역</div>
             <div className='font-semibold text-white flex justify-end'>
               <SvgGoInside style={{ width: '24px', height: '24px' }} />
             </div>
           </div>
           <div className='w-[90%] border-b-2 border-gray-500 mx-5'></div>
-          <div className='w-[100%] h-[10%] flex flex-col justify-evenly my-3 px-5'>
+          <div
+            className='w-[100%] h-[10%] flex flex-col justify-evenly my-3 px-5'
+            onClick={() => {
+              nav('payments/history');
+            }}>
             <div className='font-semibold text-white text-[20px]'>결제 내역</div>
             <div className='font-semibold text-white flex justify-end'>
               <SvgGoInside style={{ width: '24px', height: '24px' }} />
