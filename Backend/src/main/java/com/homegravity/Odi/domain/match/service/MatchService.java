@@ -1,7 +1,6 @@
 package com.homegravity.Odi.domain.match.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.match.dto.MatchResponseDTO;
 import com.homegravity.Odi.domain.match.repository.MatchRepository;
@@ -48,22 +47,25 @@ public class MatchService {
         }
 
         long sequence = getNextSequence("member");
-        String memberSequence = String.valueOf(memberId + "_" + String.valueOf(sequence));
+
+        // 순서 저장
+        matchRepository.addOrders(String.valueOf(memberId), String.valueOf(sequence));
+//        String memberSequence = String.valueOf(memberId + "_" + String.valueOf(sequence));
 
         // 요청자의 출발지, 목적지 위치 저장
-        matchRepository.addLocation("departures", matchRequestDto.getDepLat(), matchRequestDto.getDepLon(), memberSequence);
-        matchRepository.addLocation("arrivals", matchRequestDto.getArrLat(), matchRequestDto.getArrLon(), memberSequence);
+        matchRepository.addLocation("departures", matchRequestDto.getDepLat(), matchRequestDto.getDepLon(), String.valueOf(memberId));
+        matchRepository.addLocation("arrivals", matchRequestDto.getArrLat(), matchRequestDto.getArrLon(), String.valueOf(memberId));
 
         // 사용자 요청 정보를 저장
         matchRepository.addRequest(String.valueOf(memberId), matchRequestDto);
 
         // 매칭
-        return findNearbyTarget("departures", "arrivals", memberSequence, String.valueOf(memberId), matchRequestDto);
+        return findNearbyTarget("departures", "arrivals", String.valueOf(memberId), matchRequestDto);
 
     }
 
     // 주어진 위치와 반경 내의 사용자를 매칭
-    private MatchResponseDTO findNearbyTarget(String departuresKey, String arrivalsKey, String memberSequence, String memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
+    private MatchResponseDTO findNearbyTarget(String departuresKey, String arrivalsKey, String memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
 
         // 출발지 반경 1km내의 사용자 조회
         Set<String> depResult = redisTemplate.opsForGeo()
@@ -92,8 +94,8 @@ public class MatchService {
                 .collect(Collectors.toSet());
 
         // 자기 자신의 제거
-        depResult.remove(memberSequence);
-        arrResult.remove(memberSequence);
+        depResult.remove(memberId);
+        arrResult.remove(memberId);
         // 두 결과의 교집합 계산
         depResult.retainAll(arrResult);
 
@@ -104,39 +106,39 @@ public class MatchService {
 
         // 가장 먼저 들어온 상대와 매칭
         String firstMember = depResult.stream().min((a, b) -> {
-            Long seqA = getSequence(a, 1);
-            Long seqB = getSequence(b, 1);
+            Long seqA = matchRepository.getOrders(a);
+            Long seqB = matchRepository.getOrders(b);
             return Long.compare(seqA, seqB);
         }).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, "매칭할 사용자가 없습니다."));
 
-        Long firstMemberId = getSequence(firstMember, 0);
-        log.info("가장 먼저 들어온 유저 {} 와 매칭", firstMemberId);
+        log.info("가장 먼저 들어온 유저 {} 와 매칭", firstMember);
 
         // 요청 정보 조회
-        MatchRequestDTO firstMemberRequest = matchRepository.getRequestByMemberId(String.valueOf(firstMemberId));
+        MatchRequestDTO firstMemberRequest = matchRepository.getRequestByMemberId(firstMember);
         MatchRequestDTO memberRequest = matchRepository.getRequestByMemberId(memberId);
 
         // Redis에서 매칭된 사용자 정보 삭제
         matchRepository.removeMatch(firstMember);
-        matchRepository.removeMatch(memberSequence);
+        matchRepository.removeMatch(memberId);
 
         // 파티 생성
-        Long partyId = partyService.createMatchParty(firstMemberId, Long.parseLong(memberId), firstMemberRequest, memberRequest);
+        Long partyId = partyService.createMatchParty(Long.parseLong(firstMember), Long.parseLong(memberId), firstMemberRequest, memberRequest);
 
-        return MatchResponseDTO.of(firstMemberId, Long.parseLong(memberId), partyId);
+        return MatchResponseDTO.of(Long.parseLong(firstMember), Long.parseLong(memberId), partyId);
     }
-
 
     // 사용자 요청 순서 정리
     private long getNextSequence(String keyPrefix) {
         return redisTemplate.opsForValue().increment(keyPrefix + ":sequence", 1);
     }
 
-    // 순서 조회
-    private Long getSequence(String memberInfo, int index) {
-        // memberInfo 형식: "memberId_sequence"
-        String[] parts = memberInfo.split("_");
-        return Long.parseLong(parts[index]); // 시퀀스 번호 추출
+    // 매칭 취소
+    public void cancelMatch(Long memberId) {
+
+        // 유효성 검사
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+        matchRepository.removeMatch(String.valueOf(memberId));
+
     }
 
 }
