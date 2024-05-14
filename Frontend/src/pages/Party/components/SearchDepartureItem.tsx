@@ -20,7 +20,7 @@ const SearchDepartureItem = (item: IPlaceInfo) => {
       latitude: item.geoPoint!.latitude,
       longitude: item.geoPoint!.longitude,
     });
-    nav('/party-boards', { replace: true });
+    nav('/party', { replace: true });
   };
 
   let setDepartureModal = (
