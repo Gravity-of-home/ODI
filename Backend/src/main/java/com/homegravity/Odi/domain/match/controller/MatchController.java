@@ -43,7 +43,7 @@ public class MatchController {
         }
 
         if (responseDTO.getType().equals(ResultType.ALREADY_REQUEST)) {
-            template.convertAndSend("/sub/matchResult/" + responseDTO.getMemberId1(), ResultType.ALREADY_REQUEST);
+            template.convertAndSend("/sub/matchResult/" + memberId, ResultType.ALREADY_REQUEST);
         }
 
     }
