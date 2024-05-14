@@ -9,8 +9,6 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import static com.homegravity.Odi.domain.member.entity.QMember.member;
-
 @Slf4j
 @Repository
 @RequiredArgsConstructor
@@ -47,8 +45,6 @@ public class MatchRepository {
 
     // 매칭 요청 삭제
     public void removeMatch(String memberId) {
-
-//        String memberId = memberSequence.split("_")[0];
 
         // Redis에서 매칭 요청 정보 삭제
         Long a = redisTemplate.opsForHash().delete("match_requests", memberId);
