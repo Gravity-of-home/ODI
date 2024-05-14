@@ -29,6 +29,8 @@ public class MatchController {
     @MessageMapping("/match/{member-id}")
     public void enterMatch(@DestinationVariable(value = "member-id") Long memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
 
+        log.info("요청 정보 : {}", matchRequestDTO.toString());
+
         MatchResponseDTO responseDTO = matchService.createMatch(matchRequestDTO, memberId);
 
         if (responseDTO == null) {
