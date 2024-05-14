@@ -2,6 +2,7 @@ package com.homegravity.Odi.domain.report.controller;
 
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.report.dto.ReportRequestDTO;
+import com.homegravity.Odi.domain.report.service.ReportService;
 import com.homegravity.Odi.global.response.success.ApiResponse;
 import com.homegravity.Odi.global.response.success.SuccessCode;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,10 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ReportController {
 
+    private final ReportService reportService;
+
     @PostMapping()
     public ApiResponse<Void> createReport(@AuthenticationPrincipal Member member, @RequestBody ReportRequestDTO requestDTO) {
 
         /* 신고 생성 로직 호출 */
+        reportService.createReport(member, requestDTO);
         return ApiResponse.of(SuccessCode.REPORT_CREATE_SUCCESS);
     }
 
