@@ -11,18 +11,16 @@ import lombok.Setter;
 @Setter
 public class NotificationDTO {
 
-    @NotNull
     private Long receiverId; // 알림받는 사람 아이디
 
-    @NotNull
     private Long partyId; // 관련 동승글 아이디
 
-    @NotNull
+    private String senderNickname; // 알림 발생시킨 사람 아이디
+
     private String content; // 알림 내용
 
     private String sendTime; // 알림 보낸 시간
 
-    @NotNull
     private NotificationType type; // 알림 타입
 
     @Builder
