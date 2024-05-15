@@ -24,7 +24,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping()
-    public ApiResponse<Void> createReport(@AuthenticationPrincipal Member member, ReportRequestDTO requestDTO, MultipartFile file) {
+    public ApiResponse<Void> createReport(@AuthenticationPrincipal Member member, ReportRequestDTO requestDTO) {
 
         /* 신고 생성 로직 호출 */
         reportService.createReport(member, requestDTO);
