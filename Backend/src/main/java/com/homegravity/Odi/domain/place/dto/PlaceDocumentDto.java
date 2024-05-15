@@ -45,8 +45,11 @@ public class PlaceDocumentDto {
     @Schema(description = "중분류")
     private String subCategory;
 
+    @Schema(description = "버스정류장번호")
+    private Integer busstopNum;
+
     @Builder
-    private PlaceDocumentDto(String id, String placeName, String buildingName, String jibunAddress, String roadNameAddress, Integer postalCode, String sido, String sigungu, LocationPoint geoPoint, String majorCategory, String subCategory) {
+    private PlaceDocumentDto(String id, String placeName, String buildingName, String jibunAddress, String roadNameAddress, Integer postalCode, String sido, String sigungu, LocationPoint geoPoint, String majorCategory, String subCategory, Integer busstopNum) {
         this.id = id;
         this.placeName = placeName;
         this.buildingName = buildingName;
@@ -58,13 +61,14 @@ public class PlaceDocumentDto {
         this.geoPoint = geoPoint;
         this.majorCategory = majorCategory;
         this.subCategory = subCategory;
+        this.busstopNum = busstopNum;
     }
 
     public static PlaceDocumentDto from(PlaceDocument placeDocument) {
 
         return builder()
                 .id(placeDocument.getId())
-                .placeName(placeDocument.getPlaceName())
+                .placeName(placeDocument.getMajorCategory().equals("busstop") ? placeDocument.getBusstopName() : placeDocument.getPlaceName())
                 .buildingName(placeDocument.getBuildingName())
                 .jibunAddress(placeDocument.getJibunAddress())
                 .roadNameAddress(placeDocument.getRoadNameAddress())
@@ -74,6 +78,7 @@ public class PlaceDocumentDto {
                 .geoPoint(LocationPoint.of(placeDocument.getLongitude(), placeDocument.getLatitude()))
                 .majorCategory(placeDocument.getMajorCategory())
                 .subCategory(placeDocument.getSubCategory())
+                .busstopNum(placeDocument.getBusstopNum())
                 .build();
     }
 }
