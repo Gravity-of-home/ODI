@@ -11,7 +11,7 @@ const SettlementFailModal: React.FC<SettlementFailModalProps> = ({ onClose }) =>
   };
   const navigate = useNavigate();
   function goRecharge() {
-    navigate('/charge');
+    navigate('/profile/payments');
   }
   return (
     <div className='modal modal-open' onClick={onClose}>
