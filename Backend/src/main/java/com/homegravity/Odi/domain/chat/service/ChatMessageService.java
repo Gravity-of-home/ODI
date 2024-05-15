@@ -41,9 +41,8 @@ public class ChatMessageService {
         // 채팅방 ID 기반 Party 조회
         Party party = partyRepository.findByRoomIdAndDeletedAtIsNull(roomId)
                 .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
-        ChatMessage lastChatMessage = chatMessageRepository.findTopByIdOrderByCreatedAtDesc(party.getId())
-                .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
-        log.info("마지막 메세지 뭐죠??? {}", lastChatMessage);
-        return ChatMessageDTO.from(lastChatMessage);
+        return chatMessageRepository.findTopByIdOrderByCreatedAtDesc(party.getId())
+                .map(ChatMessageDTO::from)
+                .orElse(null);
     }
 }
