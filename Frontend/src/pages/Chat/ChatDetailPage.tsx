@@ -6,6 +6,7 @@ import ReportModal from './components/ReportModal';
 
 interface IInfo {
   partyId: number;
+  roomId: string;
   title: string;
   currentParticipants: number;
   departuresName: string;
@@ -58,7 +59,7 @@ const ChatDetailPage = () => {
         },
       })
       .then(res => {
-        console.log(res);
+        console.log(res.data.message);
         setInfo(res.data.data);
       })
       .catch(err => {

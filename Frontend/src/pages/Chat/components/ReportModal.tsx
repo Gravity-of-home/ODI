@@ -11,7 +11,6 @@ interface ReportModalProps {
 }
 
 const ReportModal: React.FC<ReportModalProps> = ({ partyId, onClose, reportedId }) => {
-  const navigate = useNavigate();
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
   const content = useRef<HTMLInputElement>(null);
   const [reportType, setReportType] = useState<string>('');
@@ -19,7 +18,6 @@ const ReportModal: React.FC<ReportModalProps> = ({ partyId, onClose, reportedId 
   const handleReportTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setReportType(value);
-    console.log('Report Type:', value); // 상태 업데이트 확인
   };
 
   async function handleImageUpload(event: File) {
@@ -30,9 +28,11 @@ const ReportModal: React.FC<ReportModalProps> = ({ partyId, onClose, reportedId 
     };
     try {
       const compressedFile = await imageCompression(event, options);
-      return compressedFile;
+      const file = new File([compressedFile], event.name, { type: event.type });
+      return file;
     } catch (error) {
       console.log(error);
+      return undefined;
     }
   }
 
@@ -44,7 +44,12 @@ const ReportModal: React.FC<ReportModalProps> = ({ partyId, onClose, reportedId 
     ) {
       try {
         const compressedImage = await handleImageUpload(event.target.files[0]);
-        setImageFile(compressedImage);
+        if (compressedImage) {
+          setImageFile(compressedImage);
+        } else {
+          alert('이미지 압축에 실패했습니다.');
+          setImageFile(undefined);
+        }
       } catch (error) {
         console.error('Error compressing the image:', error);
         alert('Failed to compress image.');
@@ -74,7 +79,8 @@ const ReportModal: React.FC<ReportModalProps> = ({ partyId, onClose, reportedId 
     }
 
     formData.append('content', messageContent);
-    formData.append('reportType', reportType);
+    // formData.append('roomId', roomId);
+    formData.append('type', reportType);
     formData.append('partyId', partyId || '');
     formData.append('reportedId', reportedId.toString());
 
@@ -85,12 +91,13 @@ const ReportModal: React.FC<ReportModalProps> = ({ partyId, onClose, reportedId 
         },
       })
       .then(res => {
-        if (res.data.status === 204) {
+        if (res.data.status === 200) {
           toast.success(res.data.message, {
             pauseOnFocusLoss: false,
             hideProgressBar: true,
             closeOnClick: true,
           });
+          onClose();
         }
       })
       .catch(err => {

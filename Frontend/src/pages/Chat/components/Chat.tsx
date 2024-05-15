@@ -35,7 +35,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
     try {
       const res = await jwtAxios.get(`api/chat/room/${roomId}`);
       const beforeChat = res.data.chatMessages;
-      console.log(beforeChat);
+
       setMessages(prevMessages => [...prevMessages, ...beforeChat]);
     } catch (error) {
       console.error('Error fetching messages:', error);
