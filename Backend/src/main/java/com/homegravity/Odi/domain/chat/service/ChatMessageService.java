@@ -8,11 +8,13 @@ import com.homegravity.Odi.domain.party.respository.PartyRepository;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ChatMessageService {
@@ -39,8 +41,9 @@ public class ChatMessageService {
         // 채팅방 ID 기반 Party 조회
         Party party = partyRepository.findByRoomIdAndDeletedAtIsNull(roomId)
                 .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
-        ChatMessage lastChatMessage = chatMessageRepository.findTopByOrderByCreatedAtDesc()
+        ChatMessage lastChatMessage = chatMessageRepository.findTopByIdOrderByCreatedAtDesc(party.getId())
                 .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
+        log.info("마지막 메세지 뭐죠??? {}", lastChatMessage);
         return ChatMessageDTO.from(lastChatMessage);
     }
 }
