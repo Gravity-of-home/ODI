@@ -17,6 +17,8 @@ import SvgArrivalMarker from '@/assets/svg/SvgArrivalMarker';
 import Front from '@/assets/image/icons/Front.png';
 import userStore from '@/stores/useUserStore';
 import { getCookie } from '@/utils/CookieUtil';
+import axios from 'axios';
+import { ViteConfig } from '@/apis/ViteConfig';
 import { useMatchSocket } from '@/context/matchSocketProvider';
 
 interface IAutoMatchData {
@@ -220,29 +222,54 @@ const MapRef = () => {
   }, [ref, mapCenter, map]);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+
     if (matchClient && matchClient.connected) {
       const subscription = matchClient.subscribe(
         `/sub/matchResult/${id}`,
         message => {
           console.log(JSON.parse(message.body));
           const newMessage = JSON.parse(message.body);
-          console.log(newMessage.type);
+
+          console.log('나는 타입으로 온다.', newMessage.type);
+          console.log('나는 바디로 온다.', newMessage);
 
           switch (newMessage.type) {
+            // switch (newMessage) {
             case 'MATCH_SUCCESS':
-              console.log(newMessage);
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+              }
               setIsLoading(false);
+              console.log('받은거를 처리하자!', newMessage);
               break;
             case 'MATCH_NOT_FOUND':
-              // 아무것도 안온다 찾는중 띄우기 로..딩~
+              console.log('MATCH_NOT_FOUND received, 30초 대기 진행 후 DELETE 요청 전송');
+              timeoutId = setTimeout(async () => {
+                console.log('Timeout reached, sending delete request');
+                try {
+                  const response = await axios.delete(
+                    `${ViteConfig.VITE_BASE_URL}/api/matches/${id}`,
+                    {
+                      headers: {
+                        AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+                      },
+                    },
+                  );
+
+                  console.log('Delete request successful:', response);
+                  setIsLoading(false);
+                } catch (err) {
+                  console.error('Match ID DELETE Request failed:', err);
+                }
+              }, 30000);
               break;
             case 'ALREADY_REQUEST':
-              // 아무것도 안온다. 이미 요청했을때 온다.
-              // 1. 브라우저 다르게 들어가면, 아이디 지우기 보내기
-              // 2. 이미 요청했다고 알림창 띄우기
-              // 매칭 페이지 끄기
               closeAutoMatchModal();
+              toast.error('이미 요청이 진행중입니다!');
               break;
+            default:
+              console.warn('Unknown message type:', newMessage.type);
           }
         },
         {
@@ -250,7 +277,12 @@ const MapRef = () => {
         },
       );
 
-      return () => subscription.unsubscribe();
+      return () => {
+        subscription.unsubscribe();
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
     }
   }, [matchClient, isMatchConnected]);
 

@@ -59,18 +59,18 @@ export const MatchSocketProvider: React.FC<MatchSocketProviderProps> = ({ childr
          * deactivate() 메서드와의 관계
          * 1. deactivate() 메서드를 호출하면 onDisconnect() 콜백 함수가 호출
          */
-        try {
-          // QUESTION: 자동 매칭이 아닌 다른 곳에서 요청에도 실행된다.
-          const response = await axios.delete(`${ViteConfig.VITE_BASE_URL}/api/matches/${id}`, {
-            headers: {
-              AUTHORIZATION: `Bearer ${token}`,
-            },
-          });
+        // try {
+        //   // QUESTION: 자동 매칭이 아닌 다른 곳에서 요청에도 실행된다.
+        //   const response = await axios.delete(`${ViteConfig.VITE_BASE_URL}/api/matches/${id}`, {
+        //     headers: {
+        //       AUTHORIZATION: `Bearer ${token}`,
+        //     },
+        //   });
 
-          console.log(response);
-        } catch (err) {
-          console.error('Match ID DELETE Request', err);
-        }
+        //   console.log(response);
+        // } catch (err) {
+        //   console.error('Match ID DELETE Request', err);
+        // }
       },
       onStompError: frame => {
         console.error('Match Stomp Error:', frame.headers['message']);
