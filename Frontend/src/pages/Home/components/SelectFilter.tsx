@@ -105,6 +105,11 @@ const SelectFilter: React.FC<ISelctFilterProps> = ({
     setDeparturesDate?.('');
   };
 
+  useEffect(() => {
+    // Set default value for distance
+    setDistance?.('distance,asc');
+  }, [setDistance]);
+
   return (
     <>
       <div className='flex justify-between overflow-scroll p-2 border-t-[1px] border-b-[1px] border-gray-700'>
@@ -141,7 +146,6 @@ const SelectFilter: React.FC<ISelctFilterProps> = ({
             className='select select-bordered select-xs'
             value={selectedSort}
             onChange={handleSortChange}>
-            <option value=''>전체</option>
             {distanceOptions.map(option => (
               <option key={option.value} value={option.value}>
                 {option.name}

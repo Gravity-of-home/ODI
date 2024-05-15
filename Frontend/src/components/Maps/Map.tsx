@@ -1,5 +1,5 @@
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
-import MapRef from '@/components/Maps/MapRef.tsx';
+import MapRef from '@/pages/Home/components/MapRef';
 import { ViteConfig } from '@/apis/ViteConfig';
 
 const render = (status: Status) => {

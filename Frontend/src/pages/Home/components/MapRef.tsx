@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import latLngAddStore from '@/stores/useLatLngAddStore';
+import mapStore from '@/stores/useMapStore';
 import DarkModeStyle from './DarkModeStyle';
 import { useNavigate } from 'react-router-dom';
 import BottomSheet from '@/components/BottomSheet/BottomSheet';
@@ -21,6 +22,7 @@ import axios from 'axios';
 import { ViteConfig } from '@/apis/ViteConfig';
 import { categoryIcons } from '@/constants/constants';
 import { useMatchSocket } from '@/context/matchSocketProvider';
+import { IParty } from '@/types/Party';
 
 interface IAutoMatchData {
   depName?: string;
@@ -36,6 +38,7 @@ const MapRef = () => {
   const nav = useNavigate();
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const { currentAdd, currentLat, currentLng } = latLngAddStore();
+  const { setGoogleMap, setLatitude, setLongitude } = mapStore();
   const {
     departuresName,
     departuresLocation,
@@ -48,6 +51,13 @@ const MapRef = () => {
   const autoMatchModalRef = useRef<HTMLDialogElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [mapCenter, setMapCenter] = useState<google.maps.LatLng>(
+    new google.maps.LatLng({ lat: currentLat, lng: currentLng }),
+  );
+  const [curMarker, setCurMarker] = useState<google.maps.Marker | null>(null);
+  const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
+  const { matchClient, isMatchConnected, disconnectMatch } = useMatchSocket();
+  const [partyData, setPartyData] = useState<IParty[]>([]);
   // NOTE : 자동 매칭 데이터
   const { id } = userStore();
   const [autoMatchData, setAutoMatchData] = useState<IAutoMatchData>({
@@ -58,12 +68,6 @@ const MapRef = () => {
     arrLon: 0,
     arrLat: 0,
   });
-  const [mapCenter, setMapCenter] = useState<google.maps.LatLng>(
-    new google.maps.LatLng({ lat: currentLat, lng: currentLng }),
-  );
-  const [curMarker, setCurMarker] = useState<google.maps.Marker | null>(null);
-  const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
-  const { matchClient, isMatchConnected, disconnectMatch } = useMatchSocket();
 
   const goCreateParty = () => {
     nav('/party');
@@ -204,8 +208,7 @@ const MapRef = () => {
         },
       });
       setMap(initialMap);
-
-      setMapCenter(initialMap.getCenter() as google.maps.LatLng);
+      setGoogleMap?.(initialMap);
 
       const markerInstance = new window.google.maps.Marker({
         position: initialMap.getCenter(),
@@ -219,6 +222,13 @@ const MapRef = () => {
       });
 
       setCurMarker(markerInstance);
+
+      google.maps.event.addListener(initialMap, 'dragend', () => {
+        const newCenter = initialMap.getCenter();
+        if (newCenter) {
+          setMapCenter(newCenter);
+        }
+      });
     }
   }, [ref, mapCenter, map]);
 
@@ -232,8 +242,8 @@ const MapRef = () => {
           console.log(JSON.parse(message.body));
           const newMessage = JSON.parse(message.body);
 
-          console.log('나는 타입으로 온다.', newMessage.type);
-          console.log('나는 바디로 온다.', newMessage);
+          console.log('AUTO MATCH MSG TYPE.', newMessage.type);
+          console.log('AUTO MATCH MSG BODY.', newMessage);
 
           switch (newMessage.type) {
             // switch (newMessage) {
@@ -287,6 +297,71 @@ const MapRef = () => {
       };
     }
   }, [matchClient, isMatchConnected]);
+
+  // NOTE : 서버 데이터로부터 마커 생성하기
+  useEffect(() => {
+    const getPartyData = async () => {
+      if (map) {
+        const lat = map.getCenter()?.lat();
+        const lng = map.getCenter()?.lng();
+        setLatitude?.(lat as number);
+        setLongitude?.(lng as number);
+
+        console.log('MAP CENTER', lat, lng);
+        try {
+          const response = await jwtAxios.get(
+            `/api/party-boards?page=0&size=50&sort=distance,asc&isToday=false&departuresDate=&gender=&category=&longitude=${lng}&latitude=${lat}`,
+          );
+
+          const { content } = response.data.data;
+          console.log('MAP PARTY DATA LIST', content);
+          setPartyData(content);
+          updateMarkers(content);
+        } catch (error) {
+          console.error('ERROR GET PARTY DATA', error);
+        }
+      }
+    };
+
+    getPartyData();
+  }, [map, mapCenter]);
+
+  const updateMarkers = (dataList: IParty[]) => {
+    // Clear existing markers
+    markers.forEach(marker => marker.setMap(null));
+    const newMarkers = dataList.map(item => {
+      const marker = new google.maps.Marker({
+        position: new google.maps.LatLng(
+          item.departuresLocation.latitude,
+          item.departuresLocation.longitude,
+        ),
+        map,
+        icon: {
+          url: categoryIcons[item.category as keyof typeof categoryIcons],
+          scaledSize: new google.maps.Size(50, 50),
+        },
+        draggable: false,
+        animation: google.maps.Animation.DROP,
+      });
+
+      // Add click listener to log data
+      marker.addListener('click', () => {
+        console.log(item);
+        nav(`/party/${item.id}`);
+      });
+
+      return marker;
+    });
+
+    setMarkers(newMarkers);
+    // adjustMapBounds(newMarkers);
+  };
+
+  const adjustMapBounds = (newMarkers: google.maps.Marker[]) => {
+    const bounds = new google.maps.LatLngBounds();
+    newMarkers.forEach(marker => bounds.extend(marker.getPosition() as google.maps.LatLng));
+    map!.fitBounds(bounds);
+  };
 
   let autoMatchModal = (
     <>
@@ -356,48 +431,6 @@ const MapRef = () => {
     </>
   );
 
-  // // NOTE : 서버 데이터로부터 마커 생성하기
-  // useEffect(() => {
-  //   if (map) {
-  //     fetch('YOUR_API_ENDPOINT')
-  //       .then(response => response.json())
-  //       .then(dataList => {
-  //         updateMarkers(dataList);
-  //       });
-  //   }
-  // }, [map, mapCenter]);
-
-  // const updateMarkers = (dataList: 타입[]) => {
-  //   // Clear existing markers
-  //   markers.forEach(marker => marker.setMap(null));
-  //   const newMarkers = dataList.map(item => {
-  //     const marker = new google.maps.Marker({
-  //       position: new google.maps.LatLng(item.latitude, item.longitude),
-  //       map,
-  //       icon: {
-  //         url: categoryIcons[item.category],
-  //         scaledSize: new google.maps.Size(35, 35),
-  //       },
-  //     });
-
-  //     // Add click listener to log data
-  //     marker.addListener('click', () => {
-  //       console.log(item);
-  //     });
-
-  //     return marker;
-  //   });
-
-  //   setMarkers(newMarkers);
-  //   adjustMapBounds(newMarkers);
-  // };
-
-  // const adjustMapBounds = (newMarkers: google.maps.Marker[]) => {
-  //   const bounds = new google.maps.LatLngBounds();
-  //   newMarkers.forEach(marker => bounds.extend(marker.getPosition() as google.maps.LatLng));
-  //   map!.fitBounds(bounds);
-  // };
-
   return (
     <div className='w-[100%] h-[100%]'>
       <div className='fixed w-[100%] h-[5%] bg-black z-10 flex items-center'>
@@ -434,13 +467,13 @@ const MapRef = () => {
       </div>
       <div ref={ref} id='map' className='w-[100%] h-[100%]' />
       <button
-        className='absolute btn z-10 w-[15%] h-[5%] bottom-[13%] right-[3%] bg-black text-white hover:text-OD_GREEN'
+        className='absolute btn z-10 w-[15%] h-[5%] bottom-[13%] right-[3%] border-none bg-black text-white hover:text-OD_GREEN'
         onClick={goCreateParty}>
         파티 생성
       </button>
       {'자동 매칭 모달' && autoMatchModal}
       <button
-        className='absolute btn z-10 w-[15%] h-[5%] bottom-[20%] right-[3%] bg-black text-white hover:text-OD_GREEN'
+        className='absolute btn z-10 w-[15%] h-[5%] bottom-[20%] right-[3%] border-none bg-black text-white hover:text-OD_GREEN'
         onClick={openAutoMatchModal}>
         자동 매칭
       </button>
