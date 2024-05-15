@@ -33,7 +33,7 @@ public class Report extends BaseBy {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private ReportStatus reportStatus = ReportStatus.PENDING;
+    private ReportStatus reportStatus;
 
     @Column(name = "attachments")
     private String attachments;
@@ -65,10 +65,11 @@ public class Report extends BaseBy {
         this.resolvedAt = resolvedAt;
     }
 
-    public static Report of (ReportRequestDTO requestDTO, Member reported, Member reporter) {
+    public static Report of(ReportRequestDTO requestDTO, Member reported, Member reporter) {
         return builder()
                 .type(requestDTO.getType())
                 .content(requestDTO.getContent())
+                .reportStatus(ReportStatus.PENDING)
                 .attachments(requestDTO.getAttachments())
                 .reportedMember(reported)
                 .reporterMember(reporter)

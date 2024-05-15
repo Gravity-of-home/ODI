@@ -18,12 +18,15 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
 
+    private final EmailService emailService;
+
     @Transactional
     public void createReport(Member reporter, ReportRequestDTO requestDTO) {
 
-        Member reported = memberRepository.findById(requestDTO.getReportedId()).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
-
+        Member reported = memberRepository.findById(requestDTO.getReportedId()).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage())); // 신고자
         reportRepository.save(Report.of(requestDTO, reported, reporter));
 
+        // 메일 전송
+        emailService.sendReportMessage(requestDTO);
     }
 }
