@@ -46,6 +46,7 @@ public class ChatRoomRepository {
         // 채팅방 ID로 채팅방 목록 모두 조회
         return parties.stream()
                 .map(party -> ChatListDTO.builder()
+                        .partyId(party.getId())
                         .roomId(party.getRoomId())
                         .partyTitle(party.getTitle())
                         .lastMessage(chatMessageService.getLastMessage(party.getRoomId()))
@@ -60,6 +61,7 @@ public class ChatRoomRepository {
         Party party = partyRepository.findByRoomIdAndDeletedAtIsNull(roomId)
                 .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
         return ChatDetailDTO.builder()
+                .partyId(party.getId())
                 .roomId(roomId)
                 .partyTitle(party.getTitle())
                 .chatMessages(chatMessageService.getAllChatMessage(roomId))

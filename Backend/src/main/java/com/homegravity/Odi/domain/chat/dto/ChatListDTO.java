@@ -8,12 +8,14 @@ import lombok.Setter;
 @Setter
 public class ChatListDTO {
 
+    private Long partyId;
     private String roomId;
     private String partyTitle;
     private ChatMessageDTO lastMessage;
 
     @Builder
-    public ChatListDTO(String roomId, String partyTitle, ChatMessageDTO lastMessage) {
+    public ChatListDTO(Long partyId, String roomId, String partyTitle, ChatMessageDTO lastMessage) {
+        this.partyId = partyId;
         this.roomId = roomId;
         this.partyTitle = partyTitle;
         this.lastMessage = lastMessage;
