@@ -99,7 +99,16 @@ public class MatchService {
         depResult.remove(memberId);
         arrResult.remove(memberId);
         // 두 결과의 교집합 계산
+
+        log.info("출발지 결과 : {} === 도착지 결과 : {}", depResult.size(), arrResult.size());
+
         depResult.retainAll(arrResult);
+        log.info("교집합 결과 : {}", depResult.size());
+
+        // 디버깅
+        for(String tmp : depResult) {
+            log.info("교집합 원소 : {}", tmp);
+        }
 
         if (depResult.isEmpty()) {
             log.info("현재 매칭 상대를 찾을 수 없습니다. 잠시 기다려주세요");
