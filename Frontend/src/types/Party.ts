@@ -63,6 +63,7 @@ export interface IInfo {
     id: number;
     role: string;
     nickname: string;
+    brix: number;
     gender: string;
     ageGroup: string;
     profileImage: string;
@@ -73,6 +74,7 @@ export interface IInfo {
     role: string;
     nickname: string;
     gender: string;
+    brix: number;
     ageGroup: string;
     profileImage: string;
     isPaid: boolean;
@@ -85,6 +87,7 @@ export interface IParticipant {
   id: number;
   role: string;
   nickname: string;
+  brix: number;
   gender: string;
   ageGroup: string;
   profileImage: string;

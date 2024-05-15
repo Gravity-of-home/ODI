@@ -12,6 +12,7 @@ interface IButtonProps {
   partyId: string | undefined;
   roomId: string;
   hostGender: string;
+  hostId: number;
   genderRestriction: string;
 }
 
@@ -24,6 +25,7 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   partyId,
   roomId,
   hostGender,
+  hostId,
   genderRestriction,
   fetchData,
 }) => {
@@ -45,14 +47,13 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   }, []);
   const handleSendMessage = (type: string) => {
     if (client && client.connected) {
-      if (type === 'RequestMatching') {
+      if (type === 'APPLY') {
         client.publish({
-          destination: `/pub/chat/message`,
+          destination: `/pub/notification/${hostId}`,
           body: JSON.stringify({
             partyId: partyId,
-            // roomId: 방장알림아이디,
             content: `${myNickName}님이 파티 참여를 요청했어요!`,
-            type: 'TALK',
+            type: 'APPLY',
           }),
           headers: {
             token: `${getCookie('Authorization')}`,
@@ -107,7 +108,7 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 201) {
           toast(<RequestDisplay />, { autoClose: false });
-          handleSendMessage('RequestMatching');
+          handleSendMessage('APPLY');
         }
         fetchData();
       })
@@ -136,12 +137,16 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
                 token: `${getCookie('Authorization')}`,
               },
             });
+            handleSendMessage('QUIT');
+          } else {
+            handleSendMessage('CANCEL');
           }
         }
         fetchData();
       })
       .catch(err => {
         console.log(err);
+        fetchData();
         toast.error(`${err.data.message}`, { position: 'top-center' });
       });
   }
