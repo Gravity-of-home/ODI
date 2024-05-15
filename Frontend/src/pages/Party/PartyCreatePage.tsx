@@ -43,7 +43,6 @@ const PartyCreatePage = () => {
 
   const changeTitle = (e: ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
-    console.log(title);
   };
 
   const goSetDeparture = () => {
@@ -134,7 +133,7 @@ const PartyCreatePage = () => {
       <dialog ref={passengersModalRef} id='my_modal_4' className='modal'>
         <div className='modal-box w-11/12'>
           <h3 className='font-bold text-[20px]'>모집인원</h3>
-          <div className='mt-1 border border-gray-500'></div>
+          <div className='mt-1 border border-gray-300'></div>
           <div className='flex flex-col justify-between]'>
             <h4 className='mt-5 text-lg'>몇 명 이동하실 건가요?</h4>
             <div className=''>
@@ -178,21 +177,23 @@ const PartyCreatePage = () => {
   let setDateModal = (
     <>
       <dialog ref={dateModalRef} id='my_modal_4' className='modal'>
-        <div className='modal-box w-11/12'>
-          <h3 className='font-bold text-[20px]'>출발시간</h3>
+        <div className='modal-box w-11/12 bg-black'>
+          <h3 className='font-bold text-[20px] text-white'>출발시간</h3>
           <div className='mt-1 border border-gray-500'></div>
-          <h4 className='mt-3 text-lg'>날짜</h4>
+          <h4 className='mt-3 text-lg text-white'>날짜</h4>
           <Calendar onDateClick={setDateCilck} />
           {/* <p className='flex py-2 justify-end'>날짜를 선택해 주세요.</p> */}
-          <h4 className='mt-3 text-lg'>시간</h4>
+          <h4 className='mt-3 text-lg text-white'>시간</h4>
           <div className='flex justify-center'>
             <TimePicker onTimeChange={setTimeClick} />
           </div>
           {/* <p className='flex py-2 justify-end'>시간을 선택해 주세요.</p> */}
           <div className='modal-action'>
             <form method='dialog'>
-              <button className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5'>✕</button>
-              <button className='btn bg-OD_PURPLE text-white' onClick={setDate}>
+              <button className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5 text-white'>
+                ✕
+              </button>
+              <button className='btn bg-OD_PURPLE text-white border-none' onClick={setDate}>
                 선택완료
               </button>
             </form>
@@ -203,7 +204,7 @@ const PartyCreatePage = () => {
   );
 
   return (
-    <div className='w-[100%] h-[95%]'>
+    <div className='w-[100%] h-[95%] '>
       {/* <TopHeader
         isBack={true}
         title='파티 만들기'
@@ -274,9 +275,9 @@ const PartyCreatePage = () => {
           </div>
         </div>
       </div>
-      <div className='border-b-[8px] border-gray-700'></div>
+      <div className='border-b-[8px] border-gray-200'></div>
       <div className='h-[7%] mt-6 mx-8 flex flex-col justify-between' onClick={openDateModal}>
-        <div className='font-bold text-gray-100 text-[18px]'>출발시간</div>
+        <div className='font-bold  text-[18px]'>출발시간</div>
         <div className='flex justify-between'>
           <div className='text-gray-500'>
             {showDate === '' ? '탑승 일시를 선택해주세요.' : (showDate as string)}
@@ -290,7 +291,7 @@ const PartyCreatePage = () => {
       <div
         className=' h-[7%] mt-9 mx-8 flex flex-col justify-between'
         onClick={openPassengersModal}>
-        <div className='font-bold text-gray-100 text-[18px]'>모집인원</div>
+        <div className='font-bold  text-[18px]'>모집인원</div>
         <div className='flex justify-between'>
           <div className='text-gray-500'>
             {isChangeMaxParticipants
@@ -306,7 +307,7 @@ const PartyCreatePage = () => {
       </div>
       {'모집인원 및 성별제한 정하는 모달' && passengersModal}
       <div className='h-[13%] mt-9 mx-8 flex flex-col justify-between'>
-        <div className='font-bold text-gray-100 text-[18px]'>카테고리</div>
+        <div className='font-bold  text-[18px]'>카테고리</div>
         <div className='text-gray-500'>카테고리를 선택해 주세요.</div>
         <div className='flex gap-3 overflow-x-auto whitespace-nowrap'>
           {Category.map(({ tag, name }) => {
@@ -333,7 +334,7 @@ const PartyCreatePage = () => {
                 return (
                   <div key={tag} onClick={() => setCategory(tag)}>
                     <div
-                      className={`px-5 py-2 border border-OD_YELLOW rounded-full text-OD_YELLOW ${category === tag ? 'bg-OD_YELLOW bg-opacity-30' : ''}`}>
+                      className={`px-5 py-2 border border-OD_YELLOW rounded-full text-OD_ORANGE ${category === tag ? 'bg-OD_YELLOW bg-opacity-30' : ''}`}>
                       {name}
                     </div>
                   </div>
@@ -379,7 +380,7 @@ const PartyCreatePage = () => {
         </div>
       </div>
       <div className='h-[30%] mt-9 mx-8'>
-        <div className='font-bold text-gray-100 text-[18px]'>파티 설명 (선택)</div>
+        <div className='font-bold  text-[18px]'>파티 설명 (선택)</div>
         <label className='form-control'>
           <textarea
             className='textarea textarea-bordered min-h-32 resize-none mt-5'

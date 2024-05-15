@@ -54,4 +54,12 @@ export const Category = [
   },
 ];
 
-export const categoryIcons = [DAILY, UNIVERSITY, COMMUTE, CONCERT, AIRPORT, TRAVEL, RESERVIST];
+export const categoryIcons = {
+  DAILY: DAILY,
+  UNIVERSITY: UNIVERSITY,
+  COMMUTE: COMMUTE,
+  CONCERT: CONCERT,
+  AIRPORT: AIRPORT,
+  TRAVEL: TRAVEL,
+  RESERVIST: RESERVIST,
+};

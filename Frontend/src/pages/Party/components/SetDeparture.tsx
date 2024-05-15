@@ -31,6 +31,10 @@ const MapRef = () => {
   // const previousPath = usePreviousPath();
   // console.log(`Previous path: ${previousPath}`);
 
+  useEffect(() => {
+    setDepartures?.('내 위치', { latitude: currentLat, longitude: currentLng });
+  }, []);
+
   const successReq = () => {
     return toast.success('출발지가 설정되었습니다.');
   };
@@ -187,7 +191,7 @@ const MapRef = () => {
         </div>
         <div className='w-[100%] h-[15%] font-semibold flex items-center my-5'>
           <SvgArrivalMarker width={'10%'} height={'100%'} />
-          <div className='w-[90%] h-[100%] pl-2 flex items-center'>{departName}</div>
+          <div className='w-[90%] h-[100%] pl-2 flex items-center text-gray-500'>{departName}</div>
         </div>
         <div className='w-[100%] h-[40%] flex justify-center items-center'>
           <div
@@ -285,7 +289,7 @@ const SetDeparture = () => {
           type='text'
           ref={searchRef}
           value={search}
-          className='w-[90%] h-[60%] flex items-center bg-black rounded-xl px-12 py-2'
+          className='w-[90%] h-[60%] flex items-center bg-black rounded-xl px-12 py-2 text-white'
           placeholder='어디에서 출발하나요?'
           onChange={getLocationBySearch}
         />
