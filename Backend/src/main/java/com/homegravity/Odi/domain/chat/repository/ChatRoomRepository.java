@@ -43,10 +43,6 @@ public class ChatRoomRepository {
         List<Party> parties = partyMemberRepository.findAllByMember(member).stream()
                 .map(PartyMember::getParty)
                 .toList();
-        // 파티에서 채팅방 ID 모두 조회
-        List<String> roomIds = parties.stream()
-                .map(Party::getRoomId)
-                .toList();
         // 채팅방 ID로 채팅방 목록 모두 조회
         return parties.stream()
                 .map(party -> ChatListDTO.builder()
