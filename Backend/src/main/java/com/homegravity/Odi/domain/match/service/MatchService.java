@@ -44,7 +44,7 @@ public class MatchService {
         // 중복 매칭 검사
         if (Boolean.FALSE.equals(alreadyRequested)) {
             log.info("이미 활성화된 요청이 있습니다: {}", memberId);
-            return MatchResponseDTO.of(ResultType.ALREADY_REQUEST, null, null, null);
+            return MatchResponseDTO.of(ResultType.ALREADY_REQUEST, null, null, null, matchRequestDto);
 //            throw new BusinessException(ErrorCode.MATCH_ALREADY_EXIST, ErrorCode.MATCH_ALREADY_EXIST.getMessage());
         }
 
@@ -135,7 +135,7 @@ public class MatchService {
         // 파티 생성
         Long partyId = partyService.createMatchParty(Long.parseLong(firstMember), Long.parseLong(memberId), firstMemberRequest, memberRequest);
 
-        return MatchResponseDTO.of(ResultType.MATCH_SUCCESS, Long.parseLong(firstMember), Long.parseLong(memberId), partyId);
+        return MatchResponseDTO.of(ResultType.MATCH_SUCCESS, Long.parseLong(firstMember), Long.parseLong(memberId), partyId, firstMemberRequest);
     }
 
     // 사용자 요청 순서 정리

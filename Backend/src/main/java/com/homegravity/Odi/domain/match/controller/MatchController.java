@@ -34,7 +34,7 @@ public class MatchController {
         MatchResponseDTO responseDTO = matchService.createMatch(matchRequestDTO, memberId);
 
         if (responseDTO == null) {
-            template.convertAndSend("/sub/matchResult/" + memberId, MatchResponseDTO.of(ResultType.MATCH_NOT_FOUND, null, null, null));
+            template.convertAndSend("/sub/matchResult/" + memberId, MatchResponseDTO.of(ResultType.MATCH_NOT_FOUND, null, null, null, matchRequestDTO));
             return;
         }
 
