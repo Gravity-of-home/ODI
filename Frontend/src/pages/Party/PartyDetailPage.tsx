@@ -226,10 +226,11 @@ const PartyDetailPage = () => {
           hostGender={hostInfo.gender}
           hostAge={hostInfo.ageGroup}
           hostImgUrl={hostInfo.profileImage}
+          hostBrix={hostInfo.brix}
           participants={info.participants}
           guests={info.guests}
           role={info.role}
-          partyId={partyId}
+          partyId={info.id}
           roomId={info.roomId}
           fetchData={fetchData}
         />

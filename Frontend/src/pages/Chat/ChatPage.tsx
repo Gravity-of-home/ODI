@@ -91,7 +91,6 @@ const ChatPage = () => {
       <div className='flex-grow overflow-y-auto' style={{ paddingTop: '10rem' }}>
         {info && <Chat roomId={info.roomId} me={info.me} fetchData={fetchData} />}
       </div>
-      <div className='divider'></div>
     </div>
   );
 };

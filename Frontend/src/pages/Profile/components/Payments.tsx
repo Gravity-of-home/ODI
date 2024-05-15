@@ -70,7 +70,7 @@ const Payments = () => {
           orderName: data.data.orderName,
           customerName: name,
           successUrl: `${ViteConfig.VITE_PAY_URL}/profile/payments/success`,
-          failUrl: `${ViteConfig.VITE_PAY_URL}}/profile/payments/fail`,
+          failUrl: `${ViteConfig.VITE_PAY_URL}/profile/payments/fail`,
         })
         .catch(function (error) {
           if (error.code === 'USER_CANCEL') {

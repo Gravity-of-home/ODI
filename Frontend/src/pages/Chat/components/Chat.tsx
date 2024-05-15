@@ -12,6 +12,13 @@ interface ChatProps {
   fetchData: () => void;
 }
 
+interface ChatMessageProps {
+  msg: IMessage;
+  isOwnMessage: boolean;
+  showImage: boolean;
+  showTime: boolean;
+}
+
 const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
   const { partyId } = useParams();
   const { client, isConnected } = useWebSocket();
@@ -42,10 +49,8 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
       const subscription = client.subscribe(
         `/sub/chat/room/${roomId}`,
         message => {
-          console.log(JSON.parse(message.body));
-
           const newMessage = JSON.parse(message.body);
-          console.log(newMessage.type);
+
           if (['SETTLEMENT', 'ENTER', 'QUIT'].includes(newMessage.type)) {
             fetchData();
           }
@@ -92,41 +97,71 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
 
     return newTimeString;
   }
+  const isDifferentTime = (time1: string, time2: string) => {
+    const date1 = new Date(time1);
+    const date2 = new Date(time2);
+    return (
+      date1.getFullYear() !== date2.getFullYear() ||
+      date1.getMonth() !== date2.getMonth() ||
+      date1.getDate() !== date2.getDate() ||
+      date1.getHours() !== date2.getHours() ||
+      date1.getMinutes() !== date2.getMinutes()
+    );
+  };
+
+  const ChatMessage: React.FC<ChatMessageProps> = ({ msg, isOwnMessage, showImage, showTime }) => (
+    <div className={`chat ${isOwnMessage ? 'chat-end' : 'chat-start'}`}>
+      {!isOwnMessage && (
+        <div className='chat-image avatar'>
+          {showImage ? (
+            <div className='w-10 rounded-full'>
+              <img alt='img' src={msg.senderImage} />
+            </div>
+          ) : (
+            <div className='w-10 rounded-full'></div>
+          )}
+        </div>
+      )}
+      <div
+        className={`chat-bubble ${isOwnMessage ? 'chat-bubble-primary' : 'chat-bubble-secondary'}`}>
+        {!isOwnMessage && <div className='chat-header'>{msg.senderNickname}</div>}
+        <p className='break-words'>{msg.content}</p>
+      </div>
+      {showTime && <time className='chat-footer opacity-50'>{NewTimeFormat(msg.sendTime)}</time>}
+    </div>
+  );
 
   return (
     <div className='flex flex-col'>
       <div className='mb-12 p-4 flex-grow'>
-        {messages.map((msg, index) =>
-          msg.type === 'TALK' ? (
-            msg.senderNickname === me.nickname ? (
-              <div className='chat chat-end'>
-                <div className='chat-header'>{msg.senderNickname}</div>
-                <div className='chat-bubble'>{msg.content}</div>
-                <time className='chat-footer opacity-50'>{NewTimeFormat(msg.sendTime)}</time>
-                {/* <div className='chat-footer opacity-50'>{msg.sendTime}</div> */}
-              </div>
-            ) : (
-              <div className='chat chat-start'>
-                <div className='chat-image avatar'>
-                  <div className='w-10 rounded-full'>
-                    <img alt='img' src={msg.senderImage} />
-                  </div>
-                </div>
-                <div className='chat-header'>
-                  {msg.senderNickname}
-                  {/* <time className='text-xs opacity-50'>{msg.sendTime}</time> */}
-                </div>
-                <div className='chat-bubble'>{msg.content}</div>
-                <time className='chat-footer opacity-50'>{NewTimeFormat(msg.sendTime)}</time>
-                {/* <div className='chat-footer opacity-50'>Delivered</div> */}
-              </div>
-            )
+        {messages.map((msg, index) => {
+          const prevMsg = messages[index - 1];
+          const nextMsg = messages[index + 1];
+          const showImage =
+            !prevMsg ||
+            prevMsg.senderNickname !== msg.senderNickname ||
+            prevMsg?.type !== 'TALK' ||
+            isDifferentTime(prevMsg.sendTime, msg.sendTime);
+          const showTime =
+            !nextMsg ||
+            nextMsg.senderNickname !== msg.senderNickname ||
+            nextMsg?.type !== 'TALK' ||
+            isDifferentTime(msg.sendTime, nextMsg.sendTime);
+
+          return msg.type === 'TALK' ? (
+            <ChatMessage
+              key={index}
+              msg={msg}
+              isOwnMessage={msg.senderNickname === me.nickname}
+              showImage={showImage}
+              showTime={showTime}
+            />
           ) : (
             <div key={index} className='flex justify-center my-4'>
               <span className='badge badge-lg'>{msg.content}</span>
             </div>
-          ),
-        )}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 

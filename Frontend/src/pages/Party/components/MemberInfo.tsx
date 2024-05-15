@@ -10,10 +10,11 @@ interface IMemberInfoProps {
   hostGender: string;
   hostAge: string;
   hostImgUrl: string;
+  hostBrix: number;
   participants: any;
   guests: any;
   role: string;
-  partyId: string | undefined;
+  partyId: number;
   roomId: string;
 }
 
@@ -22,6 +23,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   hostGender,
   hostAge,
   hostImgUrl,
+  hostBrix,
   participants,
   guests,
   role,
@@ -154,7 +156,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
           <p>{person.nickname}</p>
           <p>{person.gender === 'M' ? '남' : '여'}</p>
           <p>{person.ageGroup}</p>
-          <p>{person.brix}</p>
+          <p className='font-bold'>당도 : {person.brix.toFixed(1)} brix</p>
         </div>
         <div>
           {role === 'ORGANIZER' && ( // role이 'ORGANIZER'일 때만 버튼 렌더링
@@ -181,8 +183,8 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         <div>{applicant.nickname}</div>
         <div>{applicant.gender === 'M' ? '남' : '여'}</div>
         <div>{applicant.ageGroup}</div>
-        <p className=' rounded p-2' style={{ backgroundColor: '#A75DFC' }}>
-          {applicant.brix}
+        <p className='rounded-full p-2' style={{ backgroundColor: '#A75DFC' }}>
+          당도 : {applicant.brix.toFixed(1)}
         </p>
       </div>
       {role === 'ORGANIZER' && (
@@ -205,28 +207,39 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   return (
     <div className='container p-2'>
       <div className='host-info mb-5'>
-        <p className='mb-4 font-bold text-xl'>
-          팟장{' '}
+        <div className='flex justify-between items-center mb-2'>
+          <p className='font-bold text-xl'>팟장</p>
           {role === 'ORGANIZER' && (
-            <span className='content-center text-center w-10 rounded-full bg-blue-100'>나</span>
+            <span className='flex items-center justify-center h-10 w-10 rounded-full bg-blue-100'>
+              나
+            </span>
           )}
-        </p>
+        </div>
 
-        <div className='stats shadow'>
-          <div className='stat'>
-            <div className='stat-figure '>
-              <div className='stat-value'>{hostName}</div>
-              <div className='stat-title '>{hostAge}</div>
-              <div className='stat-desc'>{hostGender}</div>
-            </div>
-            <div className='avatar'>
-              <div className='w-16 rounded-full'>
-                <img src={hostImgUrl} />
+        <div className='card card-side'>
+          <figure className='w-1/2 py-2'>
+            <img className='' src={hostImgUrl} alt='hostImg' />
+          </figure>
+          <div className='card-body py-2'>
+            <h2 className='card-title'>{hostName}</h2>
+            <p>{hostGender === 'M' ? '남' : '여'}</p>
+            <p>{hostAge}</p>
+            <div className='card-actions justify-end'>
+              <div className='w-full'>
+                <p className='text-xl font-bold'>당도</p>
+                <p className='font-bold'>{hostBrix.toFixed(1)} brix</p>
+                <div className='w-full'>
+                  <progress
+                    className='progress progress-error w-full bg-red-100'
+                    value={hostBrix}
+                    max='100'></progress>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
       <div className='members'>
         <div className='mb-4 font-bold text-xl'>파티원</div>
         <div>
