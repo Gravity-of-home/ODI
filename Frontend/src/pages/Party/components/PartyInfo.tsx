@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // axios 설치 필요
 
 interface IPartyProps {
   category: string;
@@ -72,7 +71,7 @@ const PartyInfo: React.FC<IPartyProps> = ({
           예상 비용
           <span className='font-bold'>
             {' '}
-            총 {expectedCost.toLocaleString()}원 · 1인당{' '}
+            총 {Math.round(expectedCost).toLocaleString()}원 · 1인당{' '}
             {(expectedCost / maxParticipants).toLocaleString()}원({maxParticipants}인 기준)
           </span>
         </p>
