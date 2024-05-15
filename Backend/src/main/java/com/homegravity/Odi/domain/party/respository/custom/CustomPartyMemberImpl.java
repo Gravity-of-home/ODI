@@ -214,6 +214,26 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
         return new SliceImpl<>(memberPartyHistoryResponseDTOList, pageable, hasNext);
     }
 
+    @Override
+    public boolean existMemberInSameParty(Long partyId, Long reporterId, Long reportedId) {
+
+        QPartyMember pm1 = new QPartyMember("pm1");
+        QPartyMember pm2 = new QPartyMember("pm2");
+
+        return jpaQueryFactory
+                .select(pm1)
+                .from(pm1)
+                .join(pm2).on(pm1.party.id.eq(pm2.party.id))
+                .where(
+                        pm1.party.id.eq(partyId),
+                        pm1.member.id.eq(reporterId),
+                        pm2.member.id.eq(reportedId),
+                        pm1.role.ne(RoleType.REQUESTER),
+                        pm2.role.ne(RoleType.REQUESTER)
+                )
+                .fetchFirst() != null;
+    }
+
     private BooleanExpression hasRole(QPartyMember qPartyMember, RoleType roleType, boolean isAll) {
         if (isAll)//전체 이용내역 검색일경우
             return qPartyMember != null ?  qPartyMember.role.eq(RoleType.ORGANIZER).or(qPartyMember.role.eq(RoleType.PARTICIPANT)).or(qPartyMember.role.eq(RoleType.REQUESTER)): null;
