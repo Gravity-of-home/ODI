@@ -34,7 +34,7 @@ public class MatchController {
         MatchResponseDTO responseDTO = matchService.createMatch(matchRequestDTO, memberId);
 
         if (responseDTO == null) {
-            template.convertAndSend("/sub/matchResult/" + memberId, ResultType.MATCH_NOT_FOUND);
+            template.convertAndSend("/sub/matchResult/" + memberId, MatchResponseDTO.of(ResultType.MATCH_NOT_FOUND, null, null, null));
             return;
         }
 
@@ -45,7 +45,7 @@ public class MatchController {
         }
 
         if (responseDTO.getType().equals(ResultType.ALREADY_REQUEST)) {
-            template.convertAndSend("/sub/matchResult/" + memberId, ResultType.ALREADY_REQUEST);
+            template.convertAndSend("/sub/matchResult/" + memberId, responseDTO);
         }
 
     }
