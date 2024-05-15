@@ -52,6 +52,12 @@ public class PlaceDocument {
     @Field(type= FieldType.Text, name="sub_category")
     private String subCategory;
 
+    @Field(type= FieldType.Text, name="busstop_name")
+    private String busstopName;
+
+    @Field(type = FieldType.Integer, name = "bus_stop_num")
+    private Integer busstopNum;
+
     @GeoPointField
     private GeoPoint locationGeopoint;
 

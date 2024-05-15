@@ -82,6 +82,7 @@ public enum ErrorCode {
     PARTY_MEMBER_ALREADY_EXIST(400, "이미 해당 파티에 존재하는 참여자 입니다."),
     PARTY_MEMBER_CNT_MAX(400, "해당 파티의 정원이 다 찼습니다."),
     PARTY_NOT_GATHERING_NOW(400, "해당 파티가 현재 모집중이 아닙니다."),
+    PARTY_NOT_EXIST(400, "파티를 찾을 수 없습니다."),
 
     // Settlement
     PARTY_STATE_TYPE_ERROR(400, "요청에 부합하지 않는 파티 상태 입니다."),

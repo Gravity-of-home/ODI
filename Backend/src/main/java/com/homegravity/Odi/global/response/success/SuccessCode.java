@@ -81,6 +81,9 @@ public enum SuccessCode {
     NOTIFICATION_UPDATE_SUCCESS(204, "알림 읽음 처리에 성공했습니다."),
     NOTIFICATION_DELETE_SUCCESS(204, "알림 삭제에 성공했습니다."),
 
+    // Report
+    REPORT_CREATE_SUCCESS(200, "신고 제출에 성공했습니다."),
+
     ;
 
     /**
