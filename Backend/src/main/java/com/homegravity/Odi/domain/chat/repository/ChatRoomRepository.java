@@ -8,6 +8,7 @@ import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.PartyMember;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
+import com.homegravity.Odi.domain.party.service.PartyService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
@@ -24,6 +25,7 @@ public class ChatRoomRepository {
 //    public static final String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId와 채팅룸 id를 맵핑한 정보 저장
 
     private final ChatMessageService chatMessageService;
+    private final PartyService partyService;
     private final PartyMemberRepository partyMemberRepository;
 
     @Resource(name = "redisTemplate")
@@ -46,6 +48,7 @@ public class ChatRoomRepository {
         return roomIds.stream()
                 .map(roomId -> ChatListDTO.builder()
                             .roomId(roomId)
+                            .partyTitle(partyService.getPartyTitleByRoomId(roomId))
                             // 채팅방 ID로 마지막 채팅 조회
                             .lastMessage(chatMessageService.getLastMessage(roomId))
                             .build())
@@ -53,12 +56,13 @@ public class ChatRoomRepository {
     }
 
     // 특정 채팅방 조회
-    public ChatDetailDTO findRoomById(String id) {
+    public ChatDetailDTO findRoomById(String roomId) {
 //        ChatDetailDTO chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, id);
 //        assert chatRoom != null;
         return ChatDetailDTO.builder()
-                .roomId(id)
-                .chatMessages(chatMessageService.getAllChatMessage(id))
+                .roomId(roomId)
+                .partyTitle(partyService.getPartyTitleByRoomId(roomId))
+                .chatMessages(chatMessageService.getAllChatMessage(roomId))
                 .build();
     }
 
