@@ -14,6 +14,7 @@ public class ChatDetailDTO implements Serializable {
 
     private static final long serialVersionUID = 6494678977089006639L;
 
+    private Long partyId;
     private String roomId;
     private String partyTitle;
     private List<ChatMessageDTO> chatMessages;
@@ -25,7 +26,8 @@ public class ChatDetailDTO implements Serializable {
     }
 
     @Builder
-    public ChatDetailDTO(String roomId, String partyTitle, List<ChatMessageDTO> chatMessages) {
+    public ChatDetailDTO(Long partyId, String roomId, String partyTitle, List<ChatMessageDTO> chatMessages) {
+        this.partyId = partyId;
         this.roomId = roomId;
         this.partyTitle = partyTitle;
         this.chatMessages = chatMessages;
