@@ -1,9 +1,17 @@
-import React from 'react';
+import jwtAxios from '@/utils/JWTUtil';
+import React, { useEffect } from 'react';
 // import useStore from '../../../../state/store/ContentStore';
 
 const BottomSheetContent: React.FC = () => {
   // const { totalData } = useStore(state => state);
   const totalData = false;
+
+  useEffect(() => {
+    const res = jwtAxios.get(
+      '/api/party-boards?page=0&size=10&sort=distance,asc&isToday=false&departuresDate=2024-05-15&gender=&category=&longitude=128.41936482396736&latitude=36.10441210902909',
+    );
+    console.log(res);
+  });
 
   if (!totalData) {
     return (

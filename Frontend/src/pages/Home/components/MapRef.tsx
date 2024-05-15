@@ -356,7 +356,7 @@ const MapRef = () => {
     </>
   );
 
-  // NOTE : 서버 데이터로부터 마커 생성하기
+  // // NOTE : 서버 데이터로부터 마커 생성하기
   // useEffect(() => {
   //   if (map) {
   //     fetch('YOUR_API_ENDPOINT')

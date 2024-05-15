@@ -6,6 +6,7 @@ import BottomSheetContent from '@/components/BottomSheet/BottomSheetContent.tsx'
 import BottomSheetHandle from '@/components/BottomSheet/BottomSheetHandle.tsx';
 // import ContentHeader from '../SingleContent/SingleContentHeader';
 import SvgList from '@/assets/svg/SvgList';
+import SelectFilter from '@/pages/Home/components/SelectFilter';
 
 const BottomSheet: React.FC = () => {
   const { sheet, handleUp, content } = useBottomSheet();
@@ -24,7 +25,9 @@ const BottomSheet: React.FC = () => {
         </div>
         <div className='mt-4 bg-white rounded-t-3xl w-[100%] h-[90%]'>
           <BottomSheetHandle />
-          {/* <div className='w-[100%] h-[7%] bg-blue-300'>여기 필터 들어가야지 ?</div> */}
+          <div className='w-[100%] h-[7%] bg-blue-300'>
+            <SelectFilter />
+          </div>
           <div ref={content} className='w-[100%] h-[100%] bg-black overflow-scroll'>
             <div className='w-[100%] h-[100%]'>
               <BottomSheetContent />
