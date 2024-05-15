@@ -14,9 +14,6 @@ public class CorsConfig implements WebMvcConfigurer {
     @Value("${FRONT_BASE_URL}")
     private String frontBaseUrl;
 
-    @Autowired
-    private PathHandlerInterceptor pathHandlerInterceptor;
-
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -25,10 +22,5 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowedMethods("*"); // 허용할 HTTP 메소드
 //                .allowedOrigins(frontBaseUrl);
-    }
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(pathHandlerInterceptor).addPathPatterns("/api/parties/**");
     }
 }

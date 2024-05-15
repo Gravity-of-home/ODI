@@ -49,7 +49,6 @@ public class JWTFilter extends OncePerRequestFilter {
 //        }
         // 헤더에서 토큰 검증
 
-        log.info("여기여기여기!~!!!!!!");
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         // 토큰이 없다면 다음 필터로 넘김

@@ -69,7 +69,6 @@ public class PathHandlerInterceptor implements HandlerInterceptor {
 
     private boolean checkHasRole(Long partyId, Member me, HttpServletRequest request, String pathUrl) {
         String mapKey = pathUrl.replaceAll("[^a-zA-Z0-9]", "");
-        //log.info("mapkey:{} ", mapKey);
 
         Party party = partyRepository.findParty(partyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티가 존재하지 않습니다."));
@@ -78,13 +77,8 @@ public class PathHandlerInterceptor implements HandlerInterceptor {
         if (!pathPropertiesConfig.getPathSecurity().get(mapKey).containsKey(request.getMethod()))
             return true;
 
-        boolean existPartyMember = partyMemberRepository.existPartyMember(party, me);
-        PartyMember partyMember = null;
+        PartyMember partyMember = partyMemberRepository.findByPartyAndMember(party, me).orElse(null);
 
-        if (existPartyMember) {
-            partyMember = partyMemberRepository.findByPartyAndMember(party, me)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_MEMBER_NOT_EXIST, ErrorCode.PARTY_MEMBER_NOT_EXIST.getMessage()));
-        }
 
         //권한 가능 role에 포함되는지
         if (pathPropertiesConfig.getPathSecurity().get(mapKey).get(request.getMethod()).getInclude() != null) {
@@ -92,14 +86,13 @@ public class PathHandlerInterceptor implements HandlerInterceptor {
                 return false;
             }
         } else if (pathPropertiesConfig.getPathSecurity().get(mapKey).get(request.getMethod()).getExclude() != null) {
-            if(partyMember != null) {
+            if (partyMember != null) {
 
                 if (pathPropertiesConfig.getPathSecurity().get(mapKey).get(request.getMethod()).getExclude().contains(partyMember.getRole().toString())) {
-
                     return false;
                 }
-            }else{
-                if(pathPropertiesConfig.getPathSecurity().get(mapKey).get(request.getMethod()).getExclude().contains("user")){
+            } else {
+                if (pathPropertiesConfig.getPathSecurity().get(mapKey).get(request.getMethod()).getExclude().contains("user")) {
                     return false;
                 }
             }
