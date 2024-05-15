@@ -10,9 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "유저 신고 내역", description = "유저 신고")
 @Slf4j
@@ -24,7 +24,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping()
-    public ApiResponse<Void> createReport(@AuthenticationPrincipal Member member, @RequestBody ReportRequestDTO requestDTO) {
+    public ApiResponse<Void> createReport(@AuthenticationPrincipal Member member, ReportRequestDTO requestDTO, MultipartFile file) {
 
         /* 신고 생성 로직 호출 */
         reportService.createReport(member, requestDTO);

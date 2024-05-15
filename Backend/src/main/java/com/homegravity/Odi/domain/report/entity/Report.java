@@ -65,14 +65,14 @@ public class Report extends BaseBy {
         this.resolvedAt = resolvedAt;
     }
 
-    public static Report of(ReportRequestDTO requestDTO, Member reported, Member reporter) {
+    public static Report of(ReportRequestDTO requestDTO, String imgUrl, Member reported, Member reporter) {
         return builder()
                 .type(requestDTO.getType())
                 .content(requestDTO.getContent())
                 .reportStatus(ReportStatus.PENDING)
-                .attachments(requestDTO.getAttachments())
-                .reportedMember(reported)
+                .attachments(imgUrl)
                 .reporterMember(reporter)
+                .reportedMember(reported)
                 .build();
     }
 

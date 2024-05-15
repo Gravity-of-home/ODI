@@ -7,12 +7,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReportRequestDTO {
 
+    @NotNull
     @Schema(description = "파티 id")
     private Long partyId;
 
@@ -31,5 +33,5 @@ public class ReportRequestDTO {
     private String content;
 
     @Schema(description = "첨부파일")
-    private String attachments;
+    private MultipartFile attachments;
 }
