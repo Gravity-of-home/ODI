@@ -8,7 +8,10 @@ import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.PartyMember;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
+import com.homegravity.Odi.domain.party.respository.PartyRepository;
 import com.homegravity.Odi.domain.party.service.PartyService;
+import com.homegravity.Odi.global.response.error.ErrorCode;
+import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
@@ -25,7 +28,7 @@ public class ChatRoomRepository {
 //    public static final String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId와 채팅룸 id를 맵핑한 정보 저장
 
     private final ChatMessageService chatMessageService;
-    private final PartyService partyService;
+    private final PartyRepository partyRepository;
     private final PartyMemberRepository partyMemberRepository;
 
     @Resource(name = "redisTemplate")
@@ -40,28 +43,25 @@ public class ChatRoomRepository {
         List<Party> parties = partyMemberRepository.findAllByMember(member).stream()
                 .map(PartyMember::getParty)
                 .toList();
-        // 파티에서 채팅방 ID 모두 조회
-        List<String> roomIds = parties.stream()
-                .map(Party::getRoomId)
-                .toList();
         // 채팅방 ID로 채팅방 목록 모두 조회
-        return roomIds.stream()
-                .map(roomId -> ChatListDTO.builder()
-                            .roomId(roomId)
-                            .partyTitle(partyService.getPartyTitleByRoomId(roomId))
-                            // 채팅방 ID로 마지막 채팅 조회
-                            .lastMessage(chatMessageService.getLastMessage(roomId))
-                            .build())
-                .collect(Collectors.toList());
+        return parties.stream()
+                .map(party -> ChatListDTO.builder()
+                        .roomId(party.getRoomId())
+                        .partyTitle(party.getTitle())
+                        .lastMessage(chatMessageService.getLastMessage(party.getRoomId()))
+                        .build())
+                .toList();
     }
 
     // 특정 채팅방 조회
     public ChatDetailDTO findRoomById(String roomId) {
 //        ChatDetailDTO chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, id);
 //        assert chatRoom != null;
+        Party party = partyRepository.findByRoomIdAndDeletedAtIsNull(roomId)
+                .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
         return ChatDetailDTO.builder()
                 .roomId(roomId)
-                .partyTitle(partyService.getPartyTitleByRoomId(roomId))
+                .partyTitle(party.getTitle())
                 .chatMessages(chatMessageService.getAllChatMessage(roomId))
                 .build();
     }
