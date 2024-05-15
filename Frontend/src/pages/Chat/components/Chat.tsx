@@ -1,4 +1,3 @@
-// Chat.js
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWebSocket } from '@/context/webSocketProvider';
@@ -23,25 +22,25 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
   const { partyId } = useParams();
   const { client, isConnected } = useWebSocket();
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(scrollToBottom, [messages]);
-  function fetchMessages() {
-    jwtAxios
-      .get(`api/chat/room/${roomId}`)
-      .then(res => {
-        const beforeChat = res.data.chatMessages;
-        console.log(beforeChat);
-        setMessages(prevMessages => [...prevMessages, ...beforeChat]); // 배열을 펼쳐서 추가
-      })
-      .catch(error => {
-        console.error('Error fetching messages:', error);
-      });
-  }
+
+  const fetchMessages = async () => {
+    try {
+      const res = await jwtAxios.get(`api/chat/room/${roomId}`);
+      const beforeChat = res.data.chatMessages;
+      console.log(beforeChat);
+      setMessages(prevMessages => [...prevMessages, ...beforeChat]);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
 
   useEffect(() => {
     if (client && client.connected) {
@@ -64,39 +63,38 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
 
       return () => subscription.unsubscribe();
     }
-  }, [client, isConnected]);
+  }, [client, isConnected, roomId, fetchData]);
 
   const handleSendMessage = () => {
-    if (client && client.connected) {
-      if (inputMessage.trim()) {
-        client.publish({
-          destination: `/pub/chat/message`,
-          body: JSON.stringify({
-            partyId: partyId,
-            roomId: roomId,
-            content: inputMessage,
-            type: 'TALK',
-          }),
-          headers: {
-            token: `${getCookie('Authorization')}`,
-          },
-        });
-        setInputMessage('');
+    const messageContent = inputRef.current?.value;
+    if (client && client.connected && messageContent?.trim()) {
+      client.publish({
+        destination: `/pub/chat/message`,
+        body: JSON.stringify({
+          partyId,
+          roomId,
+          content: messageContent,
+          type: 'TALK',
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
+      if (inputRef.current) {
+        inputRef.current.value = '';
       }
     } else {
       alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
     }
   };
 
-  function NewTimeFormat(time: string) {
+  const NewTimeFormat = (time: string) => {
     const date = new Date(time);
     const hour = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hour}:${minutes}`;
+  };
 
-    const newTimeString = `${hour}:${minutes}`;
-
-    return newTimeString;
-  }
   const isDifferentTime = (time1: string, time2: string) => {
     const date1 = new Date(time1);
     const date2 = new Date(time2);
@@ -122,9 +120,9 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
           )}
         </div>
       )}
+      {!isOwnMessage && showImage && <div className='chat-header'>{msg.senderNickname}</div>}
       <div
         className={`chat-bubble ${isOwnMessage ? 'chat-bubble-primary' : 'chat-bubble-secondary'}`}>
-        {!isOwnMessage && <div className='chat-header'>{msg.senderNickname}</div>}
         <p className='break-words'>{msg.content}</p>
       </div>
       {showTime && <time className='chat-footer opacity-50'>{NewTimeFormat(msg.sendTime)}</time>}
@@ -168,8 +166,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
       <div className='fixed bottom-0 bg-white flex w-screen'>
         <input
           type='text'
-          value={inputMessage}
-          onChange={e => setInputMessage(e.target.value)}
+          ref={inputRef}
           onKeyPress={e => {
             if (e.key === 'Enter') {
               handleSendMessage();

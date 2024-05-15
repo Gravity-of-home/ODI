@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { getCookie } from '@/utils/CookieUtil';
+import ReportModal from './components/ReportModal';
 
 interface IInfo {
   partyId: number;
@@ -46,7 +47,9 @@ const ChatDetailPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
   const nav = useNavigate();
-
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const toggleisReportModal = () => setIsReportModalOpen(!isReportModalOpen);
+  const [reportedId, setReportedId] = useState(0);
   const fetchData = async () => {
     await jwtAxios
       .get(`api/party-boards/${partyId}/chat-info`, {
@@ -71,21 +74,26 @@ const ChatDetailPage = () => {
   function goBack() {
     nav(-1);
   }
+  // function Report(memberId: number) {
+  //   return () => {
+  //     jwtAxios
+  //       .post(`api/members/${memberId}/report`, {})
+  //       .then(res => {
+  //         console.log(res);
+  //       })
+  //       .catch(err => {
+  //         if (err instanceof Error) {
+  //           setError(err.message);
+  //         } else {
+  //           setError('An unknown error occurred');
+  //         }
+  //       });
+  //   };
+  // }
+
   function Report(memberId: number) {
-    return () => {
-      jwtAxios
-        .post(`api/members/${memberId}/report`, {})
-        .then(res => {
-          console.log(res);
-        })
-        .catch(err => {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError('An unknown error occurred');
-          }
-        });
-    };
+    setReportedId(memberId);
+    toggleisReportModal();
   }
   const organizer = (
     <div className='flex justify-between'>
@@ -98,7 +106,7 @@ const ChatDetailPage = () => {
       <div className='content-center'>
         {info?.organizer.id && info?.organizer.id !== info?.me.id && (
           <button
-            onClick={Report(info?.organizer.id)}
+            onClick={() => Report(info.organizer.id)}
             className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
             신고하기
           </button>
@@ -118,7 +126,7 @@ const ChatDetailPage = () => {
       </div>
       <div className='content-center'>
         <button
-          onClick={Report(person.id)}
+          onClick={() => Report(info.organizer.id)}
           className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
           신고하기
         </button>
@@ -169,6 +177,13 @@ const ChatDetailPage = () => {
       <button className='btn btn-ghost text-xl font-bold'>
         채팅방 나가기 <span className=''>{'>'}</span>
       </button>
+      {isReportModalOpen && (
+        <ReportModal
+          partyId={partyId}
+          reportedId={reportedId}
+          onClose={() => setIsReportModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
