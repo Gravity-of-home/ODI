@@ -2,31 +2,68 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCookie } from '@/utils/CookieUtil';
 import jwtAxios from '@/utils/JWTUtil';
+import odi from '@/assets/image/logo/odi.png';
 
-const ChatListPage = () => {
+interface IMessage {
+  roomId: string;
+  senderImage: string;
+  senderNickname: string;
+  content: string;
+  sendTime: string;
+}
+
+interface IChatRoom {
+  partyId: string;
+  partyTitle: string;
+  roomId: string;
+  lastMessage: IMessage | null;
+}
+
+const ChatListPage: React.FC = () => {
   const [error, setError] = useState(false);
-  const [chatList, setChatList] = useState([]);
+  const [chatList, setChatList] = useState<IChatRoom[]>([]);
   const nav = useNavigate();
 
   const fetchData = async () => {
     await jwtAxios
-      .get(`api/chat/rooms`, {
+      .get('api/chat/rooms', {
         headers: {
           AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
         },
       })
       .then(res => {
         console.log(res.data);
-        setChatList(res.data.data);
+        setChatList(res.data);
       })
       .catch(err => {
         console.log(err);
+        setError(true);
       });
   };
 
-  function GoGhatPage(id: number) {
-    nav(`/party/chat/:${id}`);
-  }
+  const GoChatPage = (id: string) => {
+    nav(`/party/chat/${id}`);
+  };
+
+  const formatSendTime = (sendTime: string) => {
+    const date = new Date(sendTime);
+    const now = new Date();
+
+    const isToday = date.toDateString() === now.toDateString();
+    const isYesterday =
+      new Date(now.setDate(now.getDate() - 1)).toDateString() === date.toDateString();
+    const isWithinTwoDays = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24) <= 2;
+
+    if (isToday) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (isYesterday) {
+      return '어제';
+    } else if (isWithinTwoDays) {
+      return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+    } else {
+      return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -36,7 +73,7 @@ const ChatListPage = () => {
     <div className='container'>
       <div className='navbar bg-base-100'>
         <div className='navbar-start'>
-          <button className='btn btn-square btn-ghost'>
+          <button className='btn btn-square btn-ghost' onClick={() => nav(-1)}>
             <svg
               xmlns='http://www.w3.org/2000/svg'
               fill='none'
@@ -51,7 +88,7 @@ const ChatListPage = () => {
           </button>
         </div>
         <div className='navbar-center'>
-          <a className='text-xl'>채팅</a>
+          <a className='text-xl'>채팅목록</a>
         </div>
         <div className='navbar-end'></div>
       </div>
@@ -59,20 +96,34 @@ const ChatListPage = () => {
         <div className='overflow-x-auto'>
           <table className='table'>
             <tbody>
-              {/* row 1 */}
-              <tr className=''>
-                <td>
-                  <div className='flex items-center gap-3'>
-                    <div className='avatar w-12 h-12 relative'></div>
+              {chatList?.map(chatRoom => (
+                <tr
+                  key={chatRoom.roomId}
+                  onClick={() => GoChatPage(chatRoom.partyId)}
+                  className='cursor-pointer'>
+                  <td>
+                    <div className='flex items-center gap-3'>
+                      <img
+                        src={chatRoom.lastMessage?.senderImage || odi}
+                        alt='avatar'
+                        className=''
+                        width={60}
+                      />
 
-                    <div>
-                      <div className='font-bold'>Hart Hagerty</div>
+                      <div className='ml-4'>
+                        <div className='font-bold text-xl'>{chatRoom.partyTitle}</div>
+                        <div className=''>
+                          {chatRoom.lastMessage ? chatRoom.lastMessage.content : ''}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td>Zemlak, Daniel and Leannon</td>
-                <td>Purple</td>
-              </tr>
+                  </td>
+
+                  <td className='w-32 text-center'>
+                    {chatRoom.lastMessage ? formatSendTime(chatRoom.lastMessage.sendTime) : ''}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

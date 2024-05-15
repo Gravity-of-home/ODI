@@ -38,7 +38,7 @@ const ChatPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, []); // 이제 `fetchData`에 대한 의존성이 명시적
+  }, []);
   if (isLoading)
     return (
       <div className='flex h-screen justify-center'>
