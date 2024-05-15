@@ -26,7 +26,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   const { id } = userStore();
   const BASE_URI = ViteConfig.VITE_BASE_URL;
   const broker = ViteConfig.VITE_SOCK_URL;
-  const { id } = userStore();
   const nav = useNavigate();
 
   function GoPartyPage(id: number) {
