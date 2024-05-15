@@ -11,6 +11,7 @@ import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +54,7 @@ public class StompController {
      * websocket "/pub/notification/{receiver-id}"로 들어오는 메시징을 처리한다.
      */
     @MessageMapping("/notification/{receiver-id}")
-    public void message(@PathVariable(value = "receiver-id") Long receiverId, NotificationDTO message, @Header("token") String token) {
+    public void message(@DestinationVariable(value = "receiver-id") Long receiverId, NotificationDTO message, @Header("token") String token) {
         Member sender = memberRepository.findById(Long.valueOf(jwtUtil.getId(token)))
                 .orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
         // 알림 받는 사람 설정
