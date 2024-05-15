@@ -35,7 +35,7 @@ public class PlaceDocumentNativeQueryRepository {
     public List<PlaceDocument> searchPlaces(String searchWord, GeoPoint geoPoint, Pageable pageable) {
 
         // query 검색 대상 필드
-        List<String> searchTargetFields = List.of("major_category^100", "sub_category^100", "road_name_address.analyzed^14", "jibun_address", "place_name^10", "place_name.analyzed^7", "building_name.analyzed^5");
+        List<String> searchTargetFields = List.of("major_category^100", "sub_category^100", "road_name_address.analyzed^14", "jibun_address", "place_name^10", "place_name.analyzed^7", "building_name.analyzed^5", "busstop_name.analyzed", "bus_stop_num");
 
         // multi match query
         MultiMatchQuery multiMatchQuery = MultiMatchQuery.of(mmq -> mmq.query(searchWord).fields(searchTargetFields).type(TextQueryType.Phrase));
