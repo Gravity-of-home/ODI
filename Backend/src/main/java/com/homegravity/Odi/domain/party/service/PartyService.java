@@ -368,10 +368,4 @@ public class PartyService {
         return party.getId();
     }
 
-    public String getPartyTitleByRoomId(String roomId) {
-
-        Party party = partyRepository.findByRoomIdAndDeletedAtIsNull(roomId)
-                .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
-        return party.getTitle();
-    }
 }
