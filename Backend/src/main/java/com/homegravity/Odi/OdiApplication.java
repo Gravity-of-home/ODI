@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableScheduling
 @EnableJpaAuditing
 @SpringBootApplication
-@Tag(name="z오디", description = "오디 API 호출 테스트")
+@Tag(name = "z오디", description = "오디 API 호출 테스트")
 public class OdiApplication {
 
     // 연결 테스트
