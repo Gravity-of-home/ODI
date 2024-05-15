@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.place.repository;
 
+import co.elastic.clients.elasticsearch._types.InlineScript;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.json.JsonData;
 import com.homegravity.Odi.domain.place.entity.PlaceDocument;
@@ -14,7 +15,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
-import org.springframework.data.elasticsearch.core.query.*;
+import org.springframework.data.elasticsearch.core.query.GeoDistanceOrder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Repository;
 
@@ -34,23 +35,30 @@ public class PlaceDocumentNativeQueryRepository {
     public List<PlaceDocument> searchPlaces(String searchWord, GeoPoint geoPoint, Pageable pageable) {
 
         // query 검색 대상 필드
-        List<String> searchTargetFields = List.of("major_category^100", "sub_category^100", "road_name_address.analyzed^14", "place_name.analyzed^7", "building_name.analyzed^5");
+        List<String> searchTargetFields = List.of("major_category^100", "sub_category^100", "road_name_address.analyzed^14", "jibun_address", "place_name^10", "place_name.analyzed^7", "building_name.analyzed^5");
 
         // multi match query
         MultiMatchQuery multiMatchQuery = MultiMatchQuery.of(mmq -> mmq.query(searchWord).fields(searchTargetFields).type(TextQueryType.Phrase));
 
         // 위치 (geoPoint로 부터 10Km 떨어진 값은 decay만큼 감쇠)
-        DecayPlacement decayPlacement = DecayPlacement.of(dp -> dp.scale(JsonData.of("10km")).offset(JsonData.of("0km")).decay(0.1).origin(JsonData.of(geoPoint)));
+        DecayPlacement decayPlacement = DecayPlacement.of(dp -> dp.scale(JsonData.of("500km")).offset(JsonData.of("0km")).decay(0.1).origin(JsonData.of(geoPoint)));
 
         // Decay function
         DecayFunction decayFunction = DecayFunction.of(df -> df.field("location-geopoint").placement(decayPlacement));
+
+        // Script Score function : '~역'검색 시 지하철 및 기차역 우선 검색
+        InlineScript script = InlineScript.of(s -> s.source("if (params.query_content.endsWith('역') && doc['major_category.keyword'].contains('지하철 및 도시철도')) { return 100000; } else { return 1; }")
+                .params("query_content", JsonData.of(searchWord)));
+        ScriptScoreFunction scriptScoreFunction = ScriptScoreFunction.of(ssf -> ssf.script(s -> s.inline(script)));
 
         // 검색어의 유사도 * 거리 (decay 함수 사용)
         Query query = NativeQuery.builder()
                 .withQuery(QueryBuilders.functionScore(fs -> fs
                                 .query(fsq -> fsq.multiMatch(multiMatchQuery))
                                 .functions(f -> f.gauss(decayFunction))
+                                .functions(f -> f.scriptScore(scriptScoreFunction))
                                 .scoreMode(FunctionScoreMode.Multiply)
+                                .boostMode(FunctionBoostMode.Multiply)
                         )
                 )
                 .withPageable(pageable)
@@ -69,16 +77,8 @@ public class PlaceDocumentNativeQueryRepository {
     public PlaceDocument getNearestPlace(GeoPoint geoPoint) {
 
         Query query = NativeQuery.builder()
-                .withQuery(
-                        q -> q.geoDistance(
-                                g -> g.distance(PLACE_MAX_DISTANCE)
-                                        .field("location-geopoint").
-                                        location(loc -> loc.latlon(Queries.latLon(geoPoint)))
-                        )
-                )
-                .withSort(Sort.by(
-                        new GeoDistanceOrder("location-geopoint", geoPoint)
-                ))
+                .withQuery(QueryBuilders.geoDistance(gd -> gd.distance(PLACE_MAX_DISTANCE).field("location-geopoint").location(loc -> loc.latlon(Queries.latLon(geoPoint)))))
+                .withSort(Sort.by(new GeoDistanceOrder("location-geopoint", geoPoint)))
                 .withMaxResults(1)
                 .build();
 

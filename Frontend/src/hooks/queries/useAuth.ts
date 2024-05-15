@@ -6,6 +6,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { UseMutationCustomOptions, UseQueryCustomOptions } from '@/types/common';
 import { removeHeader, setHeader } from '@/utils/HeaderUtil';
 import { getCookie } from '@/utils/CookieUtil';
+import { IAPIResponse } from '@/types/APIResponse.ts';
 import { IUser } from '@/types/User';
 
 // const useLogin = (mutatuionOptions?: UseMutationCustomOptions) => {
@@ -57,7 +58,8 @@ const useGetUserInfo = (queryOptions?: UseQueryCustomOptions) => {
     ...queryOptions,
   });
 
-  const userData = data as IUser;
+  const result = data as IAPIResponse<IUser>;
+  const userData = result?.data;
 
   return { isSuccess, userData, isError };
 };

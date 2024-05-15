@@ -25,37 +25,19 @@ public class ChatService {
     private final MemberRepository memberRepository;
     private final PartyRepository partyRepository;
 
-    private final ChannelTopic channelTopic;
+    private final ChannelTopic chatTopic;
     private final RedisTemplate redisTemplate;
-
-    /**
-     * destination정보에서 roomId 추출
-     */
-    public String getRoomId(String destination) {
-        int lastIndex = destination.lastIndexOf('/');
-        if (lastIndex != -1)
-            return destination.substring(lastIndex + 1);
-        else
-            return "";
-    }
 
     /**
      * 채팅방에 메시지 발송
      */
     public void sendChatMessage(ChatMessageDTO chatMessage) {
-//        if (MessageType.ENTER.equals(chatMessage.getType())) {
-//            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 방에 입장했습니다.");
-//        } else if (MessageType.QUIT.equals(chatMessage.getType())) {
-//            chatMessage.setContent(chatMessage.getSenderNickname() + "님이 방에서 나갔습니다.");
-//        }
          if (MessageType.DATE.equals(chatMessage.getType())) {
             chatMessage.setContent(chatMessage.getSendTime().toString());
         } else if (MessageType.SETTLEMENT.equals(chatMessage.getType())) {
             chatMessage.setContent(chatMessage.getSenderNickname() + "님이 정산을 요청하셨습니다.");
         }
-        log.info("시간어떻게들어오니??? {}",chatMessage.getSendTime());
-        redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
-        log.info("@@@@@@@@@@@@@@@@@@ {}",chatMessage.getRoomId());
+        redisTemplate.convertAndSend(chatTopic.getTopic(), chatMessage);
         // 메세지 닉네임 기반으로 유저 조회
         Member sender = memberRepository.findByNicknameAndDeletedAtIsNull(chatMessage.getSenderNickname())
                 .orElseThrow(()->new BusinessException(ErrorCode.MEMBER_NICKNAME_NOT_EXIST,ErrorCode.MEMBER_NICKNAME_NOT_EXIST.getMessage()));
@@ -68,6 +50,5 @@ public class ChatService {
                         .party(party)
                         .messageType(chatMessage.getType())
                 .build());
-        log.info("저장저장저장저장저장저장");
     }
 }

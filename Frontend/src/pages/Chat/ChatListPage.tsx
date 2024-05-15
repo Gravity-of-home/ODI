@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { getCookie } from '@/utils/CookieUtil';
 import jwtAxios from '@/utils/JWTUtil';
 
 const ChatListPage = () => {
   const [error, setError] = useState(false);
   const [chatList, setChatList] = useState([]);
   const nav = useNavigate();
-  // 채팅 목록 불러오기
-  // TODO : chatlist 데이터 어떻게 들어오는지 보고 리스트 보여주기
-  function fetchData() {
-    const response = jwtAxios
-      .post(`/api/chats`)
+
+  const fetchData = async () => {
+    await jwtAxios
+      .get(`api/chat/rooms`, {
+        headers: {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+        },
+      })
       .then(res => {
         console.log(res.data);
         setChatList(res.data.data);
@@ -19,7 +22,7 @@ const ChatListPage = () => {
       .catch(err => {
         console.log(err);
       });
-  }
+  };
 
   function GoGhatPage(id: number) {
     nav(`/party/chat/:${id}`);

@@ -2,6 +2,7 @@ package com.homegravity.Odi.domain.party.respository.custom;
 
 import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.request.SelectPartyRequestDTO;
+import com.homegravity.Odi.domain.party.entity.CategoryType;
 import com.homegravity.Odi.domain.party.entity.Party;
 import com.homegravity.Odi.domain.party.entity.QParty;
 import com.homegravity.Odi.domain.party.entity.StateType;
@@ -72,6 +73,7 @@ public class CustomPartyRepositoryImpl implements CustomPartyRepository {
         List<Tuple> results = jpaQueryFactory.select(distance, qparty)
                 .from(qparty)
                 .where(qparty.deletedAt.isNull()
+                        , qparty.category.ne(CategoryType.MATCHING)
                         , qparty.departuresDate.goe(LocalDateTime.now()) // 현재 시간 이후만 조회
                         , distance.loe(radius) //현재 위치로 부터 반경 2km
                         , eqToday(requestDTO, qparty)

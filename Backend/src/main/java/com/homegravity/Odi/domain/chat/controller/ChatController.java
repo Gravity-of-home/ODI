@@ -1,47 +1,37 @@
 package com.homegravity.Odi.domain.chat.controller;
 
-import com.homegravity.Odi.domain.chat.dto.ChatMessageDTO;
-import com.homegravity.Odi.domain.chat.service.ChatService;
+import com.homegravity.Odi.domain.chat.dto.ChatDetailDTO;
+import com.homegravity.Odi.domain.chat.dto.ChatListDTO;
+import com.homegravity.Odi.domain.chat.repository.ChatRoomRepository;
 import com.homegravity.Odi.domain.member.entity.Member;
-import com.homegravity.Odi.domain.member.repository.MemberRepository;
-import com.homegravity.Odi.global.jwt.util.JWTUtil;
-import com.homegravity.Odi.global.response.error.ErrorCode;
-import com.homegravity.Odi.global.response.error.exception.BusinessException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-@Slf4j
+@Tag(name = "채팅방 정보", description = "채팅방 목록 조회, 채팅방 상세 조회")
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/chat")
 public class ChatController {
 
-    private final ChatService chatService;
-    private final MemberRepository memberRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
-    private final JWTUtil jwtUtil;
-
-    /**
-     * websocket "/pub/chat/message"로 들어오는 메시징을 처리한다.
-     */
-    @MessageMapping("/chat/message")
-    public void message(ChatMessageDTO message, @Header("token") String token) {
-        Member sender = memberRepository.findById(Long.valueOf(jwtUtil.getId(token)))
-                .orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
-        log.info("{}", sender.getNickname());
-        String nickname = sender.getNickname();
-        String image = sender.getImage();
-        // 로그인 회원 정보로 대화명 설정
-        message.setSenderNickname(nickname);
-        message.setSenderImage(image);
-        message.setSendTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-        // Websocket에 발행된 메시지를 redis로 발행(publish)
-        log.info("pub!!!!!!!!!! {}", message.getSendTime());
-        chatService.sendChatMessage(message);
+    @Operation(summary = "채팅방 목록 조회", description = "내가 참여하고 있는 모든 채팅방 목록을 조회합니다.")
+    @GetMapping("/rooms")
+    @ResponseBody
+    public List<ChatListDTO> room(@AuthenticationPrincipal Member member) {
+        return chatRoomRepository.findAllRoomByMember(member);
     }
+
+    @Operation(summary = "채팅방 상세 조회", description = "채팅방 ID에 해당하는 채팅방 상세 정보를 조회합니다.")
+    @GetMapping("/room/{room-id}")
+    @ResponseBody
+    public ChatDetailDTO roomInfo(@PathVariable(value = "room-id") String roomId) {
+        return chatRoomRepository.findRoomById(roomId);
+    }
+
 }
