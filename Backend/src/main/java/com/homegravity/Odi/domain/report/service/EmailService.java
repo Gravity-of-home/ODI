@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -23,6 +24,7 @@ public class EmailService {
 
     private final JavaMailSender javaMailSender;
 
+    @Async // 비동기 처리
     public void sendReportMessage(ReportRequestDTO requestDTO) {
 
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -50,7 +52,7 @@ public class EmailService {
                     "<p><strong>파티 ID:</strong> " + requestDTO.getPartyId() + "</p>" +
                     "<p><strong>채팅방 ID:</strong> " + requestDTO.getRoomId() + "</p>" +
                     "<p><strong>신고 받을 멤버 ID:</strong> " + requestDTO.getReportedId() + "</p>" +
-                    "<p><strong>신고 유형:</strong> " + requestDTO.getType() + "</p>" +
+                    "<p><strong>신고 유형:</strong> " + requestDTO.getType().getDescription() + "</p>" +
                     "<p><strong>신고 상세 내용:</strong> " + requestDTO.getContent() + "</p>" +
                     "</div>" +
                     "</div>" +
