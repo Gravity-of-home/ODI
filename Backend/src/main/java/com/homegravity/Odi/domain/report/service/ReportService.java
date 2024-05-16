@@ -7,6 +7,7 @@ import com.homegravity.Odi.domain.party.respository.PartyRepository;
 import com.homegravity.Odi.domain.report.dto.ReportRequestDTO;
 import com.homegravity.Odi.domain.report.entity.Report;
 import com.homegravity.Odi.domain.report.repository.ReportRepository;
+import com.homegravity.Odi.global.entity.S3Folder;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import com.homegravity.Odi.global.service.S3Service;
@@ -46,7 +47,7 @@ public class ReportService {
         // 첨부파일 S3 저장
         String imgUrl = "";
         if (requestDTO.getAttachments() != null) {
-            imgUrl = s3Service.saveFile(requestDTO.getAttachments());
+            imgUrl = s3Service.saveFile(requestDTO.getAttachments(), S3Folder.RECEIPT);
         }
 
         reportRepository.save(Report.of(requestDTO, imgUrl, reported, reporter));
