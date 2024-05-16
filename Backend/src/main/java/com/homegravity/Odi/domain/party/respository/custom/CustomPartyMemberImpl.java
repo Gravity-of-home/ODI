@@ -8,7 +8,6 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +71,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                 .where(qPartyMember.party.eq(party)
                         .and(builder)
                         .and(qPartyMember.deletedAt.isNull()))
-                .fetch().stream().map(pm -> PartyMemberDTO.from(pm)).toList();
+                .fetch().stream().map(PartyMemberDTO::from).toList();
     }
 
     @Override
@@ -141,10 +140,11 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
         return jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.deletedAt.isNull()
+                        , qPartyMember.party.eq(party)
                         , qPartyMember.role.eq(RoleType.PARTICIPANT)
                         , neMember(member, qPartyMember))
                 .fetch()
-                .stream().map(pm -> PartyMemberDTO.from(pm))
+                .stream().map(PartyMemberDTO::from)
                 .toList();
     }
 
@@ -176,6 +176,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                         .and(qPartyMember.role.ne(RoleType.REQUESTER)))
                 .fetch();
     }
+
     public Slice<MemberPartyHistoryResponseDTO> findAllPartyMemberByMember(Member member, RoleType roleType, Pageable pageable, boolean isAll) {
         QPartyMember qPartyMember = QPartyMember.partyMember;
         QParty qParty = QParty.party;
@@ -183,10 +184,10 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
         List<Party> partyList = jpaQueryFactory.select(qParty)
                 .from(qPartyMember)
                 .where(qPartyMember.member.eq(member)
-                        ,(qPartyMember.party.deletedAt.isNull())
+                        , (qPartyMember.party.deletedAt.isNull())
                         , hasRole(qPartyMember, roleType, isAll)
                         , (qPartyMember.deletedAt.isNull()))
-                .orderBy(getOrderSpecifier(pageable,qParty))
+                .orderBy(getOrderSpecifier(pageable, qParty))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -249,10 +250,10 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
     private BooleanExpression hasRole(QPartyMember qPartyMember, RoleType roleType, boolean isAll) {
         if (isAll)//전체 이용내역 검색일경우
-            return qPartyMember != null ?  qPartyMember.role.eq(RoleType.ORGANIZER).or(qPartyMember.role.eq(RoleType.PARTICIPANT)).or(qPartyMember.role.eq(RoleType.REQUESTER)): null;
-        else{
+            return qPartyMember != null ? qPartyMember.role.eq(RoleType.ORGANIZER).or(qPartyMember.role.eq(RoleType.PARTICIPANT)).or(qPartyMember.role.eq(RoleType.REQUESTER)) : null;
+        else {
             //방장이 아닌 정보를 보여줄때 => 신청했지만 참여못한 파티팟에도
-            if(roleType.equals(RoleType.PARTICIPANT)){
+            if (roleType.equals(RoleType.PARTICIPANT)) {
                 return qPartyMember != null ? qPartyMember.role.eq(RoleType.PARTICIPANT).or(qPartyMember.role.eq(RoleType.REQUESTER)) : null;
             }
             return qPartyMember != null ? qPartyMember.role.eq(RoleType.ORGANIZER) : null;
@@ -260,10 +261,10 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
     }
 
     private OrderSpecifier getOrderSpecifier(Pageable pageable, QParty qParty) {
-        OrderSpecifier orderSpecifier =null;
+        OrderSpecifier orderSpecifier = null;
 
-        for(Sort.Order order : pageable.getSort()){
-            Order direction = order.getDirection().isAscending()? Order.ASC: Order.DESC;
+        for (Sort.Order order : pageable.getSort()) {
+            Order direction = order.getDirection().isAscending() ? Order.ASC : Order.DESC;
 
             orderSpecifier = new OrderSpecifier(direction, qParty.createdAt);
         }
