@@ -48,7 +48,7 @@ export const MatchSocketProvider: React.FC<MatchSocketProviderProps> = ({ childr
         console.log('Match Client CONNECT');
         setIsMatchConnected(true);
       },
-      onDisconnect: async () => {
+      onDisconnect: () => {
         console.log('MatchSocket Disconnected');
         setIsMatchConnected(false); // 연결 해제시 상태 업데이트
         /**
