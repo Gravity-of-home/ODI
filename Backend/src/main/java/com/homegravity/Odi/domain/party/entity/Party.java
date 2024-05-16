@@ -103,7 +103,7 @@ public class Party extends BaseBy {
 
 
     // 자동매칭시 생성
-    public static Party of(MatchRequestDTO matchRequestDTO) {
+    public static Party of(MatchRequestDTO matchRequestDTO, String roomId) {
 
         GeometryFactory geometryFactory = new GeometryFactory();
         Point departuresLocation = geometryFactory.createPoint(new Coordinate(matchRequestDTO.getDepLon(), matchRequestDTO.getDepLat()));
@@ -120,6 +120,7 @@ public class Party extends BaseBy {
                 .currentParticipants(2)
                 .genderRestriction(GenderType.ANY)
                 .content("자동매칭에 성공했습니다.")
+                .roomId(roomId)
                 .build();
     }
 

@@ -1,6 +1,6 @@
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
 import { ViteConfig } from '@/apis/ViteConfig';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import watchPositionHook from '@/hooks/useRefreshLocation';
 import partyStore from '@/stores/usePartyStore';
 import LatLngAddStore from '@/stores/useLatLngAddStore';
@@ -22,7 +22,7 @@ const MapRef = () => {
       disableDefaultUI: true,
       styles: DarkModeStyle,
       zoom: 16,
-      minZoom: 10,
+      minZoom: 5,
       maxZoom: 18,
       draggable: false,
       restriction: {
@@ -80,7 +80,7 @@ const MapRef = () => {
         );
         const pathData = JSON.parse(result.data.data).route.traoptimal[0].path;
         const pathList = convertPathFormat(pathData);
-        const polyline = new google.maps.Polyline({
+        new google.maps.Polyline({
           map: map,
           path: pathList,
           geodesic: true,
@@ -88,8 +88,11 @@ const MapRef = () => {
           strokeOpacity: 1.0,
           strokeWeight: 2,
         });
-        updateBoundsWithPath(pathList);
-        return polyline;
+
+        // 출발지와 도착지 경계를 맞추기 위해 경계 확장
+        bounds.extend(new google.maps.LatLng(start.latitude, start.longitude));
+        bounds.extend(new google.maps.LatLng(end.latitude, end.longitude));
+        map.fitBounds(bounds);
       } catch (error) {
         console.error(error);
       }
@@ -121,12 +124,12 @@ const MapRef = () => {
       const endPos = new google.maps.LatLng(arrivalsLocation.latitude, arrivalsLocation.longitude);
       endMarker.setPosition(endPos);
       endMarker.setMap(map);
-      directionRoute(departuresLocation, arrivalsLocation);
       bounds.extend(endPos);
+      directionRoute(departuresLocation, arrivalsLocation);
     }
 
     // 모든 마커가 추가된 후, 맵 경계를 조정
-    if (bounds.isEmpty() === false) {
+    if (!bounds.isEmpty()) {
       map.fitBounds(bounds);
     }
   }, [departuresLocation, arrivalsLocation]);
@@ -157,20 +160,6 @@ const render = (status: Status) => {
  */
 
 const PartyMap = () => {
-  const { departuresLocation, arrivalsLocation } = partyStore();
-  const SLat = departuresLocation?.latitude as number;
-  const SLng = departuresLocation?.longitude as number;
-  const ELat = arrivalsLocation?.latitude as number;
-  const ELng = arrivalsLocation?.longitude as number;
-
-  // if (SLat === 0 || SLng === 0 || ELat === 0 || ELng === 0) {
-  //   return (
-  //     <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
-  //   );
-  // } else {
-  //   return <></>;
-  // }
-
   return (
     <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
   );

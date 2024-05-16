@@ -72,7 +72,7 @@ const ProfilePage = () => {
             <div
               className='w-[5%] h-[100%] flex justify-center items-center'
               onClick={() => {
-                /* 자세한 프로필 내역 및 수정하기! */
+                /* TODO : 자세한 프로필 내역 및 수정하기! */
               }}>
               <SvgGoInside style={{ width: '24px', height: '24px' }} />
             </div>

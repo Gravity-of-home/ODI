@@ -3,6 +3,7 @@ package com.homegravity.Odi.domain.match.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.match.dto.MatchResponseDTO;
+import com.homegravity.Odi.domain.match.dto.ResultType;
 import com.homegravity.Odi.domain.match.repository.MatchRepository;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.member.repository.MemberRepository;
@@ -43,7 +44,8 @@ public class MatchService {
         // 중복 매칭 검사
         if (Boolean.FALSE.equals(alreadyRequested)) {
             log.info("이미 활성화된 요청이 있습니다: {}", memberId);
-            throw new BusinessException(ErrorCode.MATCH_ALREADY_EXIST, ErrorCode.MATCH_ALREADY_EXIST.getMessage());
+            return MatchResponseDTO.of(ResultType.ALREADY_REQUEST, null, null, null, matchRequestDto);
+//            throw new BusinessException(ErrorCode.MATCH_ALREADY_EXIST, ErrorCode.MATCH_ALREADY_EXIST.getMessage());
         }
 
         long sequence = getNextSequence("member");
@@ -97,7 +99,16 @@ public class MatchService {
         depResult.remove(memberId);
         arrResult.remove(memberId);
         // 두 결과의 교집합 계산
+
+        log.info("출발지 결과 : {} === 도착지 결과 : {}", depResult.size(), arrResult.size());
+
         depResult.retainAll(arrResult);
+        log.info("교집합 결과 : {}", depResult.size());
+
+        // 디버깅
+        for(String tmp : depResult) {
+            log.info("교집합 원소 : {}", tmp);
+        }
 
         if (depResult.isEmpty()) {
             log.info("현재 매칭 상대를 찾을 수 없습니다. 잠시 기다려주세요");
@@ -124,7 +135,7 @@ public class MatchService {
         // 파티 생성
         Long partyId = partyService.createMatchParty(Long.parseLong(firstMember), Long.parseLong(memberId), firstMemberRequest, memberRequest);
 
-        return MatchResponseDTO.of(Long.parseLong(firstMember), Long.parseLong(memberId), partyId);
+        return MatchResponseDTO.of(ResultType.MATCH_SUCCESS, Long.parseLong(firstMember), Long.parseLong(memberId), partyId, firstMemberRequest);
     }
 
     // 사용자 요청 순서 정리
