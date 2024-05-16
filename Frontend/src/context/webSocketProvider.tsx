@@ -72,7 +72,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
           },
         );
       },
-      onDisconnect: async () => {
+      onDisconnect: () => {
         console.log('WebSocket Disconnected');
         setIsConnected(false); // 연결 해제시 상태 업데이트
       },
