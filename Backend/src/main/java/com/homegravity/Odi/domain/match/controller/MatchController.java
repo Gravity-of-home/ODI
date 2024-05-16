@@ -3,6 +3,7 @@ package com.homegravity.Odi.domain.match.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
 import com.homegravity.Odi.domain.match.dto.MatchResponseDTO;
+import com.homegravity.Odi.domain.match.dto.ResultType;
 import com.homegravity.Odi.domain.match.service.MatchService;
 import com.homegravity.Odi.global.response.success.ApiResponse;
 import com.homegravity.Odi.global.response.success.SuccessCode;
@@ -28,11 +29,23 @@ public class MatchController {
     @MessageMapping("/match/{member-id}")
     public void enterMatch(@DestinationVariable(value = "member-id") Long memberId, MatchRequestDTO matchRequestDTO) throws JsonProcessingException {
 
+        log.info("요청 정보 : {}", matchRequestDTO.toString());
+
         MatchResponseDTO responseDTO = matchService.createMatch(matchRequestDTO, memberId);
 
-        if (responseDTO != null) {
+        if (responseDTO == null) {
+            template.convertAndSend("/sub/matchResult/" + memberId, MatchResponseDTO.of(ResultType.MATCH_NOT_FOUND, null, null, null, matchRequestDTO));
+            return;
+        }
+
+        if (responseDTO.getType().equals(ResultType.MATCH_SUCCESS)) {
             template.convertAndSend("/sub/matchResult/" + responseDTO.getMemberId1(), responseDTO);
             template.convertAndSend("/sub/matchResult/" + responseDTO.getMemberId2(), responseDTO);
+            return;
+        }
+
+        if (responseDTO.getType().equals(ResultType.ALREADY_REQUEST)) {
+            template.convertAndSend("/sub/matchResult/" + memberId, responseDTO);
         }
 
     }

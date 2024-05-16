@@ -1,23 +1,21 @@
 import { create } from 'zustand';
 
 interface IMapState {
-  googleMap: google.maps.Map | null;
-  departureMarker: google.maps.Marker | null;
-  arrivalMarker: google.maps.Marker | null;
-  setGoogleMap: (newMap: google.maps.Map) => void;
-  setDepartureMarker: (newMarker: google.maps.Marker) => void;
-  setArrivalMarker: (newMarker: google.maps.Marker) => void;
-  deleteGoogleMap: () => void;
+  googleMap?: google.maps.Map | null;
+  latitude?: number;
+  longitude?: number;
+  setGoogleMap?: (newMap: google.maps.Map) => void;
+  setLatitude?: (newLatitude: number) => void;
+  setLongitude?: (newLongitude: number) => void;
 }
 
 const useMapStore = create<IMapState>(set => ({
   googleMap: null,
-  departureMarker: null,
-  arrivalMarker: null,
+  latitude: 0,
+  longitude: 0,
   setGoogleMap: newMap => set({ googleMap: newMap }),
-  setDepartureMarker: newMarker => set({ departureMarker: newMarker }),
-  setArrivalMarker: newMarker => set({ arrivalMarker: newMarker }),
-  deleteGoogleMap: () => set({ googleMap: null }),
+  setLatitude: newLatitude => set({ latitude: newLatitude }),
+  setLongitude: newLongitude => set({ longitude: newLongitude }),
 }));
 
 export default useMapStore;

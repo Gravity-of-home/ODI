@@ -118,7 +118,7 @@ const MapRef = () => {
         disableDefaultUI: true,
         styles: DarkModeStyle,
         zoom: 16,
-        minZoom: 10,
+        minZoom: 7,
         maxZoom: 18,
         gestureHandling: 'greedy',
         restriction: {
@@ -183,13 +183,13 @@ const MapRef = () => {
         </div>
         <div className='w-[100%] h-[15%] font-semibold flex items-center my-5'>
           <SvgArrivalMarker width={'10%'} height={'100%'} />
-          <div className='w-[90%] h-[100%] pl-2 flex items-center'>{arrName}</div>
+          <div className='w-[90%] h-[100%] pl-2 flex items-center text-gray-500'>{arrName}</div>
         </div>
         <div className='w-[100%] h-[40%] flex justify-center items-center'>
           <div
             className='w-[80%] h-[70%] bg-OD_PURPLE flex justify-center items-center font-semibold text-[20px] text-white rounded-xl hover:bg-OD_GREEN hover:text-black'
             onClick={() => {
-              nav('/party-boards', { replace: true });
+              nav('/party', { replace: true });
             }}>
             설정완료
           </div>
@@ -281,7 +281,7 @@ const SetArrival = () => {
           type='text'
           ref={searchRef}
           value={search}
-          className='w-[90%] h-[60%] flex items-center bg-black rounded-xl px-12 py-2'
+          className='w-[90%] h-[60%] flex items-center bg-black rounded-xl px-12 py-2 text-white'
           placeholder='어디로 가고싶으신가요?'
           onChange={getLocationBySearch}
         />
