@@ -67,14 +67,17 @@ public class Party extends BaseBy {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "room_Id")
+    private String roomId;
+
+    @Column(name = "taxi_fare")
+    private Integer taxiFare;
+
     @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartyBoardStats partyBoardStats;
 
     @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartySettlement partySettlement;
-
-    @Column(name = "room_Id")
-    private String roomId;
 
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL)
     private List<ChatMessage> chatMessages;
@@ -84,7 +87,7 @@ public class Party extends BaseBy {
                   String arrivalsName, Point arrivalsLocation,
                   LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants,
                   CategoryType category, GenderType genderRestriction, String content,
-                  String roomId) {
+                  String roomId, Integer taxiFare) {
 
         this.title = title;
         this.departuresName = departuresName;
@@ -99,6 +102,7 @@ public class Party extends BaseBy {
         this.state = StateType.GATHERING;
         this.content = content;
         this.roomId = roomId;
+        this.taxiFare = taxiFare;
     }
 
 
@@ -119,7 +123,7 @@ public class Party extends BaseBy {
                 .maxParticipants(2)
                 .currentParticipants(2)
                 .genderRestriction(GenderType.ANY)
-                .content("자동매칭에 성공했습니다.")
+                .content("매칭 성공~~! 함께 택시 타고 가요~~ 🚖")
                 .roomId(roomId)
                 .build();
     }
@@ -217,4 +221,7 @@ public class Party extends BaseBy {
 
     public void updateCurrentParticipants(int currentParticipants){ this.currentParticipants = currentParticipants; }
 
+    public void updateTaxiFare(Integer taxiFare) {
+        this.taxiFare = taxiFare;
+    }
 }

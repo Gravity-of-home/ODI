@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.party.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.homegravity.Odi.domain.chat.repository.ChatRoomRepository;
 import com.homegravity.Odi.domain.map.service.MapService;
 import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
@@ -47,7 +48,7 @@ public class PartyService {
     private final TransactionHandler transactionHandler;
 
     @Transactional
-    public Long createParty(PartyRequestDTO partyRequestDTO, Member member) {
+    public Long createParty(PartyRequestDTO partyRequestDTO, Member member) throws JsonProcessingException {
 
         String roomId = chatRoomRepository.createChatRoom();
         Party party = partyRepository.save(Party.of(partyRequestDTO, member.getGender(), roomId));
@@ -56,6 +57,9 @@ public class PartyService {
         PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0); // 생성시 조회수 초기화
         partyMemberRepository.save(PartyMember.of(RoleType.ORGANIZER, false, party, member));
         partyBoardStats.updateParty(party);
+
+        // 택시 요금 갱신 => 비동기 처리
+        mapService.getPartyPathInfo(party.getId(), party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY(), party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
 
         return party.getId();
     }
@@ -349,7 +353,7 @@ public class PartyService {
 
     // 매치 파티 생성
     @Transactional
-    public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) {
+    public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) throws JsonProcessingException {
 
         String roomId = chatRoomRepository.createChatRoom();
         Party party = partyRepository.save(Party.of(requestDTO1, roomId));
@@ -365,6 +369,10 @@ public class PartyService {
         // party board stats 저장
         PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0);
         partyBoardStats.updateParty(party);
+
+        // 택시 요금 갱신 => 비동기 처리
+        mapService.getPartyPathInfo(party.getId(), party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY(), party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
+
 
         return party.getId();
     }
