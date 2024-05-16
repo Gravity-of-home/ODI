@@ -81,10 +81,9 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   function RequestDisplay() {
     return (
       <div className=''>
-        <div className=' '>
+        <div className='text-center font-bold'>
           <p>매칭 신청 완료</p>
           <p>팟장에게 매칭 신청 알림을 보냈어요</p>
-          <p>수락 후에 채팅으로 자세한 장소, 시간을 정해보세요!</p>
         </div>
       </div>
     );

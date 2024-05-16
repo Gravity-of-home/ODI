@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useWebSocket } from '@/context/webSocketProvider';
+import userStore from '@/stores/useUserStore';
 interface ModalProps {
   isVisible: boolean;
   role: string;
@@ -34,7 +35,8 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
   fetchData,
 }) => {
   if (!isVisible) return null;
-
+  const { client, isConnected } = useWebSocket();
+  const { id } = userStore();
   const nav = useNavigate();
   // Handle outside click to close modal
   const handleOutsideClick = (e: MouseEvent<HTMLDivElement>) => {
@@ -46,7 +48,7 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
   const successParty = () => {
     jwtAxios
       .post(
-        `api/parties/${partyId}/success`,
+        `/api/parties/${partyId}/success`,
         {},
         {
           params: {

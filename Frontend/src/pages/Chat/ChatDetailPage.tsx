@@ -51,6 +51,7 @@ const ChatDetailPage = () => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const toggleisReportModal = () => setIsReportModalOpen(!isReportModalOpen);
   const [reportedId, setReportedId] = useState(0);
+
   const fetchData = async () => {
     await jwtAxios
       .get(`api/party-boards/${partyId}/chat-info`, {
@@ -72,6 +73,7 @@ const ChatDetailPage = () => {
 
     setIsLoading(false);
   };
+
   function goBack() {
     nav(-1);
   }
@@ -80,6 +82,7 @@ const ChatDetailPage = () => {
     setReportedId(memberId);
     toggleisReportModal();
   }
+
   const organizer = (
     <div className='flex justify-between'>
       <div className='flex gap-x-2 items-center'>
@@ -139,8 +142,11 @@ const ChatDetailPage = () => {
   ));
 
   useEffect(() => {
-    fetchData();
+    if (!info) {
+      fetchData();
+    }
   }, []);
+
   if (isLoading)
     return (
       <div className='flex h-screen justify-center'>

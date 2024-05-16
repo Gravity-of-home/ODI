@@ -21,7 +21,7 @@ const SettlementCheckModal: React.FC<SettlementCheckModalProps> = ({
     chargeFee();
     onClose();
   };
-  const settle = settleAmount && paidAmount ? settleAmount - paidAmount : null;
+  const settle = settleAmount && paidAmount ? settleAmount - paidAmount : 0;
 
   return (
     <div className='modal modal-open' onClick={onClose}>
@@ -42,7 +42,9 @@ const SettlementCheckModal: React.FC<SettlementCheckModalProps> = ({
         </svg>
         <div>
           <h3 className='text-md'>선불 금액 : {paidAmount}</h3>
-          <div className='font-bold text-xl'>추가로 내야할 금액 : {settle}</div>
+          <div className='font-bold text-xl'>
+            {settle >= 0 ? <p>추가로 내야할 금액 : {settle}</p> : <p>돌려 받을 금액 : {settle}</p>}
+          </div>
         </div>
         <button onClick={handleChargeAndClose} className='btn btn-sm'>
           정산하기
