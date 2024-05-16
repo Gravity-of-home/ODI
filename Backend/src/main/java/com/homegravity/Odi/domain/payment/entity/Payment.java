@@ -36,6 +36,7 @@ public class Payment extends BaseTime {
     @Column(name = "order_id", nullable = false)
     private String orderId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "payment_state")
     private PaymentState paymentState;
 
@@ -82,22 +83,20 @@ public class Payment extends BaseTime {
                 .build();
     }
 
-    public void updatePaymentSuccessInfo() {
-
-        this.paymentState = PaymentState.SUCCESS;
-    }
-
-    public void updatePaymentFailInfo(String failReason) {
-
-        this.paymentState = PaymentState.FAILURE;
-    }
-
     public void updatePaymentState(PaymentState paymentState) {
         this.paymentState = paymentState;
     }
 
     public void updatePaymentKey(String paymentKey) {
         this.paymentKey = paymentKey;
+    }
+
+    public void updateApprovedAt(LocalDateTime approvedAt) {
+        this.approvedAt = approvedAt;
+    }
+
+    public void incrementFailedCount() {
+        this.failedCount += 1;
     }
 
 }

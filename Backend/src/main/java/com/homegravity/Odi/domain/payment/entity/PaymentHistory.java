@@ -22,9 +22,11 @@ public class PaymentHistory extends BaseBy {
     private Payment payment;
 
     @Column(name = "previous_state")
+    @Enumerated(EnumType.STRING)
     private PaymentState previousState;
 
     @Column(name = "new_state")
+    @Enumerated(EnumType.STRING)
     private PaymentState newState;
 
     @Column(name = "reason")
