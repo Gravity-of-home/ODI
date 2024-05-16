@@ -34,7 +34,7 @@ public class PaymentService {
     // 토스 결제 요청: 토스 PSP로 결제 요청 전 결제 서버에 등록
     public PaymentResponseDto requestTossPayment(Member member, PaymentRequestDto requestDto) {
 
-        Payment payment = paymentRepository.save(Payment.createNewPayment(requestDto.getPayType(), requestDto.getAmount(), requestDto.getOrderName(), member));
+        Payment payment = paymentRepository.save(Payment.createNewPayment(requestDto.getPayType(), requestDto.getAmount(), requestDto.getOrderName(), member, requestDto.toString()));
         return PaymentResponseDto.from(payment);
     }
 
@@ -63,6 +63,7 @@ public class PaymentService {
     public PaymentSuccessResponseDto requestPaymentConfirm(PaymentSuccessRequestDto requestDto) {
 
         return tossPaymentWebClient.post()
+                .header("Idempotency-Key", requestDto.getOrderId())
                 .body(Mono.just(requestDto), PaymentRequestDto.class)
                 .retrieve()
                 .bodyToMono(PaymentSuccessResponseDto.class)
