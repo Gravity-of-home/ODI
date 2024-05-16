@@ -74,6 +74,9 @@ public class PathHandlerInterceptor implements HandlerInterceptor {
         Party party = partyRepository.findParty(partyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티가 존재하지 않습니다."));
 
+        if(!pathPropertiesConfig.getPathSecurity().containsKey(mapKey))
+            return true;
+
         //권한이랑 상관없는 method => 통과
         if (!pathPropertiesConfig.getPathSecurity().get(mapKey).containsKey(request.getMethod()))
             return true;
