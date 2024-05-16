@@ -68,12 +68,12 @@ public class Payment extends BaseTime {
         this.cancelReason = cancelReason;
     }
 
-    public static Payment createNewPayment(PayType payType, Integer amount, String orderName, Member member) {
+    public static Payment createNewPayment(PayType payType, Integer amount, String orderName, Member member, String orderInfoString) {
         return Payment.builder()
                 .payType(payType)
                 .amount(amount)
                 .orderName(orderName)
-                .orderId(UUID.randomUUID().toString())
+                .orderId(UUID.nameUUIDFromBytes(orderInfoString.getBytes()).toString())
                 .customer(member)
                 .build();
     }

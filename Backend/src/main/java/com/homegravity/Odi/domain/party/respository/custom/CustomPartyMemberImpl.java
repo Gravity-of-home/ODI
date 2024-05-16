@@ -234,6 +234,19 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
                 .fetchFirst() != null;
     }
 
+    @Override
+    public Optional<PartyMember> findByPartyPartyMemberAndAllRole(Party party, Member member) {
+        QPartyMember qPartyMember = QPartyMember.partyMember;
+
+        return Optional.ofNullable(
+                jpaQueryFactory.selectFrom(qPartyMember)
+                        .where(qPartyMember.party.eq(party)
+                                .and(qPartyMember.member.eq(member))
+                                .and(qPartyMember.deletedAt.isNull()))
+                        .fetchOne()
+        );
+    }
+
     private BooleanExpression hasRole(QPartyMember qPartyMember, RoleType roleType, boolean isAll) {
         if (isAll)//전체 이용내역 검색일경우
             return qPartyMember != null ?  qPartyMember.role.eq(RoleType.ORGANIZER).or(qPartyMember.role.eq(RoleType.PARTICIPANT)).or(qPartyMember.role.eq(RoleType.REQUESTER)): null;

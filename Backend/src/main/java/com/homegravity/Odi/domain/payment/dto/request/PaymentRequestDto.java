@@ -3,14 +3,14 @@ package com.homegravity.Odi.domain.payment.dto.request;
 import com.homegravity.Odi.domain.payment.entity.PayType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Schema(description = "결제 요청 DTO")
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PaymentRequestDto {
 
@@ -26,5 +26,7 @@ public class PaymentRequestDto {
     @NotNull
     private String orderName;
 
+    @Schema(description = "생성일자(Default 있음)")
+    private LocalDateTime requestedAt = LocalDateTime.now();
 
 }
