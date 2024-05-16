@@ -612,14 +612,18 @@ const MapRef = () => {
           </div>
         </div>
         <div className='fixed w-[100%] flex justify-end px-3'>
-          <div className='px-2 z-10' onClick={() => {}}>
+          <div
+            className='px-2 z-10 cursor-pointer'
+            onClick={() => {
+              nav('/chatlist');
+            }}>
             <SvgChat />
           </div>
-          <div className='px-2 z-10' onClick={() => {}}>
+          <div className='px-2 z-10 cursor-pointer' onClick={() => {}}>
             <SvgNotification />
           </div>
           <div
-            className='px-2 z-10'
+            className='px-2 z-10 cursor-pointer'
             onClick={() => {
               nav('/profile');
             }}>
