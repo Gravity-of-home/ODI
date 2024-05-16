@@ -9,6 +9,7 @@ import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartySettlementRepository;
 import com.homegravity.Odi.domain.payment.entity.PointHistoryType;
 import com.homegravity.Odi.domain.payment.service.PointService;
+import com.homegravity.Odi.global.entity.S3Folder;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import com.homegravity.Odi.global.service.S3Service;
@@ -81,7 +82,7 @@ public class PartySettlementService {
         int settlementAmount = cost / party.getCurrentParticipants();
 
         // 이미지 저장
-        String imgUrl = s3Service.saveFile(requestDto.getNewImage());
+        String imgUrl = s3Service.saveFile(requestDto.getNewImage(), S3Folder.RECEIPT);
 
         // 정산 정보 업데이트
         PartySettlement partySettlement = party.getPartySettlement();
