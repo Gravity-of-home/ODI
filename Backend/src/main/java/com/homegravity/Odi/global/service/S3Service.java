@@ -40,7 +40,7 @@ public class S3Service {
     public String saveFile(MultipartFile multipartFile, S3Folder s3folder) {
         // 파일 이름 생성
         String fileName = createFileName(multipartFile.getOriginalFilename());
-        String key = s3folder.toString() + fileName;
+        String key = getFileFolder(s3folder) + fileName;
         try {
             // S3 메타데이터 설정
             ObjectMetadata metadata = new ObjectMetadata();
