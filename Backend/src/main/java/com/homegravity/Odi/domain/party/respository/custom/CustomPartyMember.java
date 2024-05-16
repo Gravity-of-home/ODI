@@ -38,4 +38,6 @@ public interface CustomPartyMember {
     Slice<MemberPartyHistoryResponseDTO> findAllPartyMemberByMember(Member member, RoleType roleType, Pageable pageable, boolean isAll);
 
     boolean existMemberInSameParty(Long partyId, Long reporterId, Long reportedId);
+
+    Optional<PartyMember> findByPartyPartyMemberAndAllRole(Party party, Member member);
 }
