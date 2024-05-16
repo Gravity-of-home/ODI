@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -28,8 +29,7 @@ public class S3Service {
      */
     public String saveFile(MultipartFile multipartFile) {
         // 파일 원본 이름
-        String originalFilename = multipartFile.getOriginalFilename();
-
+        String originalFilename = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
         try {
             // S3 메타데이터 설정
             ObjectMetadata metadata = new ObjectMetadata();
