@@ -68,7 +68,7 @@ public class PlaceDocumentDto {
 
         return builder()
                 .id(placeDocument.getId())
-                .placeName(placeDocument.getMajorCategory().equals("busstop") ? placeDocument.getBusstopName() : placeDocument.getPlaceName())
+                .placeName(placeDocument.getMajorCategory() != null && placeDocument.getMajorCategory().equals("busstop") ? placeDocument.getBusstopName() : placeDocument.getPlaceName())
                 .buildingName(placeDocument.getBuildingName())
                 .jibunAddress(placeDocument.getJibunAddress())
                 .roadNameAddress(placeDocument.getRoadNameAddress())
