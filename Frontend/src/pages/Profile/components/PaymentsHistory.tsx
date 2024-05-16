@@ -47,11 +47,17 @@ const PaymentsHistory = () => {
           </div>
         </div>
         <div className='w-[100%] h-[95%]'>
-          {history.map((item, index) => (
-            <div key={index} className='w-[100%] h-[10%] flex justify-center'>
-              <PaymentsHistoryItem item={item} />
+          {history.length > 0 ? (
+            history.map((item, index) => (
+              <div key={index} className='w-[100%] h-[10%] flex justify-center'>
+                <PaymentsHistoryItem item={item} />
+              </div>
+            ))
+          ) : (
+            <div className='w-[100%] h-[100%] flex justify-center items-center text-[20px] font-bold text-gray-500'>
+              결제 / 정산 내역이 없습니다.
             </div>
-          ))}
+          )}
         </div>
       </div>
     </>

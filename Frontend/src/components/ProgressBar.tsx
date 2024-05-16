@@ -24,11 +24,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ targetValue }) => {
   }, [targetValue]);
 
   return (
-    <div className='w-[100%] bg-slate-700 h-4 rounded-full'>
+    <div className='w-[100%] bg-gray-400 h-4 rounded-full'>
       <div
         className='bg-OD_PURPLE h-4 rounded-full transition-width duration-500 flex justify-center items-center text-white font-bold text-sm'
         style={{ width: `${progress}%` }}>
-        {progress}
+        {progress.toFixed(1)}
       </div>
     </div>
   );

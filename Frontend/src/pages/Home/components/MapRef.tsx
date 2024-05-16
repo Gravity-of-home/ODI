@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import latLngAddStore from '@/stores/useLatLngAddStore';
 import mapStore from '@/stores/useMapStore';
 import DarkModeStyle from './DarkModeStyle';
+import RetroStyle from './RetroStyle';
+import StandardStyle from './StandardStyle';
 import { useNavigate } from 'react-router-dom';
 import BottomSheet from '@/components/BottomSheet/BottomSheet';
 import partyStore from '@/stores/usePartyStore';
@@ -245,13 +247,14 @@ const MapRef = () => {
   };
 
   useEffect(() => {
-    getAddByLatLng(currentLat, currentLng);
     if (ref.current && !map) {
       const initialMap = new google.maps.Map(ref.current, {
         center: mapCenter,
         disableDefaultUI: true,
         clickableIcons: false,
-        styles: DarkModeStyle,
+        // styles: DarkModeStyle,
+        // styles: RetroStyle,
+        styles: StandardStyle,
         zoom: 16,
         minZoom: 10,
         maxZoom: 18,
@@ -286,6 +289,7 @@ const MapRef = () => {
         const newCenter = initialMap.getCenter();
         if (newCenter) {
           setMapCenter(newCenter);
+          getAddByLatLng(newCenter.lat(), newCenter.lng());
         }
       });
     }
@@ -433,7 +437,7 @@ const MapRef = () => {
           scaledSize: new google.maps.Size(50, 50),
         },
         draggable: false,
-        animation: google.maps.Animation.DROP,
+        // animation: google.maps.Animation.DROP,
       });
 
       // Add click listener to log data
@@ -461,9 +465,9 @@ const MapRef = () => {
         ref={autoMatchModalRef}
         id='my_modal_4'
         className={`modal ${isOpen ? 'open' : 'close'}`}>
-        <div className='modal-box w-11/12 h-[60%] bg-black flex flex-col'>
-          <h3 className='font-bold text-white text-[20px]'>자동 매칭</h3>
-          <div className='mt-1 border border-gray-500'></div>
+        <div className='modal-box w-11/12 h-[60%] bg-white flex flex-col'>
+          <h3 className='font-bold text-black text-[20px]'>자동 매칭</h3>
+          <div className='mt-1 border border-gray-300'></div>
           {isLoading === false ? (
             <>
               <div className='h-[40%] mx-8 mt-5 rounded-xl flex flex-col items-center justify-center overflow-hidden'>
@@ -476,14 +480,14 @@ const MapRef = () => {
                   </div>
                   <div className='w-[85%]' onClick={goSetDeparture}>
                     <div className='flex justify-between'>
-                      <div className='font-bold mb-1 text-[17px] text-gray-300'>
+                      <div className='font-bold mb-1 text-[17px] text-black'>
                         {!!departuresName ? departuresName : currentAdd}
                       </div>
                       <div className='w-[10%] flex justify-center items-center'>
                         <img src={Front} alt='출발지 설정' />
                       </div>
                     </div>
-                    <div className='text-gray-400'>출발지</div>
+                    <div className='text-gray-500'>출발지</div>
                   </div>
                 </div>
                 <div className='w-[100%] h-[50%] flex justify-between'>
@@ -492,12 +496,12 @@ const MapRef = () => {
                   </div>
                   <div className='w-[85%]' onClick={goSetArrival}>
                     <div className='flex justify-between'>
-                      <div className='font-bold mb-1 text-[17px] text-gray-300'>{arrivalsName}</div>
+                      <div className='font-bold mb-1 text-[17px] text-black'>{arrivalsName}</div>
                       <div className='w-[10%] flex justify-center items-center'>
                         <img src={Front} alt='도착지 설정' />
                       </div>
                     </div>
-                    <div className='text-gray-400'>도착지</div>
+                    <div className='text-gray-500'>도착지</div>
                   </div>
                 </div>
               </div>
@@ -510,17 +514,17 @@ const MapRef = () => {
                 </div>
                 <div className='w-[80%] h-[30%] mx-8 mt-4'>
                   <div className='w-[100%] h-[50%] flex'>
-                    <div className='w-[30%] text-[17px] text-white self-end'>출발지 : </div>
+                    <div className='w-[30%] text-[17px] text-black self-end'>출발지 : </div>
                     <div className='w-[60%] self-end'>
-                      <div className='font-bold text-[17px] text-gray-300'>
+                      <div className='font-bold text-[17px] text-gray-600'>
                         {autoMatchData.request.depName}
                       </div>
                     </div>
                   </div>
                   <div className='w-[100%] h-[50%] flex'>
-                    <div className='w-[30%] text-[17px] text-white self-center'>도착지 : </div>
+                    <div className='w-[30%] text-[17px] text-black self-center'>도착지 : </div>
                     <div className='w-[60%] self-center'>
-                      <div className='font-bold text-[17px] text-gray-300'>
+                      <div className='font-bold text-[17px] text-gray-600'>
                         {autoMatchData.request.arrName}
                       </div>
                     </div>
@@ -539,9 +543,9 @@ const MapRef = () => {
                 <div className='w-[100%] h-[40%] mx-8 mt-5 rounded-xl flex flex-col items-center justify-center overflow-hidden'>
                   <PartyMap />
                 </div>
-                <span className='loading loading-dots loading-lg text-gray-300'></span>
+                <span className='loading loading-dots loading-lg text-gray-500'></span>
                 <div className='w-[100%] h-[15%] flex flex-col justify-evenly items-center'>
-                  <div className='text-gray-300'>매칭 대기중</div>
+                  <div className='text-gray-500'>매칭 대기중</div>
                   <div className='text-gray-500'>30초 이후 매칭신청이 종료됩니다!</div>
                   <div className='w-[80%] bg-gray-200 rounded-lg overflow-hidden'>
                     <div
@@ -551,17 +555,17 @@ const MapRef = () => {
                 </div>
                 <div className='w-[80%] h-[15%] mx-8'>
                   <div className='w-[100%] h-[50%] flex'>
-                    <div className='w-[30%] text-[17px] text-white self-end'>출발지 : </div>
+                    <div className='w-[30%] text-[17px] text-gray-500 self-end'>출발지 : </div>
                     <div className='w-[60%] self-end'>
-                      <div className='font-bold text-[17px] text-gray-300'>
+                      <div className='font-bold text-[17px] text-black'>
                         {reqAutoMatchData.depName}
                       </div>
                     </div>
                   </div>
                   <div className='w-[100%] h-[50%] flex'>
-                    <div className='w-[30%] text-[17px] text-white self-center'>도착지 : </div>
+                    <div className='w-[30%] text-[17px] text-gray-500 self-center'>도착지 : </div>
                     <div className='w-[60%] self-center'>
-                      <div className='font-bold text-[17px] text-gray-300'>
+                      <div className='font-bold text-[17px] text-black'>
                         {reqAutoMatchData.arrName}
                       </div>
                     </div>
@@ -602,7 +606,7 @@ const MapRef = () => {
     <div className='w-[100%] h-[100%]'>
       <div className='fixed w-[100%] h-[5%] bg-black z-10 flex items-center'>
         <div className='fixed w-[100%] flex pl-3 text-[18px] font-semibold text-white'>
-          {curLocAdd}
+          {`${curLocAdd.split(' ')[0]} ${curLocAdd.split(' ')[1] === undefined ? '' : curLocAdd.split(' ')[1]} ${curLocAdd.split(' ')[2] === undefined ? '' : curLocAdd.split(' ')[2]}`}
           <div
             className='flex justify-center items-center px-2'
             onClick={() => {
@@ -638,7 +642,7 @@ const MapRef = () => {
       </div>
       <div ref={ref} id='map' className='w-[100%] h-[100%]' />
       <button
-        className='absolute btn z-10 w-[15%] h-[5%] bottom-[13%] right-[3%] border-none bg-black text-white hover:text-OD_GREEN'
+        className='absolute btn z-10 w-[15%] h-[5%] bottom-[10%] right-[3%] border-none bg-black text-white hover:text-OD_GREEN'
         onClick={goCreateParty}>
         파티 생성
       </button>

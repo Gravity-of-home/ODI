@@ -177,20 +177,20 @@ const PartyCreatePage = () => {
   let setDateModal = (
     <>
       <dialog ref={dateModalRef} id='my_modal_4' className='modal'>
-        <div className='modal-box w-11/12 bg-black'>
-          <h3 className='font-bold text-[20px] text-white'>출발시간</h3>
-          <div className='mt-1 border border-gray-500'></div>
-          <h4 className='mt-3 text-lg text-white'>날짜</h4>
+        <div className='modal-box w-11/12 bg-white'>
+          <h3 className='font-bold text-[20px] text-black'>출발시간</h3>
+          <div className='mt-1 border border-gray-300'></div>
+          <h4 className='mt-3 text-lg text-black'>날짜</h4>
           <Calendar onDateClick={setDateCilck} />
           {/* <p className='flex py-2 justify-end'>날짜를 선택해 주세요.</p> */}
-          <h4 className='mt-3 text-lg text-white'>시간</h4>
+          <h4 className='mt-3 text-lg text-black'>시간</h4>
           <div className='flex justify-center'>
             <TimePicker onTimeChange={setTimeClick} />
           </div>
           {/* <p className='flex py-2 justify-end'>시간을 선택해 주세요.</p> */}
           <div className='modal-action'>
             <form method='dialog'>
-              <button className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5 text-white'>
+              <button className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5 text-black'>
                 ✕
               </button>
               <button className='btn bg-OD_PURPLE text-white border-none' onClick={setDate}>
