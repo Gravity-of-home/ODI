@@ -15,6 +15,7 @@ import com.homegravity.Odi.domain.party.entity.RoleType;
 import com.homegravity.Odi.domain.party.entity.StateType;
 import com.homegravity.Odi.domain.party.respository.PartyMemberRepository;
 import com.homegravity.Odi.domain.party.respository.PartyRepository;
+import com.homegravity.Odi.global.entity.S3Folder;
 import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import com.homegravity.Odi.global.service.S3Service;
@@ -62,7 +63,7 @@ public class MemberService {
         //이미지를 변경한다면
         if (!memberUpdateRequestDTO.getNewImage().isEmpty()) {
             String oldImgS3Url = member.getImage();
-            String newImgS3Url = s3Service.saveFile(memberUpdateRequestDTO.getNewImage());
+            String newImgS3Url = s3Service.saveFile(memberUpdateRequestDTO.getNewImage(), S3Folder.PROFILE_IMAGE);
 
             s3Service.deleteFile(oldImgS3Url);
             member.updateImage(newImgS3Url);
