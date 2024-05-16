@@ -32,4 +32,5 @@ export const ViteConfig = {
 
   /* STOMP, SOCK */
   VITE_SOCK_URL: import.meta.env.VITE_SOCK_URL,
+  VITE_MATCHING_SOCK_URL: import.meta.env.VITE_MATCHING_SOCK_URL,
 };

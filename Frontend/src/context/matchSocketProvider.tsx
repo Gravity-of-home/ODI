@@ -22,9 +22,8 @@ interface MatchSocketProviderProps {
 export const MatchSocketProvider: React.FC<MatchSocketProviderProps> = ({ children }) => {
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [isMatchConnected, setIsMatchConnected] = useState(false); // 연결 상태를 추적하는 상태
-  const { id } = userStore();
   const BASE_URI = ViteConfig.VITE_BASE_URL;
-  const broker = ViteConfig.VITE_SOCK_URL;
+  const broker = ViteConfig.VITE_MATCHING_SOCK_URL;
 
   useEffect(() => {
     const token = getCookie('Authorization');
