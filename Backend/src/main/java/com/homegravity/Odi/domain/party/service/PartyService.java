@@ -237,7 +237,7 @@ public class PartyService {
         Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, ErrorCode.NOT_FOUND_ERROR.getMessage()));
 
         // 요청자와 작성자가 동일인인지 확인
-        if (member.getId() != Long.parseLong(party.getCreatedBy())) {
+        if (!partyMemberRepository.findParticipantRole(party, member).equals(RoleType.ORGANIZER)) {
             throw new BusinessException(ErrorCode.PARTY_MEMBER_ACCESS_DENIED, ErrorCode.PARTY_MEMBER_ACCESS_DENIED.getMessage());
         }
 
@@ -309,7 +309,7 @@ public class PartyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "파티를 찾을 수 없습니다."));
 
         // 요청자와 작성자가 동일인인지 확인
-        if (member.getId() != Long.parseLong(party.getCreatedBy())) {
+        if (!partyMemberRepository.findParticipantRole(party, member).equals(RoleType.ORGANIZER)) {
             throw new BusinessException(ErrorCode.PARTY_MEMBER_ACCESS_DENIED, ErrorCode.PARTY_MEMBER_ACCESS_DENIED.getMessage());
         }
 
@@ -347,11 +347,12 @@ public class PartyService {
         return PartyChatInfoResponseDTO.of(party, me, organizer, participants);
     }
 
-    // TODO: 매치 파티 생성
+    // 매치 파티 생성
     @Transactional
     public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) {
 
-        Party party = partyRepository.save(Party.of(requestDTO1));
+        String roomId = chatRoomRepository.createChatRoom();
+        Party party = partyRepository.save(Party.of(requestDTO1, roomId));
 //        partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
 
         Member organizer = memberRepository.findById(member1).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));

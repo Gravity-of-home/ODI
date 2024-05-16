@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import latLngAddStore from '@/stores/useLatLngAddStore';
+import mapStore from '@/stores/useMapStore';
 import DarkModeStyle from './DarkModeStyle';
 import { useNavigate } from 'react-router-dom';
 import BottomSheet from '@/components/BottomSheet/BottomSheet';
@@ -37,6 +38,7 @@ const MapRef = () => {
   const nav = useNavigate();
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const { currentAdd, currentLat, currentLng } = latLngAddStore();
+  const { setGoogleMap, setLatitude, setLongitude } = mapStore();
   const {
     departuresName,
     departuresLocation,
@@ -206,8 +208,7 @@ const MapRef = () => {
         },
       });
       setMap(initialMap);
-
-      setMapCenter(initialMap.getCenter() as google.maps.LatLng);
+      setGoogleMap?.(initialMap);
 
       const markerInstance = new window.google.maps.Marker({
         position: initialMap.getCenter(),
@@ -299,21 +300,17 @@ const MapRef = () => {
 
   // NOTE : 서버 데이터로부터 마커 생성하기
   useEffect(() => {
-    // if (map) {
-    //   fetch('YOUR_API_ENDPOINT')
-    //     .then(response => response.json())
-    //     .then(dataList => {
-    //       updateMarkers(dataList);
-    //     });
-    // }
     const getPartyData = async () => {
       if (map) {
         const lat = map.getCenter()?.lat();
         const lng = map.getCenter()?.lng();
+        setLatitude?.(lat as number);
+        setLongitude?.(lng as number);
+
         console.log('MAP CENTER', lat, lng);
         try {
           const response = await jwtAxios.get(
-            `/api/party-boards?page=0&size=50&sort=distance,desc&isToday=false&departuresDate=&gender=&category=&longitude=${lng}&latitude=${lat}`,
+            `/api/party-boards?page=0&size=50&sort=distance,asc&isToday=false&departuresDate=&gender=&category=&longitude=${lng}&latitude=${lat}`,
           );
 
           const { content } = response.data.data;
@@ -321,7 +318,7 @@ const MapRef = () => {
           setPartyData(content);
           updateMarkers(content);
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error('ERROR GET PARTY DATA', error);
         }
       }
     };
@@ -343,6 +340,8 @@ const MapRef = () => {
           url: categoryIcons[item.category as keyof typeof categoryIcons],
           scaledSize: new google.maps.Size(50, 50),
         },
+        draggable: false,
+        animation: google.maps.Animation.DROP,
       });
 
       // Add click listener to log data

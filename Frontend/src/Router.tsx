@@ -21,9 +21,9 @@ import ChatPage from './pages/Chat/ChatPage';
 import ChatDetailPage from './pages/Chat/ChatDetailPage';
 
 import { WebSocketProvider } from './context/webSocketProvider';
+import { MatchSocketProvider } from './context/matchSocketProvider';
 import PaymentsSuccess from './pages/Profile/components/PaymentsSuccess';
 import PaymentsFail from './pages/Profile/components/PaymentsFail';
-import MatchPage from './pages/Match/MatchPage';
 
 type AuthWrapperProps = {
   children: React.ReactNode;
@@ -44,7 +44,11 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     return <Navigate to='/login' replace={true} />;
   }
 
-  return <WebSocketProvider>{children}</WebSocketProvider>;
+  return (
+    <WebSocketProvider>
+      <MatchSocketProvider>{children}</MatchSocketProvider>
+    </WebSocketProvider>
+  );
 };
 
 // const spinner = () => {
@@ -197,14 +201,6 @@ const router = createBrowserRouter([
     element: (
       <AuthWrapper>
         <ChatDetailPage></ChatDetailPage>
-      </AuthWrapper>
-    ),
-  },
-  {
-    path: '/matchtest',
-    element: (
-      <AuthWrapper>
-        <MatchPage></MatchPage>
       </AuthWrapper>
     ),
   },

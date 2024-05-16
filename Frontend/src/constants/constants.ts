@@ -48,6 +48,18 @@ export const Category = [
     tag: 'RESERVIST',
     name: '예비군',
   },
+  {
+    tag: 'MATCHING',
+    name: '자동매칭',
+  },
 ];
 
-export const categoryIcons = [DAILY, UNIVERSITY, COMMUTE, CONCERT, AIRPORT, TRAVEL, RESERVIST];
+export const categoryIcons = {
+  DAILY: DAILY,
+  UNIVERSITY: UNIVERSITY,
+  COMMUTE: COMMUTE,
+  CONCERT: CONCERT,
+  AIRPORT: AIRPORT,
+  TRAVEL: TRAVEL,
+  RESERVIST: RESERVIST,
+};

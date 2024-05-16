@@ -15,6 +15,7 @@ import { IPlaceInfo } from '@/types/Party';
 import jwtAxios from '@/utils/JWTUtil';
 import SearchDepartureItem from './SearchDepartureItem';
 import { toast } from 'react-toastify';
+import usePreviousPath from '@/hooks/usePreviousPath';
 
 const MapRef = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -27,6 +28,12 @@ const MapRef = () => {
     new google.maps.LatLng({ lat: currentLat, lng: currentLng }),
   );
   const [departName, setDepartName] = useState<string>('내 위치');
+  // const previousPath = usePreviousPath();
+  // console.log(`Previous path: ${previousPath}`);
+
+  useEffect(() => {
+    setDepartures?.('내 위치', { latitude: currentLat, longitude: currentLng });
+  }, []);
 
   const successReq = () => {
     return toast.success('출발지가 설정되었습니다.');
@@ -119,7 +126,7 @@ const MapRef = () => {
         clickableIcons: false,
         styles: DarkModeStyle,
         zoom: 16,
-        minZoom: 10,
+        minZoom: 7,
         maxZoom: 18,
         gestureHandling: 'greedy',
         restriction: {
@@ -184,7 +191,7 @@ const MapRef = () => {
         </div>
         <div className='w-[100%] h-[15%] font-semibold flex items-center my-5'>
           <SvgArrivalMarker width={'10%'} height={'100%'} />
-          <div className='w-[90%] h-[100%] pl-2 flex items-center'>{departName}</div>
+          <div className='w-[90%] h-[100%] pl-2 flex items-center text-gray-500'>{departName}</div>
         </div>
         <div className='w-[100%] h-[40%] flex justify-center items-center'>
           <div
@@ -282,7 +289,7 @@ const SetDeparture = () => {
           type='text'
           ref={searchRef}
           value={search}
-          className='w-[90%] h-[60%] flex items-center bg-black rounded-xl px-12 py-2'
+          className='w-[90%] h-[60%] flex items-center bg-black rounded-xl px-12 py-2 text-white'
           placeholder='어디에서 출발하나요?'
           onChange={getLocationBySearch}
         />
