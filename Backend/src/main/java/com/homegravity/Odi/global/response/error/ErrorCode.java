@@ -66,6 +66,7 @@ public enum ErrorCode {
     //S3
     S3_SAVE_ERROR(400, "S3에 파일 저장에 실패하였습니다."),
     S3_DELETE_ERROR(400, "S3에 파일 삭제에 실패하였습니다."),
+    FILE_FORMAT_NOT_EXIST(400, "존재하지 않은 형식의 파일입니다"),
 
     // Place
     NEAR_PLACE_NOT_EXIST(400, "인근 장소를 찾을 수 없습니다."),
@@ -90,9 +91,8 @@ public enum ErrorCode {
     PARTY_SETTLEMENT_NOT_COMPLETED(400, "파티 정산이 완료되지 않았습니다."),
 
     // Match
-    MATCH_ALREADY_EXIST(200, "이미 진행 중인 매칭이 있습니다."),
+    MATCH_ALREADY_EXIST(200, "이미 진행 중인 매칭이 있습니다.");
 
-    ;
     /**
      * ******************************* Error Code Field ***************************************
      */

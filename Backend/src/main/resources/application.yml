@@ -87,6 +87,10 @@ cloud:
   aws:
     s3:
       bucket: ${S3_BUCKET}
+      folder:
+        profile: ${S3_FOLDER_PROFILE_IMAGE}
+        receipt: ${S3_FOLDER_RECEIPT}
+        report: ${S3_FOLDER_REPORT}
     credentials:
       access-key: ${S3_ACCESS_KEY}
       secret-key: ${S3_SECRET_KEY}
