@@ -62,6 +62,7 @@ public class PathHandlerInterceptor implements HandlerInterceptor {
                     log.info("안돼요 돌아가세요");
                     throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, ErrorCode.FORBIDDEN_ERROR.getMessage());
                 }
+                break;
             }
         }
         return true;
@@ -78,7 +79,6 @@ public class PathHandlerInterceptor implements HandlerInterceptor {
             return true;
 
         PartyMember partyMember = partyMemberRepository.findByPartyAndMember(party, me).orElse(null);
-
 
         //권한 가능 role에 포함되는지
         if (pathPropertiesConfig.getPathSecurity().get(mapKey).get(request.getMethod()).getInclude() != null) {
