@@ -88,7 +88,7 @@ const ChatListPage: React.FC = () => {
           </button>
         </div>
         <div className='navbar-center'>
-          <a className='text-xl'>채팅목록</a>
+          <a className='text-xl font-bold'>채팅목록</a>
         </div>
         <div className='navbar-end'></div>
       </div>

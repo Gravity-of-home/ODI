@@ -121,6 +121,9 @@ const NavBar: React.FC<INavBarProps> = ({
     navigate(`/chat/detail/${partyId}`);
   }
   function goBack() {
+    navigate(-1);
+  }
+  function goParty() {
     navigate(`/party/${partyId}`);
   }
 
@@ -187,7 +190,9 @@ const NavBar: React.FC<INavBarProps> = ({
         <button onClick={goBack} className='btn btn-ghost btn-circle text-3xl'>
           {'<'}
         </button>
-        <p className='font-bold text-2xl flex-grow text-center'>{title}</p>
+        <p onClick={goParty} className='font-bold text-2xl flex-grow text-center'>
+          {title}
+        </p>
         <button onClick={goDetail} className='btn btn-square btn-ghost'>
           <svg
             xmlns='http://www.w3.org/2000/svg'

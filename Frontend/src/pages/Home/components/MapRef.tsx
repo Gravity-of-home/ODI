@@ -445,7 +445,11 @@ const MapRef = () => {
           </div>
         </div>
         <div className='fixed w-[100%] flex justify-end px-3'>
-          <div className='px-2 z-10' onClick={() => {}}>
+          <div
+            className='px-2 z-10'
+            onClick={() => {
+              nav('/chatlist');
+            }}>
             <SvgChat />
           </div>
           <div className='px-2 z-10' onClick={() => {}}>

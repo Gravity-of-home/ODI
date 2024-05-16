@@ -156,7 +156,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
           <p>{person.nickname}</p>
           <p>{person.gender === 'M' ? '남' : '여'}</p>
           <p>{person.ageGroup}</p>
-          <p className='font-bold'>당도 : {person.brix.toFixed(1)} brix</p>
+          <p className='font-bold'>당도 : {person.brix.toFixed(1)}° Bx</p>
         </div>
         <div>
           {role === 'ORGANIZER' && ( // role이 'ORGANIZER'일 때만 버튼 렌더링
@@ -178,17 +178,26 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   // 팟장에게 보일 파티 신청자 목록
   const applicantList = guests?.map((applicant: IParticipant) => (
     <li className='flex justify-between content-center' key={applicant.id}>
-      <div className='user-profile flex gap-x-2 items-center'>
+      <div className='user-profile flex gap-x-4 items-center'>
         <img src={applicant.profileImage} alt='user-img' className='rounded-full w-10 h-10' />
-        <div>{applicant.nickname}</div>
-        <div>{applicant.gender === 'M' ? '남' : '여'}</div>
-        <div>{applicant.ageGroup}</div>
-        <p className='rounded-full p-2' style={{ backgroundColor: '#A75DFC' }}>
-          당도 : {applicant.brix.toFixed(1)}
-        </p>
+        <div className='ml-4'>
+          <div>{applicant.nickname}</div>
+          <div>{applicant.gender === 'M' ? '남' : '여'}</div>
+          <div>{applicant.ageGroup}</div>
+        </div>
+      </div>
+      <div className='w-max'>
+        <p className='text-xl font-bold'>당도</p>
+        <p className='font-bold'>{hostBrix.toFixed(1)}° Bx</p>
+        <div className='w-full'>
+          <progress
+            className='progress progress-error w-full bg-red-100'
+            value={hostBrix}
+            max='100'></progress>
+        </div>
       </div>
       {role === 'ORGANIZER' && (
-        <div>
+        <div className='flex'>
           <button
             onClick={acceptEnterParty(applicant.id, applicant.nickname)}
             className='ml-2 py-1 px-3 rounded bg-green-500 text-white'>
@@ -227,7 +236,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
             <div className='card-actions justify-end'>
               <div className='w-full'>
                 <p className='text-xl font-bold'>당도</p>
-                <p className='font-bold'>{hostBrix.toFixed(1)} brix</p>
+                <p className='font-bold'>{hostBrix.toFixed(1)}° Bx</p>
                 <div className='w-full'>
                   <progress
                     className='progress progress-error w-full bg-red-100'

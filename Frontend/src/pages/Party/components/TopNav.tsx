@@ -132,8 +132,8 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
     document.body.style.overflow = modalVisible ? 'hidden' : 'auto';
   }, [modalVisible]);
 
-  const goBack = () => {
-    nav(-1);
+  const goHome = () => {
+    nav('/home');
   };
 
   const toggleModal = () => {
@@ -147,7 +147,7 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
   return (
     <div className='fixed top-0 bg-white w-screen z-[1000]'>
       <div className='flex items-center justify-between px-4 py-2'>
-        <button onClick={goBack} className='btn btn-square btn-ghost text-3xl'>
+        <button onClick={goHome} className='btn btn-square btn-ghost text-3xl'>
           {'<'}
         </button>
         <p className='text-xl font-bold flex-grow text-center'>
