@@ -141,6 +141,7 @@ public class CustomPartyMemberImpl implements CustomPartyMember {
 
         return jpaQueryFactory.selectFrom(qPartyMember)
                 .where(qPartyMember.deletedAt.isNull()
+                        , qPartyMember.party.eq(party)
                         , qPartyMember.role.eq(RoleType.PARTICIPANT)
                         , neMember(member, qPartyMember))
                 .fetch()
