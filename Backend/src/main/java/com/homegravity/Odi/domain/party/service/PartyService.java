@@ -347,11 +347,12 @@ public class PartyService {
         return PartyChatInfoResponseDTO.of(party, me, organizer, participants);
     }
 
-    // TODO: 매치 파티 생성
+    // 매치 파티 생성
     @Transactional
     public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) {
 
-        Party party = partyRepository.save(Party.of(requestDTO1));
+        String roomId = chatRoomRepository.createChatRoom();
+        Party party = partyRepository.save(Party.of(requestDTO1, roomId));
 //        partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
 
         Member organizer = memberRepository.findById(member1).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));

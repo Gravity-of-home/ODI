@@ -3,6 +3,7 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { getCookie } from '@/utils/CookieUtil';
 import { ViteConfig } from '@/apis/ViteConfig';
+import axios from 'axios';
 import userStore from '@/stores/useUserStore';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -22,9 +23,9 @@ interface WebSocketProviderProps {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false); // 연결 상태를 추적하는 상태
+  const { id } = userStore();
   const BASE_URI = ViteConfig.VITE_BASE_URL;
   const broker = ViteConfig.VITE_SOCK_URL;
-  const { id } = userStore();
   const nav = useNavigate();
 
   function GoPartyPage(id: number) {
