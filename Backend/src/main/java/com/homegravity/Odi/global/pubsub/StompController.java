@@ -42,6 +42,9 @@ public class StompController {
         // 로그인 회원 정보로 대화명 설정
         message.setSenderNickname(senderNickname);
         message.setSenderImage(image);
+        // target이 null일 경우 sender로 설정
+        if(message.getTargetId()==null)
+            message.setTargetId(sender.getId());
         // 송신 시간 설정 (한국 기준)
         message.setSendTime(LocalDateTime.now(ZoneId.of("Asia/Seoul")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         // Websocket에 발행된 메시지를 redis로 발행(publish)
