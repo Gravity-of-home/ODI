@@ -31,7 +31,7 @@ const MapRef = () => {
     return toast.success('도착지가 설정되었습니다.');
   };
   const failReq = () => {
-    return toast.error('도착지 설정에 실패했습니다.');
+    toast.error('도착지 설정에 실패했습니다.');
   };
 
   const goCurrentLoc = () => {
@@ -116,7 +116,7 @@ const MapRef = () => {
         center: mapCenter,
         clickableIcons: false,
         disableDefaultUI: true,
-        styles: DarkModeStyle,
+        // styles: DarkModeStyle,
         zoom: 16,
         minZoom: 7,
         maxZoom: 18,
@@ -231,7 +231,7 @@ const SetArrival = () => {
 
   const failReq = () => {
     setSearchData([]);
-    return toast.error('검색 결과가 없습니다.');
+    return toast.error('검색 결과가 없습니다.', { toastId: 'arrivalSearch' });
   };
 
   const getSearchData = async (searchValue: string) => {
