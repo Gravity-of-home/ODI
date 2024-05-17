@@ -7,6 +7,7 @@ import com.homegravity.Odi.domain.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,8 +31,8 @@ public class ChatController {
     @Operation(summary = "채팅방 상세 조회", description = "채팅방 ID에 해당하는 채팅방 상세 정보를 조회합니다.")
     @GetMapping("/room/{room-id}")
     @ResponseBody
-    public ChatDetailDTO roomInfo(@PathVariable(value = "room-id") String roomId) {
-        return chatRoomRepository.findRoomById(roomId);
+    public ChatDetailDTO roomInfo(@PathVariable(value = "room-id") String roomId, Pageable pageable) {
+        return chatRoomRepository.findRoomById(roomId, pageable);
     }
 
 }
