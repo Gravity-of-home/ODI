@@ -58,9 +58,6 @@ public class PartyService {
         partyMemberRepository.save(PartyMember.of(RoleType.ORGANIZER, false, party, member));
         partyBoardStats.updateParty(party);
 
-        // 택시 요금 갱신 => 비동기 처리
-        mapService.getPartyPathInfo(party.getId(), party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY(), party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
-
         return party.getId();
     }
 
@@ -357,7 +354,6 @@ public class PartyService {
 
         String roomId = chatRoomRepository.createChatRoom();
         Party party = partyRepository.save(Party.of(requestDTO1, roomId));
-//        partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
 
         Member organizer = memberRepository.findById(member1).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
         Member participant = memberRepository.findById(member2).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
@@ -369,10 +365,6 @@ public class PartyService {
         // party board stats 저장
         PartyBoardStats partyBoardStats = PartyBoardStats.of(0, 0);
         partyBoardStats.updateParty(party);
-
-        // 택시 요금 갱신 => 비동기 처리
-        mapService.getPartyPathInfo(party.getId(), party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY(), party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY());
-
 
         return party.getId();
     }

@@ -34,28 +34,24 @@ public class MapService {
                 .block(); // 동기 처리
     }
 
-    @Async
-    public void getPartyPathInfo(Long partyId, Double departuresX, Double departuresY, Double arrivalsX, Double arrivalsY) throws JsonProcessingException {
+    public Integer getPartyPathInfo(Long partyId) throws JsonProcessingException {
+
+        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.PARTY_NOT_EXIST, ErrorCode.PARTY_NOT_EXIST.getMessage()));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule()); // JavaTimeModule 등록 - LocalDateTime 사용 가능
 
         String uriTemplate = "?start={startX},{startY}&goal={goalX},{goalY}";
 
         String response = naverWebClient.get()
-                .uri(uriTemplate, departuresX, departuresY, arrivalsX, arrivalsY)
+                .uri(uriTemplate, party.getDeparturesLocation().getX(), party.getDeparturesLocation().getY(), party.getArrivalsLocation().getX(), party.getArrivalsLocation().getY())
                 .retrieve()
                 .bodyToMono(String.class)
                 .block(); // 동기 처리
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule()); // JavaTimeModule 등록 - LocalDateTime 사용 가능
         MapResponseDTO result = objectMapper.readValue(response, MapResponseDTO.class);
 
-        // 택시비 갱신
-        Party party = partyRepository.findParty(partyId).orElseThrow(() -> new BusinessException(ErrorCode.PARTY_NOT_EXIST, ErrorCode.PARTY_NOT_EXIST.getMessage()));
-        int taxiFare = result.getRoute().getTraoptimal().get(0).getSummary().getTaxiFare();
-        if(party.getTaxiFare() != taxiFare) {
-            party.updateTaxiFare(taxiFare);
-        }
-
+        return result.getRoute().getTraoptimal().get(0).getSummary().getTaxiFare();
 
     }
 }

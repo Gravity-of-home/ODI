@@ -70,9 +70,6 @@ public class Party extends BaseBy {
     @Column(name = "room_Id")
     private String roomId;
 
-    @Column(name = "taxi_fare")
-    private Integer taxiFare;
-
     @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartyBoardStats partyBoardStats;
 
@@ -87,7 +84,7 @@ public class Party extends BaseBy {
                   String arrivalsName, Point arrivalsLocation,
                   LocalDateTime departuresDate, Integer maxParticipants, Integer currentParticipants,
                   CategoryType category, GenderType genderRestriction, String content,
-                  String roomId, Integer taxiFare) {
+                  String roomId) {
 
         this.title = title;
         this.departuresName = departuresName;
@@ -102,7 +99,6 @@ public class Party extends BaseBy {
         this.state = StateType.GATHERING;
         this.content = content;
         this.roomId = roomId;
-        this.taxiFare = taxiFare;
     }
 
 
@@ -221,7 +217,4 @@ public class Party extends BaseBy {
 
     public void updateCurrentParticipants(int currentParticipants){ this.currentParticipants = currentParticipants; }
 
-    public void updateTaxiFare(Integer taxiFare) {
-        this.taxiFare = taxiFare;
-    }
 }
