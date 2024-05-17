@@ -21,7 +21,6 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
-    private final PartyRepository partyRepository;
     private final PartyMemberRepository partyMemberRepository;
 
     private final EmailService emailService;
@@ -47,7 +46,7 @@ public class ReportService {
         // 첨부파일 S3 저장
         String imgUrl = "";
         if (requestDTO.getAttachments() != null) {
-            imgUrl = s3Service.saveFile(requestDTO.getAttachments(), S3Folder.RECEIPT);
+            imgUrl = s3Service.saveFile(requestDTO.getAttachments(), S3Folder.REPORT);
         }
 
         reportRepository.save(Report.of(requestDTO, imgUrl, reported, reporter));
