@@ -26,8 +26,6 @@ public class PointService {
     private final MemberRepository memberRepository;
     private final PointHistoryRepository pointHistoryRepository;
 
-    private final String POINT_HISTORY_DETAIL_CONTENT = "%s -> %s (%d원, %d명 동승)";
-
     // 파티 선불/정산 및 내역 생성
     public void usePoint(Member member, Party party, int wholeCost, int memberCost, int paidAmount, PointHistoryType type) {
 
@@ -39,8 +37,8 @@ public class PointService {
         memberRepository.save(member);
 
         // 포인트 사용 내역 생성
-        String detailContent = String.format(POINT_HISTORY_DETAIL_CONTENT, party.getDeparturesName(), party.getArrivalsName(), wholeCost, party.getCurrentParticipants());
-        pointHistoryRepository.save(PointHistory.createSettleHistory(member, party.getId(), party.getTitle(), detailContent, type, paidAmount - memberCost));
+        String detailContent = String.format("%s -> %s (%d원, %d명 동승)", party.getDeparturesName(), party.getArrivalsName(), wholeCost, party.getCurrentParticipants());
+        pointHistoryRepository.save(PointHistory.createHistory(member, party.getId(), party.getTitle(), detailContent, type, paidAmount - memberCost));
     }
 
     // 정산 요청자 - 선불 금액 돌려받기
@@ -48,7 +46,8 @@ public class PointService {
         member.updatePoint(cost);
         memberRepository.save(member);
 
-        pointHistoryRepository.save(PointHistory.createSettleHistory(member, party.getId(), party.getTitle(), "선불 금액 반환", PointHistoryType.SETTLEMENT, cost));
+        String detailContent = String.format("%s -> %s [선불 금액 반환]", party.getDeparturesName(), party.getArrivalsName());
+        pointHistoryRepository.save(PointHistory.createHistory(member, party.getId(), party.getTitle(), detailContent, PointHistoryType.PAYER_SETTLEMENT, cost));
     }
 
     // 포인트 입금
@@ -56,14 +55,14 @@ public class PointService {
         member.updatePoint(cost);
         memberRepository.save(member);
 
-        String detailContent = String.format(POINT_HISTORY_DETAIL_CONTENT, party.getDeparturesName(), party.getArrivalsName(), wholeCost, party.getCurrentParticipants());
-        pointHistoryRepository.save(PointHistory.createSettleHistory(member, party.getId(), party.getTitle(), detailContent + " [정산자 입금]", PointHistoryType.SETTLEMENT, cost));
+        String detailContent = String.format("%s -> %s (%d원, %d명 동승) [정산자 입금]", party.getDeparturesName(), party.getArrivalsName(), wholeCost, party.getCurrentParticipants());
+        pointHistoryRepository.save(PointHistory.createHistory(member, party.getId(), party.getTitle(), detailContent, PointHistoryType.PAYER_SETTLEMENT, cost));
     }
 
     // 포인트 충전
     public void chargePoint(Payment payment) {
         payment.getCustomer().updatePoint(payment.getAmount());
-        pointHistoryRepository.save(PointHistory.createPaymentHistory(payment.getCustomer(), payment.getId(), "포인트 충전: 토스페이", payment.getAmount()));
+        pointHistoryRepository.save(PointHistory.createHistory(payment.getCustomer(), payment.getId(), "포인트 충전", "", PointHistoryType.CHARGE, payment.getAmount()));
     }
 
     // 포인트 사용 내역
