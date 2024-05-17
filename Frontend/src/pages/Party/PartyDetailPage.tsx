@@ -198,6 +198,7 @@ const PartyDetailPage = () => {
         role={info.role}
         state={info.state}
         partyId={partyId}
+        roomId={info.roomId}
         title={info.title}
         currentParticipants={info.currentParticipants}
         expectedCost={info.expectedCost}
@@ -263,6 +264,7 @@ const PartyDetailPage = () => {
         role={info.role}
         partyId={partyId}
         roomId={info.roomId}
+        expectedCost={info.expectedCost}
         fetchData={fetchData}
         hostGender={hostInfo.gender}
         hostId={hostInfo.id}

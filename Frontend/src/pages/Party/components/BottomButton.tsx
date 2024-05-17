@@ -11,19 +11,18 @@ interface IButtonProps {
   role: string;
   partyId: string | undefined;
   roomId: string;
+  expectedCost: number;
   hostGender: string;
   hostId: number;
   genderRestriction: string;
 }
 
-// 파티 상태와 조회하는 사람마다 다르게 버튼을 보여주어야 함
-// 1. 모집마감 (팟장 & 파티원, 파티신청자, 게스트)
-// 2. 모집중 ( 팟장, & 파티원, 파티신청자, 게스트)
 const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   state,
   role,
   partyId,
   roomId,
+  expectedCost,
   hostGender,
   hostId,
   genderRestriction,
@@ -34,45 +33,52 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
   const [gender, setGender] = useState<string | undefined>();
   const [myNickName, setMyNickName] = useState('');
   const [myId, setMyID] = useState(0);
+
   useEffect(() => {
     const userDataJSON = localStorage.getItem('User');
-
     if (userDataJSON) {
       const userData = JSON.parse(userDataJSON);
       const nickname = userData?.state?.nickname;
       const id = userData?.state?.id;
+      const userGender = userData?.state?.gender;
+      setGender(userGender);
       setMyNickName(nickname);
       setMyID(id);
     }
   }, []);
+
+  // 개인알림 보내주는거
+  const handleSendAlarm = (type: string) => {
+    if (client && client.connected) {
+      client.publish({
+        destination: `/pub/notification/${hostId}`,
+        body: JSON.stringify({
+          partyId: partyId,
+          content: `${myNickName}님이 파티 참여를 요청했어요!`,
+          type,
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+  // 채팅 보내주는거
   const handleSendMessage = (type: string) => {
     if (client && client.connected) {
-      if (type === 'APPLY') {
-        client.publish({
-          destination: `/pub/notification/${hostId}`,
-          body: JSON.stringify({
-            partyId: partyId,
-            content: `${myNickName}님이 파티 참여를 요청했어요!`,
-            type: 'APPLY',
-          }),
-          headers: {
-            token: `${getCookie('Authorization')}`,
-          },
-        });
-      }
-      // else if (type === 'RequestMatching'){
-      //   client.publish({
-      //     destination: `/pub/chat/message`,
-      //     body: JSON.stringify({
-      //       // roomId: 방장개인알림아이디,
-      //       content: `${myNickName}님이 파티 참여를 요청했어요!`,
-      //       type: 'TALK',
-      //     }),
-      //     headers: {
-      //       token: `${getCookie('Authorization')}`,
-      //     },
-      //   });
-      // }
+      client?.publish({
+        destination: `/pub/chat/message`,
+        body: JSON.stringify({
+          partyId: partyId,
+          roomId: roomId,
+          type,
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
     } else {
       alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
     }
@@ -89,16 +95,6 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
     );
   }
 
-  useEffect(() => {
-    const userDataJSON = localStorage.getItem('User');
-
-    if (userDataJSON) {
-      const userData = JSON.parse(userDataJSON);
-      const userGender = userData?.state?.gender;
-      setGender(userGender);
-    }
-  }, []);
-
   // 동승 참여 요청
   function RequestMatching() {
     jwtAxios
@@ -107,7 +103,7 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 201) {
           toast(<RequestDisplay />, { autoClose: false });
-          handleSendMessage('APPLY');
+          handleSendAlarm('APPLY');
         }
         fetchData();
       })
@@ -124,21 +120,10 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
           if (role === 'PARTICIPANT') {
-            client?.publish({
-              destination: `/pub/chat/message`,
-              body: JSON.stringify({
-                partyId: partyId,
-                roomId: roomId,
-                content: `${myNickName}님이 파티에서 나갔습니다.`,
-                type: 'QUIT',
-              }),
-              headers: {
-                token: `${getCookie('Authorization')}`,
-              },
-            });
             handleSendMessage('QUIT');
+            handleSendAlarm('QUIT');
           } else {
-            handleSendMessage('CANCEL');
+            handleSendAlarm('QUIT');
           }
         }
         fetchData();
@@ -149,6 +134,48 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         toast.error(`${err.data.message}`, { position: 'top-center' });
       });
   }
+
+  const successParty = () => {
+    jwtAxios
+      .post(
+        `/api/parties/${partyId}/success`,
+        {},
+        {
+          params: {
+            expected_cost: expectedCost,
+          },
+        },
+      )
+      .then(res => {
+        console.log(res.data);
+        if (res.data.status === 204) {
+          toast.success(`${res.data.message} 선 차감된 금액:`, {
+            position: 'top-center',
+          });
+          if (client && client.connected) {
+            client.publish({
+              destination: `/pub/chat/message`,
+              body: JSON.stringify({
+                partyId,
+                roomId,
+                type: 'TALK',
+              }),
+              headers: {
+                token: `${getCookie('Authorization')}`,
+              },
+            });
+          }
+        }
+        fetchData();
+      })
+      .catch(err => {
+        console.error(err);
+        toast.error(`${err.response.data.message} ${err.response.data.reason}`, {
+          position: 'top-center',
+        });
+      });
+  };
+
   // 채팅방으로 routing
   function GoChat() {
     nav(`/party/chat/${partyId}`);
@@ -162,8 +189,13 @@ const Button: React.FC<IButtonProps & { fetchData: () => void }> = ({
         <div>
           <button
             onClick={GoChat}
-            className='btn btn-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4'>
+            className='btn w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4'>
             <p>팟 채팅</p>
+          </button>
+          <button
+            onClick={successParty}
+            className='btn w-1/2 bg-purple-400 hover:bg-purlple-700 text-purple font-bold py-2 px-4'>
+            <p>팟 확정하기</p>
           </button>
         </div>
       );

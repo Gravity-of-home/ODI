@@ -170,6 +170,7 @@ const NavBar: React.FC<INavBarProps> = ({
         console.log(res);
         if (res.data.status === 204) {
           toast.success('정산을 완료했습니다');
+          fetchData();
         }
       })
       .catch(err => {
@@ -182,6 +183,58 @@ const NavBar: React.FC<INavBarProps> = ({
         }
       });
     fetchData();
+  };
+
+  // const successParty = () => {
+  //   jwtAxios
+  //     .post(
+  //       `/api/parties/${partyId}/success`,
+  //       {},
+  //       {
+  //         params: {
+  //           expected_cost: expectedCost,
+  //         },
+  //       },
+  //     )
+  //     .then(res => {
+  //       console.log(res.data);
+  //       if (res.data.status === 204) {
+  //         toast.success(
+  //           `${res.data.message} 선 차감된 금액: ${res.data.data.prepaidCost / currentParticipants}`,
+  //           {
+  //             position: 'top-center',
+  //           },
+  //         );
+  //         if (client && client.connected) {
+  //           client.publish({
+  //             destination: `/pub/chat/message`,
+  //             body: JSON.stringify({
+  //               partyId,
+  //               roomId,
+  //               content: messageContent,
+  //               type: 'TALK',
+  //             }),
+  //             headers: {
+  //               token: `${getCookie('Authorization')}`,
+  //             },
+  //           });
+  //         }
+  //       }
+  //       fetchData();
+  //     })
+  //     .catch(err => {
+  //       console.error(err);
+  //       toast.error(`${err.response.data.message} ${err.response.data.reason}`, {
+  //         position: 'top-center',
+  //       });
+  //     });
+  // };
+
+  const showDialog = () => {
+    const dialog = document.getElementById('my_modal_2') as HTMLDialogElement;
+    if (dialog) {
+      dialog.showModal();
+    }
   };
 
   return (
@@ -218,7 +271,25 @@ const NavBar: React.FC<INavBarProps> = ({
         </div>
         <div className='divider mb-2'></div>
       </div>
-
+      {state === 'GATHERING' && me.role === 'ORGANIZER' && (
+        <div>
+          <button
+            className='btn btn-block bg-purple-400 text-white text-xl font-bold'
+            onClick={showDialog}>
+            팟 확정하기
+          </button>
+          <dialog id='my_modal_2' className='modal'>
+            <div className='modal-box'>
+              <h3 className='font-bold text-lg'>팟 확정하기!</h3>
+              <p className='py-4'>현재 인원으로 파티를 확정하시겠습니까?</p>
+              <button className='btn'>확인</button>
+            </div>
+            <form method='dialog' className='modal-backdrop'>
+              <button>close</button>
+            </form>
+          </dialog>
+        </div>
+      )}
       {state === 'COMPLETED' && (
         <div onClick={toggleModal} className='mt-1 btn btn-block btn-primary'>
           <p className='font-bold text-white'>1/N 정산요청하기</p>

@@ -42,13 +42,33 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
     }
   }, []);
 
-  const handleSendMessage = (type: string, id: number) => {
+  // 개인 알림 보내주는 거
+  const handleSendAlarm = (type: string, id: number) => {
     if (client && client.connected) {
       client.publish({
         destination: `/pub/notification/${id}`,
         body: JSON.stringify({
           partyId: partyId,
           type: type,
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+  // 채팅 보내주는거
+  const handleSendMessage = (type: string, nickname: string) => {
+    if (client && client.connected) {
+      client?.publish({
+        destination: `/pub/chat/message`,
+        body: JSON.stringify({
+          partyId: partyId,
+          roomId: roomId,
+          content: `${nickname}님이 파티에 입장하셨습니다`,
+          type,
         }),
         headers: {
           token: `${getCookie('Authorization')}`,
@@ -67,20 +87,8 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 201) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          client?.publish({
-            destination: `/pub/chat/message`,
-            body: JSON.stringify({
-              partyId: partyId,
-              roomId: roomId,
-              content: `${nickname}님이 파티에 입장하셨습니다`,
-              type: 'ENTER',
-            }),
-            headers: {
-              token: `${getCookie('Authorization')}`,
-            },
-          });
-
-          handleSendMessage('ACCEPT', memberId);
+          handleSendMessage('ENTER', nickname);
+          handleSendAlarm('ACCEPT', memberId);
         }
         fetchData();
       })
@@ -97,18 +105,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          client?.publish({
-            destination: `/pub/notification/${memberId}`,
-            body: JSON.stringify({
-              partyId: partyId,
-              // content: `${nickname}님이 파티에 입장하셨습니다`,
-              type: 'REJECT',
-            }),
-            headers: {
-              token: `${getCookie('Authorization')}`,
-            },
-          });
-          handleSendMessage('REJECT', memberId);
+          handleSendAlarm('REJECT', memberId);
         }
         fetchData();
       })
@@ -125,19 +122,8 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          client?.publish({
-            destination: `/pub/chat/message`,
-            body: JSON.stringify({
-              partyId: partyId,
-              roomId: roomId,
-              content: `${nickname}님이 파티에서 추방되었습니다.`,
-              type: 'QUIT',
-            }),
-            headers: {
-              token: `${getCookie('Authorization')}`,
-            },
-          });
-          handleSendMessage('KICK', memberId);
+          handleSendMessage('KICK', nickname);
+          handleSendAlarm('KICK', memberId);
         }
         fetchData();
       })
