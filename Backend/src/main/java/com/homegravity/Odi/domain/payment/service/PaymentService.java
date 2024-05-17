@@ -8,9 +8,9 @@ import com.homegravity.Odi.domain.payment.dto.response.PaymentConfirmationRespon
 import com.homegravity.Odi.domain.payment.dto.response.PaymentHistoryResponseDto;
 import com.homegravity.Odi.domain.payment.dto.response.PaymentResponseDto;
 import com.homegravity.Odi.domain.payment.dto.toss.PaymentConfirmation;
+import com.homegravity.Odi.domain.payment.dto.toss.PaymentConfirmation.PaymentDetails;
+import com.homegravity.Odi.domain.payment.dto.toss.PaymentConfirmation.PaymentFailure;
 import com.homegravity.Odi.domain.payment.dto.toss.PSPConfirmationResponseDto;
-import com.homegravity.Odi.domain.payment.dto.toss.PaymentDetails;
-import com.homegravity.Odi.domain.payment.dto.toss.PaymentFailure;
 import com.homegravity.Odi.domain.payment.entity.Payment;
 import com.homegravity.Odi.domain.payment.entity.PaymentHistory;
 import com.homegravity.Odi.domain.payment.entity.PaymentState;

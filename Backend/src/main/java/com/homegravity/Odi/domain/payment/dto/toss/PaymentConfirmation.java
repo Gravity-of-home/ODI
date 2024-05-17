@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.payment.dto.toss;
 
+import com.homegravity.Odi.domain.payment.dto.PaymentFailDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,4 +52,47 @@ public class PaymentConfirmation {
                 .isRetryable(false)
                 .build();
     }
+
+    @Getter
+    public static class PaymentDetails {
+        String orderName;
+        String method;
+        String type; // NORMAL
+        Integer totalAmount;
+        PaymentConfirmationStatus status;
+        LocalDateTime requestedAt; // 결제 날짜
+        LocalDateTime approvedAt; // 결제 승인 날짜
+
+        @Builder
+        private PaymentDetails(String orderName, String method, String type, Integer totalAmount, PaymentConfirmationStatus status, LocalDateTime requestedAt, LocalDateTime approvedAt) {
+            this.orderName = orderName;
+            this.method = method;
+            this.type = type;
+            this.totalAmount = totalAmount;
+            this.status = status;
+            this.requestedAt = requestedAt;
+            this.approvedAt = approvedAt;
+        }
+    }
+
+    @Getter
+    public static class PaymentFailure {
+        String errorCode;
+        String message;
+
+        @Builder
+        private PaymentFailure(String errorCode, String message) {
+            this.errorCode = errorCode;
+            this.message = message;
+        }
+
+        public static PaymentFailure fromPaymentFailDto(PaymentFailDto paymentFailDto) {
+            return builder()
+                    .errorCode(paymentFailDto.getCode())
+                    .message(paymentFailDto.getMessage())
+                    .build();
+        }
+    }
+
+
 }

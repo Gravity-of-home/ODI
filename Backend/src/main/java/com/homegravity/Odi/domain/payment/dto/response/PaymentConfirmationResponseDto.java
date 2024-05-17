@@ -1,6 +1,6 @@
 package com.homegravity.Odi.domain.payment.dto.response;
 
-import com.homegravity.Odi.domain.payment.dto.toss.PaymentFailure;
+import com.homegravity.Odi.domain.payment.dto.toss.PaymentConfirmation.PaymentFailure;
 import com.homegravity.Odi.domain.payment.entity.PaymentState;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
