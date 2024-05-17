@@ -16,6 +16,8 @@ public class ChatMessageDTO {
 
     private String roomId; // 채팅방 아이디
 
+    private Long targetId; // 대상자 아이디
+
     private String senderImage; // 메세지 보낸 사람 프로필사진
 
     private String senderNickname; // 메시지 보낸 사람 이름
@@ -27,8 +29,9 @@ public class ChatMessageDTO {
     private MessageType type; // 메시지 타입
 
     @Builder
-    public ChatMessageDTO(String roomId, String senderImage, String senderNickname, String content, String sendTime, MessageType type) {
+    public ChatMessageDTO(String roomId, Long targetId, String senderImage, String senderNickname, String content, String sendTime, MessageType type) {
         this.roomId = roomId;
+        this.targetId = targetId;
         this.senderImage = senderImage;
         this.senderNickname = senderNickname;
         this.content = content;

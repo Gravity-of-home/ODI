@@ -14,6 +14,7 @@ import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +56,7 @@ public class ChatRoomRepository {
     }
 
     // 특정 채팅방 조회
-    public ChatDetailDTO findRoomById(String roomId) {
+    public ChatDetailDTO findRoomById(String roomId, Pageable pageable) {
 //        ChatDetailDTO chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, id);
 //        assert chatRoom != null;
         Party party = partyRepository.findByRoomIdAndDeletedAtIsNull(roomId)
@@ -64,7 +65,7 @@ public class ChatRoomRepository {
                 .partyId(party.getId())
                 .roomId(roomId)
                 .partyTitle(party.getTitle())
-                .chatMessages(chatMessageService.getAllChatMessage(roomId))
+                .chatMessages(chatMessageService.getSliceChatMessage(roomId, pageable))
                 .build();
     }
 
