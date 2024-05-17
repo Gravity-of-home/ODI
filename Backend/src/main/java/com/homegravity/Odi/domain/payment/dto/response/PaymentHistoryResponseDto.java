@@ -2,6 +2,7 @@ package com.homegravity.Odi.domain.payment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.homegravity.Odi.domain.payment.entity.Payment;
+import com.homegravity.Odi.domain.payment.entity.PaymentState;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -43,7 +44,7 @@ public class PaymentHistoryResponseDto {
                 .paymentId(payment.getId())
                 .amount(payment.getAmount())
                 .orderName(payment.getOrderName())
-                .paymentSuccessful(payment.getPaymentSuccessful())
+                .paymentSuccessful(payment.getPaymentState() == PaymentState.SUCCESS)
                 .paidAt(payment.getModifiedAt())
                 .build();
     }

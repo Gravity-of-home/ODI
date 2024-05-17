@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.party.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.party.dto.PartyDTO;
 import com.homegravity.Odi.domain.party.dto.request.PartyRequestDTO;
@@ -29,7 +30,7 @@ public class PartyController {
 
     @Operation(summary = "동승자 구인 글 작성", description = "동승자를 구하는 글을 작성합니다.")
     @PostMapping("")
-    public ApiResponse<Long> createParty(@RequestBody PartyRequestDTO partyRequestDTO, @AuthenticationPrincipal Member member) {
+    public ApiResponse<Long> createParty(@RequestBody PartyRequestDTO partyRequestDTO, @AuthenticationPrincipal Member member) throws JsonProcessingException {
 
         return ApiResponse.of(SuccessCode.PARTY_CREATE_SUCCESS, partyService.createParty(partyRequestDTO, member));
     }

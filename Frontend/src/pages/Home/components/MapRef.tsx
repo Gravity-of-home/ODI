@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import latLngAddStore from '@/stores/useLatLngAddStore';
 import mapStore from '@/stores/useMapStore';
 import DarkModeStyle from './DarkModeStyle';
+import RetroStyle from './RetroStyle';
+import StandardStyle from './StandardStyle';
 import { useNavigate } from 'react-router-dom';
 import BottomSheet from '@/components/BottomSheet/BottomSheet';
 import partyStore from '@/stores/usePartyStore';
@@ -33,6 +35,14 @@ interface IAutoMatchData {
   arrLat?: number;
 }
 
+interface ISuccessData {
+  memberID1: number;
+  memberID2: number;
+  partyId: number;
+  request: IAutoMatchData;
+  type: string;
+}
+
 const MapRef = () => {
   const ref = useRef<HTMLDivElement>(null);
   const nav = useNavigate();
@@ -58,9 +68,10 @@ const MapRef = () => {
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const { matchClient, isMatchConnected, disconnectMatch } = useMatchSocket();
   const [partyData, setPartyData] = useState<IParty[]>([]);
+  const [progress, setProgress] = useState(100);
   // NOTE : 자동 매칭 데이터
   const { id } = userStore();
-  const [autoMatchData, setAutoMatchData] = useState<IAutoMatchData>({
+  const [reqAutoMatchData, setReqAutoMatchData] = useState<IAutoMatchData>({
     depName: '',
     depLon: 0,
     depLat: 0,
@@ -68,6 +79,21 @@ const MapRef = () => {
     arrLon: 0,
     arrLat: 0,
   });
+  const [autoMatchData, setAutoMatchData] = useState<ISuccessData>({
+    memberID1: 0,
+    memberID2: 0,
+    partyId: 0,
+    request: {
+      depName: '',
+      depLon: 0,
+      depLat: 0,
+      arrName: '',
+      arrLon: 0,
+      arrLat: 0,
+    },
+    type: '',
+  });
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const goCreateParty = () => {
     nav('/party');
@@ -90,7 +116,9 @@ const MapRef = () => {
 
   // TODO  : 자동 매칭 신청 함수
   const reqAutoMatch = () => {
+    if (arrivalsName === '도착지를 설정해 주세요.') return toast.error('도착지를 설정해 주세요.');
     setIsLoading(true);
+    setProgress(100);
     const data = {
       depName: departuresName,
       depLon: departuresLocation!.longitude,
@@ -99,7 +127,7 @@ const MapRef = () => {
       arrLon: arrivalsLocation!.longitude,
       arrLat: arrivalsLocation!.latitude,
     };
-    setAutoMatchData(data);
+    setReqAutoMatchData(data);
     try {
       if (matchClient && matchClient.connected) {
         console.log(data);
@@ -112,10 +140,43 @@ const MapRef = () => {
         });
       }
       // setIsLoading(false);
-      setDepartures?.('내 위치', { latitude: currentLat, longitude: currentLng });
-      setArrivals?.('도착지를 설정해 주세요.', { latitude: 0, longitude: 0 });
+      // setDepartures?.('내 위치', { latitude: currentLat, longitude: currentLng });
+      // setArrivals?.('도착지를 설정해 주세요.', { latitude: 0, longitude: 0 });
       // closeAutoMatchModal();
     } catch (error) {}
+  };
+
+  const reqCancelMatch = async () => {
+    if (timeoutId.current !== null) {
+      console.log('30초 대기 TIMEOUT 삭제');
+      clearTimeout(timeoutId.current as NodeJS.Timeout);
+    }
+    if (intervalId.current !== null) {
+      console.log('30초 대기 INTERVAL 삭제');
+      clearInterval(intervalId.current as NodeJS.Timeout);
+    }
+    try {
+      const response = await axios.delete(`${ViteConfig.VITE_BASE_URL}/api/matches/${id}`, {
+        headers: {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+        },
+      });
+
+      console.log('Delete request successful:', response);
+      setIsLoading(false);
+      toast.error('매칭이 취소되었습니다.', { autoClose: 3000 });
+    } catch (err) {
+      console.error('Match ID DELETE Request failed:', err);
+    }
+    closeAutoMatchModal();
+  };
+
+  const successMatch = () => {
+    setIsSuccess(false);
+    setIsLoading(false);
+    setDepartures?.('내 위치', { latitude: currentLat, longitude: currentLng });
+    setArrivals?.('도착지를 설정해 주세요.', { latitude: 0, longitude: 0 });
+    nav(`/party/${autoMatchData.partyId}`);
   };
 
   const goSetDeparture = () => {
@@ -186,13 +247,14 @@ const MapRef = () => {
   };
 
   useEffect(() => {
-    getAddByLatLng(currentLat, currentLng);
     if (ref.current && !map) {
       const initialMap = new google.maps.Map(ref.current, {
         center: mapCenter,
         disableDefaultUI: true,
         clickableIcons: false,
-        styles: DarkModeStyle,
+        // styles: DarkModeStyle,
+        // styles: RetroStyle,
+        styles: StandardStyle,
         zoom: 16,
         minZoom: 10,
         maxZoom: 18,
@@ -227,14 +289,16 @@ const MapRef = () => {
         const newCenter = initialMap.getCenter();
         if (newCenter) {
           setMapCenter(newCenter);
+          getAddByLatLng(newCenter.lat(), newCenter.lng());
         }
       });
     }
   }, [ref, mapCenter, map]);
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null;
+  const timeoutId = useRef<NodeJS.Timeout | null>(null);
+  const intervalId = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
     if (matchClient && matchClient.connected) {
       const subscription = matchClient.subscribe(
         `/sub/matchResult/${id}`,
@@ -248,17 +312,46 @@ const MapRef = () => {
           switch (newMessage.type) {
             // switch (newMessage) {
             case 'MATCH_SUCCESS':
-              if (timeoutId) {
+              if (timeoutId.current !== null) {
                 console.log('30초 대기 TIMEOUT 삭제');
-                clearTimeout(timeoutId);
+                clearTimeout(timeoutId.current as NodeJS.Timeout);
               }
-              setIsLoading(false);
-              console.log('받은거를 처리하자!', newMessage);
+              if (intervalId.current !== null) {
+                console.log('30초 대기 INTERVAL 삭제');
+                clearInterval(intervalId.current as NodeJS.Timeout);
+              }
+              // setDepartures?.('내 위치', { latitude: currentLat, longitude: currentLng });
+              // setArrivals?.('도착지를 설정해 주세요.', { latitude: 0, longitude: 0 });
+              setDepartures?.(newMessage.request.depName, {
+                latitude: newMessage.request.depLat,
+                longitude: newMessage.request.depLon,
+              });
+              setArrivals?.(newMessage.request.arrName, {
+                latitude: newMessage.request.arrLat,
+                longitude: newMessage.request.arrLon,
+              });
+              setAutoMatchData(newMessage);
+              setIsSuccess(true);
+              // setIsLoading(false);
+              console.log('SUCCESS...', newMessage.request);
               break;
             case 'MATCH_NOT_FOUND':
               console.log('MATCH_NOT_FOUND received, 30초 대기 진행 후 DELETE 요청 전송');
-              timeoutId = setTimeout(async () => {
+              intervalId.current = setInterval(() => {
+                setProgress(prevProgress => {
+                  if (prevProgress <= 0) {
+                    clearInterval(intervalId.current as NodeJS.Timeout);
+                    return 0;
+                  }
+                  return prevProgress - 100 / 30;
+                });
+              }, 1000);
+              console.log('WAITTING...', newMessage.request);
+              timeoutId.current = setTimeout(async () => {
                 console.log('Timeout reached, sending delete request');
+                toast.error('근처에 매칭 대상이 없습니다.', {
+                  autoClose: 4000,
+                });
                 try {
                   const response = await axios.delete(
                     `${ViteConfig.VITE_BASE_URL}/api/matches/${id}`,
@@ -291,8 +384,11 @@ const MapRef = () => {
 
       return () => {
         subscription.unsubscribe();
-        if (timeoutId) {
-          clearTimeout(timeoutId);
+        if (timeoutId.current !== null) {
+          clearTimeout(timeoutId.current as NodeJS.Timeout);
+        }
+        if (intervalId.current !== null) {
+          clearInterval(intervalId.current as NodeJS.Timeout);
         }
       };
     }
@@ -341,7 +437,7 @@ const MapRef = () => {
           scaledSize: new google.maps.Size(50, 50),
         },
         draggable: false,
-        animation: google.maps.Animation.DROP,
+        // animation: google.maps.Animation.DROP,
       });
 
       // Add click listener to log data
@@ -369,12 +465,12 @@ const MapRef = () => {
         ref={autoMatchModalRef}
         id='my_modal_4'
         className={`modal ${isOpen ? 'open' : 'close'}`}>
-        <div className='modal-box w-11/12 h-[60%] bg-black'>
-          <h3 className='font-bold text-white text-[20px]'>자동 매칭</h3>
-          <div className='mt-1 border border-gray-500'></div>
+        <div className='modal-box w-11/12 h-[60%] bg-white flex flex-col'>
+          <h3 className='font-bold text-black text-[20px]'>자동 매칭</h3>
+          <div className='mt-1 border border-gray-300'></div>
           {isLoading === false ? (
             <>
-              <div className='h-[40%] mx-8 mt-5 border border-gray-500 rounded-xl flex flex-col items-center justify-center overflow-hidden'>
+              <div className='h-[40%] mx-8 mt-5 rounded-xl flex flex-col items-center justify-center overflow-hidden'>
                 <PartyMap />
               </div>
               <div className='h-[30%] mx-8 mt-5'>
@@ -384,7 +480,7 @@ const MapRef = () => {
                   </div>
                   <div className='w-[85%]' onClick={goSetDeparture}>
                     <div className='flex justify-between'>
-                      <div className='font-bold mb-1 text-[17px]'>
+                      <div className='font-bold mb-1 text-[17px] text-black'>
                         {!!departuresName ? departuresName : currentAdd}
                       </div>
                       <div className='w-[10%] flex justify-center items-center'>
@@ -400,7 +496,7 @@ const MapRef = () => {
                   </div>
                   <div className='w-[85%]' onClick={goSetArrival}>
                     <div className='flex justify-between'>
-                      <div className='font-bold mb-1 text-[17px]'>{arrivalsName}</div>
+                      <div className='font-bold mb-1 text-[17px] text-black'>{arrivalsName}</div>
                       <div className='w-[10%] flex justify-center items-center'>
                         <img src={Front} alt='도착지 설정' />
                       </div>
@@ -410,22 +506,97 @@ const MapRef = () => {
                 </div>
               </div>
             </>
+          ) : isSuccess === true ? (
+            <>
+              <div className='w-[100%] h-[100%] flex flex-col items-center'>
+                <div className='w-[100%] h-[40%] mx-8 mt-5 rounded-xl flex flex-col items-center justify-center overflow-hidden'>
+                  <PartyMap />
+                </div>
+                <div className='w-[80%] h-[30%] mx-8 mt-4'>
+                  <div className='w-[100%] h-[50%] flex'>
+                    <div className='w-[30%] text-[17px] text-black self-end'>출발지 : </div>
+                    <div className='w-[60%] self-end'>
+                      <div className='font-bold text-[17px] text-gray-600'>
+                        {autoMatchData.request.depName}
+                      </div>
+                    </div>
+                  </div>
+                  <div className='w-[100%] h-[50%] flex'>
+                    <div className='w-[30%] text-[17px] text-black self-center'>도착지 : </div>
+                    <div className='w-[60%] self-center'>
+                      <div className='font-bold text-[17px] text-gray-600'>
+                        {autoMatchData.request.arrName}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  className='btn mt-4 w-[40%] bg-OD_GREEN text-black font-bold border-none'
+                  onClick={successMatch}>
+                  상세 결과 보기
+                </button>
+              </div>
+            </>
           ) : (
             <>
-              <div className='w-[100%] h-[100%] flex justify-center items-center'>
-                <span className='loading loading-dots loading-lg'></span>
+              <div className='w-[100%] h-[100%] flex flex-col items-center'>
+                <div className='w-[100%] h-[40%] mx-8 mt-5 rounded-xl flex flex-col items-center justify-center overflow-hidden'>
+                  <PartyMap />
+                </div>
+                <span className='loading loading-dots loading-lg text-gray-500'></span>
+                <div className='w-[100%] h-[15%] flex flex-col justify-evenly items-center'>
+                  <div className='text-gray-500'>매칭 대기중</div>
+                  <div className='text-gray-500'>30초 이후 매칭신청이 종료됩니다!</div>
+                  <div className='w-[80%] bg-gray-200 rounded-lg overflow-hidden'>
+                    <div
+                      className='bg-blue-500 h-4 transition-all duration-1000 ease-linear'
+                      style={{ width: `${progress}%` }}></div>
+                  </div>
+                </div>
+                <div className='w-[80%] h-[15%] mx-8'>
+                  <div className='w-[100%] h-[50%] flex'>
+                    <div className='w-[30%] text-[17px] text-gray-500 self-end'>출발지 : </div>
+                    <div className='w-[60%] self-end'>
+                      <div className='font-bold text-[17px] text-black'>
+                        {reqAutoMatchData.depName}
+                      </div>
+                    </div>
+                  </div>
+                  <div className='w-[100%] h-[50%] flex'>
+                    <div className='w-[30%] text-[17px] text-gray-500 self-center'>도착지 : </div>
+                    <div className='w-[60%] self-center'>
+                      <div className='font-bold text-[17px] text-black'>
+                        {reqAutoMatchData.arrName}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  className='btn mt-2 w-[30%] bg-OD_PURPLE text-white border-none'
+                  onClick={reqCancelMatch}>
+                  매칭 취소
+                </button>
               </div>
             </>
           )}
 
           <div className='modal-action'>
             <form method='dialog'>
-              <button className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5'>✕</button>
+              <button
+                className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5 text-white'
+                onClick={() => {
+                  setIsSuccess(false);
+                  setIsLoading(false);
+                }}>
+                ✕
+              </button>
             </form>
           </div>
-          <button className='btn bg-OD_PURPLE text-white' onClick={reqAutoMatch}>
-            설정하기
-          </button>
+          {isLoading === false && isSuccess === false && (
+            <button className='btn bg-OD_PURPLE text-white border-none' onClick={reqAutoMatch}>
+              설정하기
+            </button>
+          )}
         </div>
       </dialog>
     </>
@@ -435,7 +606,7 @@ const MapRef = () => {
     <div className='w-[100%] h-[100%]'>
       <div className='fixed w-[100%] h-[5%] bg-black z-10 flex items-center'>
         <div className='fixed w-[100%] flex pl-3 text-[18px] font-semibold text-white'>
-          {curLocAdd}
+          {`${curLocAdd.split(' ')[0]} ${curLocAdd.split(' ')[1] === undefined ? '' : curLocAdd.split(' ')[1]} ${curLocAdd.split(' ')[2] === undefined ? '' : curLocAdd.split(' ')[2]}`}
           <div
             className='flex justify-center items-center px-2'
             onClick={() => {
@@ -445,14 +616,18 @@ const MapRef = () => {
           </div>
         </div>
         <div className='fixed w-[100%] flex justify-end px-3'>
-          <div className='px-2 z-10' onClick={() => {}}>
+          <div
+            className='px-2 z-10 cursor-pointer'
+            onClick={() => {
+              nav('/chatlist');
+            }}>
             <SvgChat />
           </div>
-          <div className='px-2 z-10' onClick={() => {}}>
+          <div className='px-2 z-10 cursor-pointer' onClick={() => {}}>
             <SvgNotification />
           </div>
           <div
-            className='px-2 z-10'
+            className='px-2 z-10 cursor-pointer'
             onClick={() => {
               nav('/profile');
             }}>
@@ -467,7 +642,7 @@ const MapRef = () => {
       </div>
       <div ref={ref} id='map' className='w-[100%] h-[100%]' />
       <button
-        className='absolute btn z-10 w-[15%] h-[5%] bottom-[13%] right-[3%] border-none bg-black text-white hover:text-OD_GREEN'
+        className='absolute btn z-10 w-[15%] h-[5%] bottom-[10%] right-[3%] border-none bg-black text-white hover:text-OD_GREEN'
         onClick={goCreateParty}>
         파티 생성
       </button>

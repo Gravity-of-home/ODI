@@ -49,7 +49,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
         `/sub/chat/room/${roomId}`,
         message => {
           const newMessage = JSON.parse(message.body);
-
+          console.log(newMessage);
           if (['SETTLEMENT', 'ENTER', 'QUIT'].includes(newMessage.type)) {
             fetchData();
           }
@@ -63,7 +63,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
 
       return () => subscription.unsubscribe();
     }
-  }, [client, isConnected, roomId, fetchData]);
+  }, [isConnected]);
 
   const handleSendMessage = () => {
     const messageContent = inputRef.current?.value;

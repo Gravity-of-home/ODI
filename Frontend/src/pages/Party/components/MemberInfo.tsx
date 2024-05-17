@@ -42,13 +42,33 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
     }
   }, []);
 
-  const handleSendMessage = (type: string, id: number) => {
+  // 개인 알림 보내주는 거
+  const handleSendAlarm = (type: string, id: number) => {
     if (client && client.connected) {
       client.publish({
         destination: `/pub/notification/${id}`,
         body: JSON.stringify({
           partyId: partyId,
           type: type,
+        }),
+        headers: {
+          token: `${getCookie('Authorization')}`,
+        },
+      });
+    } else {
+      alert('서버와의 연결이 끊어졌습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+  // 채팅 보내주는거
+  const handleSendMessage = (type: string, nickname: string) => {
+    if (client && client.connected) {
+      client?.publish({
+        destination: `/pub/chat/message`,
+        body: JSON.stringify({
+          partyId: partyId,
+          roomId: roomId,
+          content: `${nickname}님이 파티에 입장하셨습니다`,
+          type,
         }),
         headers: {
           token: `${getCookie('Authorization')}`,
@@ -67,20 +87,8 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 201) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          client?.publish({
-            destination: `/pub/chat/message`,
-            body: JSON.stringify({
-              partyId: partyId,
-              roomId: roomId,
-              content: `${nickname}님이 파티에 입장하셨습니다`,
-              type: 'ENTER',
-            }),
-            headers: {
-              token: `${getCookie('Authorization')}`,
-            },
-          });
-
-          handleSendMessage('ACCEPT', memberId);
+          handleSendMessage('ENTER', nickname);
+          handleSendAlarm('ACCEPT', memberId);
         }
         fetchData();
       })
@@ -97,18 +105,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          client?.publish({
-            destination: `/pub/notification/${memberId}`,
-            body: JSON.stringify({
-              partyId: partyId,
-              // content: `${nickname}님이 파티에 입장하셨습니다`,
-              type: 'REJECT',
-            }),
-            headers: {
-              token: `${getCookie('Authorization')}`,
-            },
-          });
-          handleSendMessage('REJECT', memberId);
+          handleSendAlarm('REJECT', memberId);
         }
         fetchData();
       })
@@ -125,19 +122,8 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          client?.publish({
-            destination: `/pub/chat/message`,
-            body: JSON.stringify({
-              partyId: partyId,
-              roomId: roomId,
-              content: `${nickname}님이 파티에서 추방되었습니다.`,
-              type: 'QUIT',
-            }),
-            headers: {
-              token: `${getCookie('Authorization')}`,
-            },
-          });
-          handleSendMessage('KICK', memberId);
+          handleSendMessage('KICK', nickname);
+          handleSendAlarm('KICK', memberId);
         }
         fetchData();
       })
@@ -150,53 +136,75 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   const participantsList = participants
     .filter((person: IParticipant) => person.role !== 'ORGANIZER')
     .map((person: IParticipant) => (
-      <li className='flex justify-between ' key={person.id}>
+      <li className='flex justify-between my-4' key={person.id}>
         <div className='flex gap-x-2 items-center'>
           <img className='rounded-full w-10 h-10' src={person.profileImage} alt='' />
-          <p>{person.nickname}</p>
-          <p>{person.gender === 'M' ? '남' : '여'}</p>
-          <p>{person.ageGroup}</p>
-          <p className='font-bold'>당도 : {person.brix.toFixed(1)} brix</p>
+          <div className='ml-4 font-bold'>
+            <p>{person.nickname}</p>
+            <p>{person.gender === 'M' ? '남' : '여'}</p>
+            <p>{person.ageGroup}</p>
+          </div>
         </div>
-        <div>
+        <div className='w-max ml-10'>
+          <p className='text-xl font-bold'>당도</p>
+          <p className='font-bold'>{person.brix.toFixed(1)}° Bx</p>
+          <div className='w-full'>
+            <progress
+              className='progress progress-error w-full bg-purple-100'
+              value={person.brix}
+              max='100'></progress>
+          </div>
+        </div>
+        <div className='flex items-center ml-10'>
           {role === 'ORGANIZER' && ( // role이 'ORGANIZER'일 때만 버튼 렌더링
             <button
               onClick={banParticipant(person.id, person.nickname)}
-              className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
+              className='btn btn-error btn-square rounded bg-red-500 text-white'>
               추방
             </button>
           )}
         </div>
-        {person.id === userId && (
-          <div className='content-center text-center rounded-full w-10 bg-blue-100'>
-            <p className='content-center text-center '>나</p>
-          </div>
-        )}
+        <div className='content-center'>
+          {person.id === userId && (
+            <div className='content-center  rounded-full w-10 h-10 bg-blue-100'>
+              <p className='content-center text-center '>나</p>
+            </div>
+          )}
+        </div>
       </li>
     ));
 
   // 팟장에게 보일 파티 신청자 목록
   const applicantList = guests?.map((applicant: IParticipant) => (
-    <li className='flex justify-between content-center' key={applicant.id}>
-      <div className='user-profile flex gap-x-2 items-center'>
+    <li className='flex justify-between content-center my-2' key={applicant.id}>
+      <div className='user-profile flex gap-x-4 items-center'>
         <img src={applicant.profileImage} alt='user-img' className='rounded-full w-10 h-10' />
-        <div>{applicant.nickname}</div>
-        <div>{applicant.gender === 'M' ? '남' : '여'}</div>
-        <div>{applicant.ageGroup}</div>
-        <p className='rounded-full p-2' style={{ backgroundColor: '#A75DFC' }}>
-          당도 : {applicant.brix.toFixed(1)}
-        </p>
+        <div className='ml-4 font-bold'>
+          <div>{applicant.nickname}</div>
+          <div>{applicant.gender === 'M' ? '남' : '여'}</div>
+          <div>{applicant.ageGroup}</div>
+        </div>
+      </div>
+      <div className='w-max'>
+        <p className='text-xl font-bold'>당도</p>
+        <p className='font-bold'>{hostBrix.toFixed(1)}° Bx</p>
+        <div className='w-full'>
+          <progress
+            className='progress progress-error w-full bg-purple-100'
+            value={hostBrix}
+            max='100'></progress>
+        </div>
       </div>
       {role === 'ORGANIZER' && (
-        <div>
+        <div className='flex items-center gap-x-2'>
           <button
             onClick={acceptEnterParty(applicant.id, applicant.nickname)}
-            className='ml-2 py-1 px-3 rounded bg-green-500 text-white'>
-            수락
+            className='btn btn-info btn-square rounded  text-white'>
+            <p>수락</p>
           </button>
           <button
             onClick={rejectEnterParty(applicant.id)}
-            className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
+            className='btn btn-error btn-square rounded bg-red-500 text-white'>
             거절
           </button>
         </div>
@@ -227,10 +235,10 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
             <div className='card-actions justify-end'>
               <div className='w-full'>
                 <p className='text-xl font-bold'>당도</p>
-                <p className='font-bold'>{hostBrix.toFixed(1)} brix</p>
+                <p className='font-bold'>{hostBrix.toFixed(1)}° Bx</p>
                 <div className='w-full'>
                   <progress
-                    className='progress progress-error w-full bg-red-100'
+                    className='progress progress-error w-full bg-purple-100'
                     value={hostBrix}
                     max='100'></progress>
                 </div>

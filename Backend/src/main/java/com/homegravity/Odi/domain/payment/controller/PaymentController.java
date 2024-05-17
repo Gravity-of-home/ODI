@@ -4,9 +4,10 @@ import com.homegravity.Odi.domain.member.entity.Member;
 import com.homegravity.Odi.domain.payment.dto.PaymentFailDto;
 import com.homegravity.Odi.domain.payment.dto.request.PaymentRequestDto;
 import com.homegravity.Odi.domain.payment.dto.request.PaymentSuccessRequestDto;
+import com.homegravity.Odi.domain.payment.dto.response.PaymentConfirmationResponseDto;
 import com.homegravity.Odi.domain.payment.dto.response.PaymentHistoryResponseDto;
 import com.homegravity.Odi.domain.payment.dto.response.PaymentResponseDto;
-import com.homegravity.Odi.domain.payment.dto.response.PaymentSuccessResponseDto;
+import com.homegravity.Odi.domain.payment.dto.toss.PSPConfirmationResponseDto;
 import com.homegravity.Odi.domain.payment.service.PaymentService;
 import com.homegravity.Odi.global.response.success.ApiResponse;
 import com.homegravity.Odi.global.response.success.SuccessCode;
@@ -38,14 +39,14 @@ public class PaymentController {
 
     @Operation(summary = "구매자 PSP 결제 성공", description = "구매자의 PSP 결제 성공에 대해 결제 데이터를 업데이트 합니다.")
     @PostMapping("/success")
-    public ApiResponse<PaymentSuccessResponseDto> successTossPayment(@RequestBody @Valid PaymentSuccessRequestDto requestDto) {
+    public ApiResponse<PaymentConfirmationResponseDto> successTossPayment(@RequestBody @Valid PaymentSuccessRequestDto requestDto) {
 
-        return ApiResponse.of(SuccessCode.PAYMENT_CONFIRM_SUCCESS, paymentService.successTossPayment(requestDto));
+        return ApiResponse.of(SuccessCode.PAYMENT_CONFIRM_SUCCESS, paymentService.confirm(requestDto));
     }
 
     @Operation(summary = "구매자 PSP 결제 실패", description = "구매자의 PSP 결제 실패에 대해 결제 정보를 업데이트 합니다.")
     @PostMapping("/fail")
-    public ApiResponse<PaymentFailDto> failTossPayment(@RequestBody @Valid PaymentFailDto requestDto) {
+    public ApiResponse<PaymentConfirmationResponseDto> failTossPayment(@RequestBody @Valid PaymentFailDto requestDto) {
 
         return ApiResponse.of(SuccessCode.PAYMENT_FAIL_UPDATE_SUCCESS, paymentService.failTossPayment(requestDto));
     }

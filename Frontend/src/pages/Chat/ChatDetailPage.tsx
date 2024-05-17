@@ -51,6 +51,7 @@ const ChatDetailPage = () => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const toggleisReportModal = () => setIsReportModalOpen(!isReportModalOpen);
   const [reportedId, setReportedId] = useState(0);
+
   const fetchData = async () => {
     await jwtAxios
       .get(`api/party-boards/${partyId}/chat-info`, {
@@ -59,7 +60,7 @@ const ChatDetailPage = () => {
         },
       })
       .then(res => {
-        console.log(res.data.message);
+        console.log(res.data);
         setInfo(res.data.data);
       })
       .catch(err => {
@@ -72,34 +73,21 @@ const ChatDetailPage = () => {
 
     setIsLoading(false);
   };
+
   function goBack() {
     nav(-1);
   }
-  // function Report(memberId: number) {
-  //   return () => {
-  //     jwtAxios
-  //       .post(`api/members/${memberId}/report`, {})
-  //       .then(res => {
-  //         console.log(res);
-  //       })
-  //       .catch(err => {
-  //         if (err instanceof Error) {
-  //           setError(err.message);
-  //         } else {
-  //           setError('An unknown error occurred');
-  //         }
-  //       });
-  //   };
-  // }
 
   function Report(memberId: number) {
     setReportedId(memberId);
     toggleisReportModal();
   }
+
   const organizer = (
     <div className='flex justify-between'>
       <div className='flex gap-x-2 items-center'>
         <img className='rounded-full w-12 h-12' src={info?.organizer.profileImage} alt='' />
+        <p className='font-bold'>팟장</p>
         <p>{info?.organizer.nickname}</p>
         <p>{info?.organizer.gender === 'M' ? '남' : '여'}</p>
         <p>{info?.organizer.ageGroup}</p>
@@ -116,6 +104,19 @@ const ChatDetailPage = () => {
     </div>
   );
 
+  const myInfo = (
+    <div className='flex justify-between'>
+      <div className='flex gap-x-2 items-center'>
+        <img className='rounded-full w-12 h-12' src={info?.me.profileImage} alt='' />
+        <p className='font-bold'>나</p>
+        <p>{info?.me.nickname}</p>
+        <p>{info?.me.gender === 'M' ? '남' : '여'}</p>
+        <p>{info?.me.ageGroup}</p>
+      </div>
+      <div className='content-center'></div>
+    </div>
+  );
+
   // 파티원 목록
   const participantsList = info?.participants.map(person => (
     <li className='flex justify-between ' key={person.id}>
@@ -127,7 +128,7 @@ const ChatDetailPage = () => {
       </div>
       <div className='content-center'>
         <button
-          onClick={() => Report(info.organizer.id)}
+          onClick={() => Report(person.id)}
           className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
           신고하기
         </button>
@@ -141,8 +142,11 @@ const ChatDetailPage = () => {
   ));
 
   useEffect(() => {
-    fetchData();
+    if (!info) {
+      fetchData();
+    }
   }, []);
+
   if (isLoading)
     return (
       <div className='flex h-screen justify-center'>
@@ -171,13 +175,11 @@ const ChatDetailPage = () => {
             참여자 <span className='ml-2 text-gray-200 text-lg'>{info?.currentParticipants}명</span>
           </p>
           <div className='mt-4'>{organizer}</div>
+          <div className='mt-4'>{info?.organizer.id != info?.me.id && myInfo}</div>
           <div className='mt-4'>{participantsList}</div>
         </div>
       </div>
       <div className='divider'></div>
-      <button className='btn btn-ghost text-xl font-bold'>
-        채팅방 나가기 <span className=''>{'>'}</span>
-      </button>
       {isReportModalOpen && (
         <ReportModal
           partyId={partyId}

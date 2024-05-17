@@ -73,6 +73,9 @@ public enum ErrorCode {
 
     // Payment
     ORDER_ID_NOT_EXIST(400, "존재하지 않는 결제 정보입니다."),
+    PAYMENT_ALREADY_SUCCESS(400, "이미 성공한 결제 정보입니다."),
+    PAYMENT_ALREADY_FAILURE(400, "이미 실패한 결제 정보입니다."),
+    PAYMENT_INVALID(400, "유효하지 않은 결제 상태입니다."),
 
     // Party Member
     PARTY_MEMBER_NOT_EXIST(400, "존재하지 않는 파티 참여자입니다."),

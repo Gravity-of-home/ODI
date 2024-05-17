@@ -20,7 +20,7 @@ const MapRef = () => {
 
     const map = new window.google.maps.Map(ref.current, {
       disableDefaultUI: true,
-      styles: DarkModeStyle,
+      // styles: DarkModeStyle,
       zoom: 16,
       minZoom: 5,
       maxZoom: 18,
@@ -86,7 +86,7 @@ const MapRef = () => {
           geodesic: true,
           strokeColor: '#00FF00',
           strokeOpacity: 1.0,
-          strokeWeight: 2,
+          strokeWeight: 4,
         });
 
         // 출발지와 도착지 경계를 맞추기 위해 경계 확장
