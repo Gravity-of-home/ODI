@@ -47,7 +47,7 @@ const PathMap: React.FC<IPathMapProps> = ({
         return 14;
       }
     }
-    const zoomLevel = calculateZoomLevel(distance / 2.5);
+    const zoomLevel = calculateZoomLevel(distance > 40 ? distance / 2 : distance / 2.5);
     if (!mapRef.current) {
       mapRef.current = new naver.maps.Map('map', {
         zoom: zoomLevel,

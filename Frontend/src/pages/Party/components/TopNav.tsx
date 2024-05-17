@@ -3,12 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useWebSocket } from '@/context/webSocketProvider';
+import userStore from '@/stores/useUserStore';
+import { getCookie } from '@/utils/CookieUtil';
 interface ModalProps {
   isVisible: boolean;
   role: string;
   state: string;
   partyId: string | undefined;
+  roomId: string;
   expectedCost: number;
   currentParticipants: number;
   onClose: () => void;
@@ -19,6 +22,7 @@ interface INavProps {
   state: string;
   title: string;
   partyId: string | undefined;
+  roomId: string;
   expectedCost: number;
   currentParticipants: number;
 }
@@ -29,12 +33,14 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
   role,
   state,
   partyId,
+  roomId,
   expectedCost,
   currentParticipants,
   fetchData,
 }) => {
   if (!isVisible) return null;
-
+  const { client, isConnected } = useWebSocket();
+  const { id } = userStore();
   const nav = useNavigate();
   // Handle outside click to close modal
   const handleOutsideClick = (e: MouseEvent<HTMLDivElement>) => {
@@ -46,7 +52,7 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
   const successParty = () => {
     jwtAxios
       .post(
-        `api/parties/${partyId}/success`,
+        `/api/parties/${partyId}/success`,
         {},
         {
           params: {
@@ -63,6 +69,19 @@ const Modal: React.FC<ModalProps & { fetchData: () => void }> = ({
               position: 'top-center',
             },
           );
+          if (client && client.connected) {
+            client.publish({
+              destination: `/pub/chat/message`,
+              body: JSON.stringify({
+                partyId,
+                roomId,
+                type: 'TALK',
+              }),
+              headers: {
+                token: `${getCookie('Authorization')}`,
+              },
+            });
+          }
         }
         fetchData();
       })
@@ -119,6 +138,7 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
   role,
   state,
   partyId,
+  roomId,
   title,
   expectedCost,
   currentParticipants,
@@ -132,8 +152,8 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
     document.body.style.overflow = modalVisible ? 'hidden' : 'auto';
   }, [modalVisible]);
 
-  const goBack = () => {
-    nav(-1);
+  const goHome = () => {
+    nav('/home');
   };
 
   const toggleModal = () => {
@@ -147,7 +167,7 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
   return (
     <div className='fixed top-0 bg-white w-screen z-[1000]'>
       <div className='flex items-center justify-between px-4 py-2'>
-        <button onClick={goBack} className='btn btn-square btn-ghost text-3xl'>
+        <button onClick={goHome} className='btn btn-square btn-ghost text-3xl'>
           {'<'}
         </button>
         <p className='text-xl font-bold flex-grow text-center'>
@@ -176,6 +196,7 @@ const TopNav: React.FC<INavProps & { fetchData: () => void }> = ({
           role={role}
           state={state}
           partyId={partyId}
+          roomId={roomId}
           expectedCost={expectedCost}
           currentParticipants={currentParticipants}
           fetchData={fetchData}

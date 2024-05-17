@@ -29,6 +29,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ partyId, onClose, reportedId 
     try {
       const compressedFile = await imageCompression(event, options);
       const file = new File([compressedFile], event.name, { type: event.type });
+
       return file;
     } catch (error) {
       console.log(error);

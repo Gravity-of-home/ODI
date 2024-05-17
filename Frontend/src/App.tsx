@@ -13,6 +13,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <Layout>
           <ToastContainer
+            className='toast-container' // 클래스 이름 추가
             position='top-center'
             autoClose={2000}
             hideProgressBar={false}

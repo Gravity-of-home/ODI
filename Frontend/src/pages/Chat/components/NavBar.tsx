@@ -85,7 +85,9 @@ const NavBar: React.FC<INavBarProps> = ({
       const compressedFile = await imageCompression(imageFile, options);
       // console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
       // console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
-      return compressedFile;
+      const file = new File([compressedFile], imageFile.name, { type: imageFile.type });
+
+      return file;
     } catch (error) {
       console.log(error);
     }
@@ -106,7 +108,12 @@ const NavBar: React.FC<INavBarProps> = ({
     ) {
       try {
         const compressedImage = await handleImageUpload(event.target.files[0]); // Wait for the compression to complete
-        setImageFile(compressedImage); // Set the compressed image file
+        if (compressedImage) {
+          setImageFile(compressedImage); // Set the compressed image file
+        } else {
+          alert('이미지 압축에 실패했습니다.');
+          setImageFile(undefined);
+        }
       } catch (error) {
         console.error('Error compressing the image:', error);
         alert('Failed to compress image.');
@@ -121,6 +128,9 @@ const NavBar: React.FC<INavBarProps> = ({
     navigate(`/chat/detail/${partyId}`);
   }
   function goBack() {
+    navigate(-1);
+  }
+  function goParty() {
     navigate(`/party/${partyId}`);
   }
 
@@ -167,6 +177,7 @@ const NavBar: React.FC<INavBarProps> = ({
         console.log(res);
         if (res.data.status === 204) {
           toast.success('정산을 완료했습니다');
+          fetchData();
         }
       })
       .catch(err => {
@@ -181,13 +192,67 @@ const NavBar: React.FC<INavBarProps> = ({
     fetchData();
   };
 
+  // const successParty = () => {
+  //   jwtAxios
+  //     .post(
+  //       `/api/parties/${partyId}/success`,
+  //       {},
+  //       {
+  //         params: {
+  //           expected_cost: expectedCost,
+  //         },
+  //       },
+  //     )
+  //     .then(res => {
+  //       console.log(res.data);
+  //       if (res.data.status === 204) {
+  //         toast.success(
+  //           `${res.data.message} 선 차감된 금액: ${res.data.data.prepaidCost / currentParticipants}`,
+  //           {
+  //             position: 'top-center',
+  //           },
+  //         );
+  //         if (client && client.connected) {
+  //           client.publish({
+  //             destination: `/pub/chat/message`,
+  //             body: JSON.stringify({
+  //               partyId,
+  //               roomId,
+  //               content: messageContent,
+  //               type: 'TALK',
+  //             }),
+  //             headers: {
+  //               token: `${getCookie('Authorization')}`,
+  //             },
+  //           });
+  //         }
+  //       }
+  //       fetchData();
+  //     })
+  //     .catch(err => {
+  //       console.error(err);
+  //       toast.error(`${err.response.data.message} ${err.response.data.reason}`, {
+  //         position: 'top-center',
+  //       });
+  //     });
+  // };
+
+  const showDialog = () => {
+    const dialog = document.getElementById('my_modal_2') as HTMLDialogElement;
+    if (dialog) {
+      dialog.showModal();
+    }
+  };
+
   return (
     <div className=''>
       <div className='flex items-center justify-between'>
         <button onClick={goBack} className='btn btn-ghost btn-circle text-3xl'>
           {'<'}
         </button>
-        <p className='font-bold text-2xl flex-grow text-center'>{title}</p>
+        <p onClick={goParty} className='font-bold text-2xl flex-grow text-center'>
+          {title}
+        </p>
         <button onClick={goDetail} className='btn btn-square btn-ghost'>
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -213,7 +278,25 @@ const NavBar: React.FC<INavBarProps> = ({
         </div>
         <div className='divider mb-2'></div>
       </div>
-
+      {state === 'GATHERING' && me.role === 'ORGANIZER' && (
+        <div>
+          <button
+            className='btn btn-block bg-purple-400 text-white text-xl font-bold'
+            onClick={showDialog}>
+            팟 확정하기
+          </button>
+          <dialog id='my_modal_2' className='modal'>
+            <div className='modal-box'>
+              <h3 className='font-bold text-lg'>팟 확정하기!</h3>
+              <p className='py-4'>현재 인원으로 파티를 확정하시겠습니까?</p>
+              <button className='btn'>확인</button>
+            </div>
+            <form method='dialog' className='modal-backdrop'>
+              <button>close</button>
+            </form>
+          </dialog>
+        </div>
+      )}
       {state === 'COMPLETED' && (
         <div onClick={toggleModal} className='mt-1 btn btn-block btn-primary'>
           <p className='font-bold text-white'>1/N 정산요청하기</p>
