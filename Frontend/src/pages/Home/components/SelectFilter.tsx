@@ -112,10 +112,10 @@ const SelectFilter: React.FC<ISelctFilterProps> = ({
 
   return (
     <>
-      <div className='flex justify-between overflow-scroll p-2 border-t-[1px] border-b-[1px] border-gray-700'>
+      <div className='flex justify-between overflow-scroll p-2 border-t-[1px] border-b-[1px] border-gray-300'>
         <div className='form-control'>
           <label className='label cursor-pointer flex flex-col'>
-            <span className='label-text text-[13px] text-white'>오늘출발</span>
+            <span className='label-text text-[13px] text-black'>오늘출발</span>
             <input
               type='checkbox'
               className='toggle toggle-success'
@@ -126,7 +126,7 @@ const SelectFilter: React.FC<ISelctFilterProps> = ({
         </div>
 
         <div className='self-center flex flex-col'>
-          <label className='text-[13px] text-white'>카테고리</label>
+          <label className='text-[13px] text-black'>카테고리</label>
           <select
             className='select select-bordered select-xs'
             value={selectedCategory}
@@ -141,7 +141,7 @@ const SelectFilter: React.FC<ISelctFilterProps> = ({
         </div>
 
         <div className='self-center flex flex-col'>
-          <label className='text-[13px] text-white'>거리</label>
+          <label className='text-[13px] text-black'>거리</label>
           <select
             className='select select-bordered select-xs'
             value={selectedSort}
@@ -155,7 +155,7 @@ const SelectFilter: React.FC<ISelctFilterProps> = ({
         </div>
 
         <div className='self-center flex flex-col pr-1'>
-          <label className='text-[13px] text-white'>동승자</label>
+          <label className='text-[13px] text-black'>동승자</label>
           <select
             className='select select-bordered select-xs'
             value={selectedGender}
@@ -170,7 +170,7 @@ const SelectFilter: React.FC<ISelctFilterProps> = ({
         </div>
       </div>
       {isTodayChecked ? null : (
-        <div className='border-b-[1px] border-gray-700 animate-fadeIn'>
+        <div className='border-b-[1px] border-gray-300 animate-fadeIn'>
           <Calendar onDateClick={setDateClick} />
         </div>
       )}

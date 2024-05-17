@@ -1,26 +1,24 @@
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
 import { ViteConfig } from '@/apis/ViteConfig';
 import { useEffect, useRef } from 'react';
-import watchPositionHook from '@/hooks/useRefreshLocation';
-import partyStore from '@/stores/usePartyStore';
-import LatLngAddStore from '@/stores/useLatLngAddStore';
-import DarkModeStyle from '@/components/Maps/DarkModeStyle';
 import DEPARTURE from '@/assets/image/icons/departureMarker.png';
 import ARRIVAL from '@/assets/image/icons/arrivalMarker.png';
 import jwtAxios from '@/utils/JWTUtil';
 import { ILocation } from '@/types/Map';
 
-const MapRef = () => {
+interface PartyMapProps {
+  departuresLocation: ILocation;
+  arrivalsLocation: ILocation;
+}
+
+const PartyMap: React.FC<PartyMapProps> = ({ departuresLocation, arrivalsLocation }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { currentLat, currentLng } = LatLngAddStore();
-  const { departuresName, departuresLocation, arrivalsName, arrivalsLocation } = partyStore();
 
   useEffect(() => {
     if (!ref.current) return;
 
     const map = new window.google.maps.Map(ref.current, {
       disableDefaultUI: true,
-      // styles: DarkModeStyle,
       zoom: 16,
       minZoom: 5,
       maxZoom: 18,
@@ -39,20 +37,10 @@ const MapRef = () => {
     const bounds = new google.maps.LatLngBounds();
 
     const convertPathFormat = (pathList: [number, number][]) => {
-      return pathList.map(
-        point =>
-          ({
-            lat: point[1], // 두 번째 항목이 위도
-            lng: point[0], // 첫 번째 항목이 경도
-          }) as google.maps.LatLngLiteral,
-      );
-    };
-
-    const updateBoundsWithPath = (path: google.maps.LatLngLiteral[]) => {
-      path.forEach(location => {
-        bounds.extend(new google.maps.LatLng(location.lat, location.lng));
-      });
-      map.fitBounds(bounds);
+      return pathList.map(point => ({
+        lat: point[1], // 두 번째 항목이 위도
+        lng: point[0], // 첫 번째 항목이 경도
+      }));
     };
 
     const startMarker = new window.google.maps.Marker({
@@ -89,7 +77,6 @@ const MapRef = () => {
           strokeWeight: 4,
         });
 
-        // 출발지와 도착지 경계를 맞추기 위해 경계 확장
         bounds.extend(new google.maps.LatLng(start.latitude, start.longitude));
         bounds.extend(new google.maps.LatLng(end.latitude, end.longitude));
         map.fitBounds(bounds);
@@ -98,12 +85,7 @@ const MapRef = () => {
       }
     };
 
-    // 초기 위치 설정과 마커 추가
-    if (
-      departuresLocation &&
-      departuresLocation.latitude !== 0 &&
-      departuresLocation.longitude !== 0
-    ) {
+    if (departuresLocation.latitude !== 0 && departuresLocation.longitude !== 0) {
       const startPos = new google.maps.LatLng(
         departuresLocation.latitude,
         departuresLocation.longitude,
@@ -114,10 +96,8 @@ const MapRef = () => {
     }
 
     if (
-      departuresLocation &&
       departuresLocation.latitude !== 0 &&
       departuresLocation.longitude !== 0 &&
-      arrivalsLocation &&
       arrivalsLocation.latitude !== 0 &&
       arrivalsLocation.longitude !== 0
     ) {
@@ -128,7 +108,6 @@ const MapRef = () => {
       directionRoute(departuresLocation, arrivalsLocation);
     }
 
-    // 모든 마커가 추가된 후, 맵 경계를 조정
     if (!bounds.isEmpty()) {
       map.fitBounds(bounds);
     }
@@ -137,32 +116,25 @@ const MapRef = () => {
   return <div ref={ref} id='map' className='w-[100%] h-[100%]' />;
 };
 
-const render = (status: Status) => {
+const render = (status: Status, props: PartyMapProps) => {
   switch (status) {
     case Status.LOADING:
-      return (
-        <>
-          <span className='loading loading-dots loading-lg'></span>
-        </>
-      );
+      return <span className='loading loading-dots loading-lg'></span>;
     case Status.FAILURE:
       return <>에러 발생</>;
     case Status.SUCCESS:
-      return <MapRef />;
+      return <PartyMap {...props} />;
   }
 };
 
-/**
- * NOTE :
- * 구글 맵으로 열심히 커스텀해서 만들었는데...
- * 충격적이게도 구글 맵은 자바스크립트를 이용한 경로 생성을 지원하지 않습니다...
- * 그래서 출발지와 도착지가 다 생성이 되었다면, 네이버 맵을 이용하여 컴포넌트를 만들어야 할 것 같습니다.
- */
-
-const PartyMap = () => {
+const PartyItemMap: React.FC<PartyMapProps> = ({ departuresLocation, arrivalsLocation }) => {
   return (
-    <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
+    <Wrapper
+      apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY}
+      render={status => render(status, { departuresLocation, arrivalsLocation })}
+      libraries={['marker']}
+    />
   );
 };
 
-export default PartyMap;
+export default PartyItemMap;

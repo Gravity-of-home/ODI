@@ -21,16 +21,14 @@ const BottomSheet: React.FC = () => {
 
   useEffect(() => {
     // console.log(latitude, longitude, googleMap);
+    if (googleMap === null) return;
     const getListData = async () => {
-      if (googleMap === null) return;
       try {
         const response = await jwtAxios.get(
           `api/party-boards?page=0&size=10&sort=${distance}&isToday=${isToday}&departuresDate=${departuresDate}&gender=${gender}&category=${category}&longitude=${longitude}&latitude=${latitude}`,
-          // `/api/party-boards?page=0&size=10&sort=${distance}&isToday=false&departuresDate=&gender=&category=&longitude=${longitude}&latitude=${latitude}`,
-          // `api/party-boards?page=0&size=5&sort=distance,desc&isToday=false&departuresDate=&gender=&category=&longitude=128.41936482396736&latitude=36.10441210902909`,
         );
+        console.log('FILTER DATA LIST RESPONSE', response);
         const { content } = response.data.data;
-        // console.log(response);
         console.log('FILTER DATA LIST', content);
         setListData(content);
       } catch (error) {
@@ -38,7 +36,7 @@ const BottomSheet: React.FC = () => {
       }
     };
     getListData();
-  }, [isToday, category, distance, gender, departuresDate]);
+  }, [googleMap, isToday, category, distance, gender, departuresDate]);
 
   return (
     <>
@@ -53,7 +51,7 @@ const BottomSheet: React.FC = () => {
         </div>
         <div className='mt-4 bg-white rounded-t-3xl w-[100%] h-[90%]'>
           <BottomSheetHandle />
-          <div className='w-[100%] bg-black'>
+          <div className='w-[100%] bg-white'>
             <SelectFilter
               setIsToday={setIsToday}
               setCategory={setCategory}
@@ -62,9 +60,11 @@ const BottomSheet: React.FC = () => {
               setDeparturesDate={setDeparturesDate}
             />
           </div>
-          <div ref={content} className='w-[100%] h-[100%] bg-black overflow-scroll'>
-            <div className='w-[100%] h-[100%]'>
-              <BottomSheetContent />
+          <div
+            ref={content}
+            className='w-[100%] h-dvh flex justify-center bg-white overflow-scroll'>
+            <div className='w-[85%] h-[50%] overflow-scroll'>
+              <BottomSheetContent partyList={listData} />
             </div>
           </div>
         </div>
