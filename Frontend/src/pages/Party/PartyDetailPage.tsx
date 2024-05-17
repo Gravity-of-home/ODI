@@ -9,8 +9,13 @@ import { getCookie } from '@/utils/CookieUtil';
 import TopNav from './components/TopNav';
 import StateBadge from './components/StateBadge';
 import { IInfo } from '@/types/Party';
+import { useWebSocket } from '@/context/webSocketProvider';
+import userStore from '@/stores/useUserStore';
+import './partyDetail.css';
 
 const PartyDetailPage = () => {
+  const { client, isConnected } = useWebSocket();
+  const { id } = userStore();
   const { partyId } = useParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
@@ -127,6 +132,23 @@ const PartyDetailPage = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/sub/notification/${id}`,
+        msg => {
+          console.log(JSON.parse(msg.body));
+          fetchData();
+        },
+        {
+          token: `${getCookie('Authorization')}`,
+        },
+      );
+
+      return () => subscription.unsubscribe();
+    }
+  }, [client, isConnected, partyId, fetchData]);
+
   // 날짜형태변환 "2024-05-10 15:34" -> 5월 10일 (요일) 오후 03:34
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -177,6 +199,7 @@ const PartyDetailPage = () => {
         role={info.role}
         state={info.state}
         partyId={partyId}
+        roomId={info.roomId}
         title={info.title}
         currentParticipants={info.currentParticipants}
         expectedCost={info.expectedCost}
@@ -242,6 +265,7 @@ const PartyDetailPage = () => {
         role={info.role}
         partyId={partyId}
         roomId={info.roomId}
+        expectedCost={info.expectedCost}
         fetchData={fetchData}
         hostGender={hostInfo.gender}
         hostId={hostInfo.id}

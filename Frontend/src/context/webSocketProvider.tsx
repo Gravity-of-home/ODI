@@ -63,6 +63,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
               toast.info(`${message.content}`, { onClick: () => GoPartyPage(message.partyId) });
             } else if (message.type === 'ACCEPT') {
               toast.info(`${message.content}`, { onClick: () => GoPartyPage(message.partyId) });
+            } else if (message.type === 'KICK') {
+              toast.error(`${message.content}`, { onClick: () => GoPartyPage(message.partyId) });
             } else {
               toast.info(`${message.content}`, {});
             }
