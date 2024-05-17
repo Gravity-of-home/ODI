@@ -67,14 +67,14 @@ public class Party extends BaseBy {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "room_Id")
+    private String roomId;
+
     @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartyBoardStats partyBoardStats;
 
     @OneToOne(mappedBy = "party", cascade = CascadeType.ALL)
     private PartySettlement partySettlement;
-
-    @Column(name = "room_Id")
-    private String roomId;
 
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL)
     private List<ChatMessage> chatMessages;
@@ -119,7 +119,7 @@ public class Party extends BaseBy {
                 .maxParticipants(2)
                 .currentParticipants(2)
                 .genderRestriction(GenderType.ANY)
-                .content("자동매칭에 성공했습니다.")
+                .content("매칭 성공~~! 함께 택시 타고 가요~~ 🚖")
                 .roomId(roomId)
                 .build();
     }

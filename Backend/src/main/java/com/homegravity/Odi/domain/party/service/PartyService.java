@@ -1,5 +1,6 @@
 package com.homegravity.Odi.domain.party.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.homegravity.Odi.domain.chat.repository.ChatRoomRepository;
 import com.homegravity.Odi.domain.map.service.MapService;
 import com.homegravity.Odi.domain.match.dto.MatchRequestDTO;
@@ -47,7 +48,7 @@ public class PartyService {
     private final TransactionHandler transactionHandler;
 
     @Transactional
-    public Long createParty(PartyRequestDTO partyRequestDTO, Member member) {
+    public Long createParty(PartyRequestDTO partyRequestDTO, Member member) throws JsonProcessingException {
 
         String roomId = chatRoomRepository.createChatRoom();
         Party party = partyRepository.save(Party.of(partyRequestDTO, member.getGender(), roomId));
@@ -349,11 +350,10 @@ public class PartyService {
 
     // 매치 파티 생성
     @Transactional
-    public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) {
+    public Long createMatchParty(Long member1, Long member2, MatchRequestDTO requestDTO1, MatchRequestDTO requestDTO2) throws JsonProcessingException {
 
         String roomId = chatRoomRepository.createChatRoom();
         Party party = partyRepository.save(Party.of(requestDTO1, roomId));
-//        partyDocumentRepository.save(PartyDocument.from(party)); // elasticsearch 저장
 
         Member organizer = memberRepository.findById(member1).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
         Member participant = memberRepository.findById(member2).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST, ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
