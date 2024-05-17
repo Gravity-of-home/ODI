@@ -39,15 +39,19 @@ public class RedisService {
      */
     public void sendChatMessage(ChatMessageDTO chatMessage) {
 
+        Member target = memberRepository.findByIdAndDeletedAtIsNull(chatMessage.getTargetId())
+                .orElseThrow(()->new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
+        String targetNickname = target.getNickname();
+
         switch (chatMessage.getType()) {
             case MessageType.DATE:
                 chatMessage.setContent(chatMessage.getSendTime()); break;
             case MessageType.ENTER:
-                chatMessage.setContent(chatMessage.getSenderNickname() + "님이 입장하셨습니다."); break;
+                chatMessage.setContent(targetNickname + "님이 입장하셨습니다."); break;
             case MessageType.QUIT:
                 chatMessage.setContent(chatMessage.getSenderNickname() + "님이 퇴장하셨습니다."); break;
             case MessageType.KICK:
-                chatMessage.setContent(chatMessage.getSenderNickname() + "님이 강퇴되었습니다."); break;
+                chatMessage.setContent(targetNickname + "님이 강퇴되었습니다."); break;
             case MessageType.SETTLEMENT_REQUEST:
                 chatMessage.setContent(chatMessage.getSenderNickname() + "님이 정산을 요청하셨습니다."); break;
             case MessageType.SETTLEMENT_SUCCESS:
