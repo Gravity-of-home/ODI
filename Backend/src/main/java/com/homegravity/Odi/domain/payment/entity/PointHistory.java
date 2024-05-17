@@ -54,7 +54,7 @@ public class PointHistory extends BaseTime {
         this.amount = amount;
     }
 
-    public static PointHistory createSettleHistory(Member member, Long partyId, String content, String detailContent, PointHistoryType type, Integer amount) {
+    public static PointHistory createHistory(Member member, Long partyId, String content, String detailContent, PointHistoryType type, Integer amount) {
 
         return builder()
                 .member(member)
@@ -65,16 +65,4 @@ public class PointHistory extends BaseTime {
                 .amount(amount)
                 .build();
     }
-
-    public static PointHistory createPaymentHistory(Member member, Long paymentId, String content, Integer amount) {
-
-        return builder()
-                .member(member)
-                .paymentId(paymentId)
-                .content(content)
-                .type(PointHistoryType.CHARGE)
-                .amount(amount)
-                .build();
-    }
-
 }
