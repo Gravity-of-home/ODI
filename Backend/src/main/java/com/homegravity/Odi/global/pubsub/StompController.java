@@ -36,11 +36,13 @@ public class StompController {
     public void message(ChatMessageDTO message, @Header("token") String token) {
         Member sender = memberRepository.findById(Long.valueOf(jwtUtil.getId(token)))
                 .orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_ID_NOT_EXIST,ErrorCode.MEMBER_ID_NOT_EXIST.getMessage()));
-        String nickname = sender.getNickname();
+        String senderNickname = sender.getNickname();
         String image = sender.getImage();
+
         // 로그인 회원 정보로 대화명 설정
-        message.setSenderNickname(nickname);
+        message.setSenderNickname(senderNickname);
         message.setSenderImage(image);
+        // 송신 시간 설정 (한국 기준)
         message.setSendTime(LocalDateTime.now(ZoneId.of("Asia/Seoul")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         // Websocket에 발행된 메시지를 redis로 발행(publish)
         redisService.sendChatMessage(message);

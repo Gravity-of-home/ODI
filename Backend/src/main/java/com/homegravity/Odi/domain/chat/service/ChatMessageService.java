@@ -9,6 +9,10 @@ import com.homegravity.Odi.global.response.error.ErrorCode;
 import com.homegravity.Odi.global.response.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,15 +27,17 @@ public class ChatMessageService {
     private final PartyRepository partyRepository;
 
     /**
-     * 특정 채팅방의 모든 채팅 메세지 조회
+     * 특정 채팅방의 채팅 메세지 페이지네이션 조회
      */
-    public List<ChatMessageDTO> getAllChatMessage(String roomId) {
+    public List<ChatMessageDTO> getSliceChatMessage(String roomId, Pageable pageable) {
         // 채팅방 ID 기반 Party 조회
         Party party = partyRepository.findByRoomIdAndDeletedAtIsNull(roomId)
                 .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
-        List<ChatMessage> chatMessages = chatMessageRepository.findAllByPartyId(party.getId())
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        Slice<ChatMessage> chatMessages = chatMessageRepository.findAllByPartyId(party.getId(), pageRequest)
                 .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
-        return chatMessages.stream().map(ChatMessageDTO::from).collect(Collectors.toList());
+        return chatMessages.stream().map(ChatMessageDTO::from).collect(Collectors.toList()).reversed();
     }
 
     /**
