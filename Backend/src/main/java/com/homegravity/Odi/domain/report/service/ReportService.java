@@ -53,6 +53,6 @@ public class ReportService {
         reportRepository.save(Report.of(requestDTO, imgUrl, reported, reporter));
 
         // 메일 전송
-        emailService.sendReportMessage(requestDTO);
+        emailService.sendReportMessage(requestDTO, imgUrl);
     }
 }

@@ -25,7 +25,7 @@ public class EmailService {
     private final JavaMailSender javaMailSender;
 
     @Async // 비동기 처리
-    public void sendReportMessage(ReportRequestDTO requestDTO) {
+    public void sendReportMessage(ReportRequestDTO requestDTO, String imgUrl) {
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -54,22 +54,19 @@ public class EmailService {
                     "<p><strong>신고 받을 멤버 ID:</strong> " + requestDTO.getReportedId() + "</p>" +
                     "<p><strong>신고 유형:</strong> " + requestDTO.getType().getDescription() + "</p>" +
                     "<p><strong>신고 상세 내용:</strong> " + requestDTO.getContent() + "</p>" +
+                    "<div> <p><strong>첨부 파일</p></strong><img src=\"" + imgUrl + "\" width=\"200px\"></div>" +
                     "</div>" +
                     "</div>" +
                     "</body>" +
                     "</html>";
-
 
             helper.setFrom(from + "@gmail.com");
             helper.setTo(to);
             helper.setSubject("[유저 신고] 확인부탁드립니다.");
             helper.setText(text, true); // html 사용
 
-            if (requestDTO.getAttachments() != null) {
-                helper.addAttachment(requestDTO.getAttachments().getOriginalFilename(), requestDTO.getAttachments());
-            }
-
             javaMailSender.send(message);
+
         } catch (MessagingException e) {
             log.error("메일 전송에 실패했습니다.");
             e.printStackTrace();
