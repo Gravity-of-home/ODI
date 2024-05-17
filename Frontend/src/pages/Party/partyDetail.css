@@ -1,0 +1,12 @@
+/* styles.css */
+.progress[value]::-webkit-progress-value {
+  background-color: purple;
+}
+
+.progress[value]::-moz-progress-bar {
+  background-color: purple;
+}
+
+.progress[value]::-ms-fill {
+  background-color: purple;
+}

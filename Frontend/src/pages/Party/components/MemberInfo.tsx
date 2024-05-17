@@ -136,37 +136,50 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   const participantsList = participants
     .filter((person: IParticipant) => person.role !== 'ORGANIZER')
     .map((person: IParticipant) => (
-      <li className='flex justify-between ' key={person.id}>
+      <li className='flex justify-between my-4' key={person.id}>
         <div className='flex gap-x-2 items-center'>
           <img className='rounded-full w-10 h-10' src={person.profileImage} alt='' />
-          <p>{person.nickname}</p>
-          <p>{person.gender === 'M' ? '남' : '여'}</p>
-          <p>{person.ageGroup}</p>
-          <p className='font-bold'>당도 : {person.brix.toFixed(1)}° Bx</p>
+          <div className='ml-4 font-bold'>
+            <p>{person.nickname}</p>
+            <p>{person.gender === 'M' ? '남' : '여'}</p>
+            <p>{person.ageGroup}</p>
+          </div>
         </div>
-        <div>
+        <div className='w-max ml-10'>
+          <p className='text-xl font-bold'>당도</p>
+          <p className='font-bold'>{person.brix.toFixed(1)}° Bx</p>
+          <div className='w-full'>
+            <progress
+              className='progress progress-error w-full bg-purple-100'
+              value={person.brix}
+              max='100'></progress>
+          </div>
+        </div>
+        <div className='flex items-center ml-10'>
           {role === 'ORGANIZER' && ( // role이 'ORGANIZER'일 때만 버튼 렌더링
             <button
               onClick={banParticipant(person.id, person.nickname)}
-              className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
+              className='btn btn-error btn-square rounded bg-red-500 text-white'>
               추방
             </button>
           )}
         </div>
-        {person.id === userId && (
-          <div className='content-center text-center rounded-full w-10 bg-blue-100'>
-            <p className='content-center text-center '>나</p>
-          </div>
-        )}
+        <div className='content-center'>
+          {person.id === userId && (
+            <div className='content-center  rounded-full w-10 h-10 bg-blue-100'>
+              <p className='content-center text-center '>나</p>
+            </div>
+          )}
+        </div>
       </li>
     ));
 
   // 팟장에게 보일 파티 신청자 목록
   const applicantList = guests?.map((applicant: IParticipant) => (
-    <li className='flex justify-between content-center' key={applicant.id}>
+    <li className='flex justify-between content-center my-2' key={applicant.id}>
       <div className='user-profile flex gap-x-4 items-center'>
         <img src={applicant.profileImage} alt='user-img' className='rounded-full w-10 h-10' />
-        <div className='ml-4'>
+        <div className='ml-4 font-bold'>
           <div>{applicant.nickname}</div>
           <div>{applicant.gender === 'M' ? '남' : '여'}</div>
           <div>{applicant.ageGroup}</div>
@@ -177,21 +190,21 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         <p className='font-bold'>{hostBrix.toFixed(1)}° Bx</p>
         <div className='w-full'>
           <progress
-            className='progress progress-error w-full bg-red-100'
+            className='progress progress-error w-full bg-purple-100'
             value={hostBrix}
             max='100'></progress>
         </div>
       </div>
       {role === 'ORGANIZER' && (
-        <div className='flex'>
+        <div className='flex items-center gap-x-2'>
           <button
             onClick={acceptEnterParty(applicant.id, applicant.nickname)}
-            className='ml-2 py-1 px-3 rounded bg-green-500 text-white'>
-            수락
+            className='btn btn-info btn-square rounded  text-white'>
+            <p>수락</p>
           </button>
           <button
             onClick={rejectEnterParty(applicant.id)}
-            className='ml-2 py-1 px-3 rounded bg-red-500 text-white'>
+            className='btn btn-error btn-square rounded bg-red-500 text-white'>
             거절
           </button>
         </div>
@@ -225,7 +238,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
                 <p className='font-bold'>{hostBrix.toFixed(1)}° Bx</p>
                 <div className='w-full'>
                   <progress
-                    className='progress progress-error w-full bg-red-100'
+                    className='progress progress-error w-full bg-purple-100'
                     value={hostBrix}
                     max='100'></progress>
                 </div>

@@ -85,7 +85,9 @@ const NavBar: React.FC<INavBarProps> = ({
       const compressedFile = await imageCompression(imageFile, options);
       // console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
       // console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
-      return compressedFile;
+      const file = new File([compressedFile], imageFile.name, { type: imageFile.type });
+
+      return file;
     } catch (error) {
       console.log(error);
     }
@@ -106,7 +108,12 @@ const NavBar: React.FC<INavBarProps> = ({
     ) {
       try {
         const compressedImage = await handleImageUpload(event.target.files[0]); // Wait for the compression to complete
-        setImageFile(compressedImage); // Set the compressed image file
+        if (compressedImage) {
+          setImageFile(compressedImage); // Set the compressed image file
+        } else {
+          alert('이미지 압축에 실패했습니다.');
+          setImageFile(undefined);
+        }
       } catch (error) {
         console.error('Error compressing the image:', error);
         alert('Failed to compress image.');

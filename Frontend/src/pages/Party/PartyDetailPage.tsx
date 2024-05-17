@@ -11,6 +11,7 @@ import StateBadge from './components/StateBadge';
 import { IInfo } from '@/types/Party';
 import { useWebSocket } from '@/context/webSocketProvider';
 import userStore from '@/stores/useUserStore';
+import './partyDetail.css';
 
 const PartyDetailPage = () => {
   const { client, isConnected } = useWebSocket();
