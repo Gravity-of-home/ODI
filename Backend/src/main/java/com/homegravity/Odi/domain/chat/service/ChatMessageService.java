@@ -37,7 +37,7 @@ public class ChatMessageService {
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
         Slice<ChatMessage> chatMessages = chatMessageRepository.findAllByPartyId(party.getId(), pageRequest)
                 .orElseThrow(()->new BusinessException(ErrorCode.NOT_FOUND_ERROR,ErrorCode.NOT_FOUND_ERROR.getMessage()));
-        return chatMessages.stream().map(ChatMessageDTO::from).collect(Collectors.toList());
+        return chatMessages.stream().map(ChatMessageDTO::from).collect(Collectors.toList()).reversed();
     }
 
     /**
