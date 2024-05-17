@@ -50,7 +50,6 @@ public class EmailService {
                     "<div class='content'>" +
                     "<h3>신고 내역</h3>" +
                     "<p><strong>파티 ID:</strong> " + requestDTO.getPartyId() + "</p>" +
-                    "<p><strong>채팅방 ID:</strong> " + requestDTO.getRoomId() + "</p>" +
                     "<p><strong>신고 받을 멤버 ID:</strong> " + requestDTO.getReportedId() + "</p>" +
                     "<p><strong>신고 유형:</strong> " + requestDTO.getType().getDescription() + "</p>" +
                     "<p><strong>신고 상세 내용:</strong> " + requestDTO.getContent() + "</p>" +

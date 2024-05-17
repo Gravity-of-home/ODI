@@ -18,9 +18,6 @@ public class ReportRequestDTO {
     @Schema(description = "파티 id")
     private Long partyId;
 
-    @Schema(description = "채팅방 id")
-    private String roomId;
-
     @NotNull
     @Schema(description = "신고 받을 멤버 id")
     private Long reportedId;
