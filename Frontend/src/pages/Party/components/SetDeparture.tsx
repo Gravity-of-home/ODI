@@ -124,7 +124,7 @@ const MapRef = () => {
         center: mapCenter,
         disableDefaultUI: true,
         clickableIcons: false,
-        styles: DarkModeStyle,
+        // styles: DarkModeStyle,
         zoom: 16,
         minZoom: 7,
         maxZoom: 18,
@@ -239,7 +239,7 @@ const SetDeparture = () => {
 
   const failReq = () => {
     setSearchData([]);
-    return toast.error('검색 결과가 없습니다.');
+    toast.error('검색 결과가 없습니다.', { toastId: 'departureSearch' });
   };
 
   const getSearchData = async (searchValue: string) => {

@@ -41,7 +41,9 @@ const SearchArrivalItem: FC<IArrivalProps> = ({ setIsSearch, ...props }) => {
           <p className='flex py-2 justify-end'>설정 이후 지도를 통해 정확하게 설정해 주세요.</p>
           <div className='modal-action'>
             <form method='dialog'>
-              <button className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5'>✕</button>
+              <button className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5 border-none'>
+                ✕
+              </button>
               <button className='btn bg-OD_PURPLE text-white' onClick={setData}>
                 설정하기
               </button>
@@ -58,7 +60,13 @@ const SearchArrivalItem: FC<IArrivalProps> = ({ setIsSearch, ...props }) => {
       <div className='w-[100%] h-[10%] flex justify-center border-b border-slate-700 hover:bg-slate-500'>
         <div className='w-[90%]' onClick={openSetArrivalModal}>
           <div className='w-[100%] flex justify-between my-2'>
-            <div className='font-semibold'>{props.placeName}</div>
+            <div className='font-semibold'>
+              {props.placeName === null
+                ? props.buildingName
+                : props.placeName === null
+                  ? '장소 또는 건물명 미제공'
+                  : props.placeName}
+            </div>
             <div className='w-[10%] flex justify-center items-center'>
               <SvgGoInside />
             </div>

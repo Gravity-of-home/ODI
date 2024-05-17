@@ -16,13 +16,13 @@ function App() {
             position='top-center'
             autoClose={2000}
             hideProgressBar={false}
-            newestOnTop={false}
+            newestOnTop={true}
             closeOnClick
             rtl={false}
             pauseOnFocusLoss
             draggable
             pauseOnHover
-            theme='dark'
+            theme='light'
           />
           <RouterProvider router={router} />
         </Layout>

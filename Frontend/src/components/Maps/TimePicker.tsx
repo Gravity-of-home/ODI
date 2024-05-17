@@ -22,7 +22,7 @@ const TimePicker: React.FC<TimePickerProps> = ({ onTimeChange }) => {
   };
 
   return (
-    <div className='flex flex-row items-center text-white px-4 py-4 gap-2'>
+    <div className='flex flex-row items-center text-black px-4 py-4 gap-2'>
       <select
         value={selectedHour}
         onChange={handleHourChange}
