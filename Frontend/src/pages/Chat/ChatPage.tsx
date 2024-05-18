@@ -119,7 +119,9 @@ const ChatPage = () => {
           />
         </div>
       )}
+
       <div className='flex-grow pt-24 overflow-hidden'>
+        <div className='divider p-4'></div>
         {info && <Chat roomId={info.roomId} me={info.me} fetchData={fetchData} />}
       </div>
     </div>

@@ -48,7 +48,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
         `/sub/chat/room/${roomId}`,
         message => {
           const newMessage = JSON.parse(message.body);
-          if (['SETTLEMENT', 'ENTER', 'QUIT'].includes(newMessage.type)) {
+          if (['SETTLEMENT', 'ENTER', 'QUIT', 'CONFIRM'].includes(newMessage.type)) {
             fetchData();
           }
 

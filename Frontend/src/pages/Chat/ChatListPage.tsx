@@ -92,42 +92,48 @@ const ChatListPage: React.FC = () => {
         </div>
         <div className='navbar-end'></div>
       </div>
-      <div className='chat-list'>
-        <div className='overflow-x-auto'>
-          <table className='table'>
-            <tbody>
-              {chatList?.map(chatRoom => (
-                <tr
-                  key={chatRoom.roomId}
-                  onClick={() => GoChatPage(chatRoom.partyId)}
-                  className='cursor-pointer'>
-                  <td>
-                    <div className='flex items-center gap-3'>
-                      <img
-                        src={chatRoom.lastMessage?.senderImage || odi}
-                        alt='avatar'
-                        className=''
-                        width={60}
-                      />
+      {chatList.length > 0 ? (
+        <div className='chat-list'>
+          <div className='overflow-x-auto'>
+            <table className='table'>
+              <tbody>
+                {chatList.map(chatRoom => (
+                  <tr
+                    key={chatRoom.roomId}
+                    onClick={() => GoChatPage(chatRoom.partyId)}
+                    className='cursor-pointer'>
+                    <td>
+                      <div className='flex items-center gap-3'>
+                        <img
+                          src={chatRoom.lastMessage?.senderImage || odi}
+                          alt='avatar'
+                          className=''
+                          width={60}
+                        />
 
-                      <div className='ml-4'>
-                        <div className='font-bold text-xl'>{chatRoom.partyTitle}</div>
-                        <div className=''>
-                          {chatRoom.lastMessage ? chatRoom.lastMessage.content : ''}
+                        <div className='ml-4'>
+                          <div className='font-bold text-xl'>{chatRoom.partyTitle}</div>
+                          <div className=''>
+                            {chatRoom.lastMessage ? chatRoom.lastMessage.content : ''}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  <td className='w-32 text-center'>
-                    {chatRoom.lastMessage ? formatSendTime(chatRoom.lastMessage.sendTime) : ''}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <td className='w-32 text-center'>
+                      {chatRoom.lastMessage ? formatSendTime(chatRoom.lastMessage.sendTime) : ''}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className='flex justify-center items-center h-64'>
+          <span className='text-lg'>채팅 목록이 없습니다.</span>
+        </div>
+      )}
     </div>
   );
 };
