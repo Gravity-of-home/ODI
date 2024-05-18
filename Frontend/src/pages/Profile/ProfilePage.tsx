@@ -94,7 +94,7 @@ const ProfilePage = () => {
           <div className='w-[100%] h-[15%] flex flex-col justify-evenly my-3 px-5'>
             <div className='font-semibold text-black text-[20px]'>내 포인트</div>
             <div className='font-semibold text-black text-[18px] flex justify-end'>
-              {point}
+              {point!.toLocaleString()}
               <span className='text-slate-500 px-2'>오디</span>
             </div>
             <button

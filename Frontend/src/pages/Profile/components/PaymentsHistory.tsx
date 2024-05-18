@@ -49,7 +49,7 @@ const PaymentsHistory = () => {
         <div className='w-[100%] h-[95%]'>
           {history.length > 0 ? (
             history.map((item, index) => (
-              <div key={index} className='w-[100%] h-[10%] flex justify-center'>
+              <div key={index} className='w-[100%] h-[20%] flex justify-center'>
                 <PaymentsHistoryItem item={item} />
               </div>
             ))

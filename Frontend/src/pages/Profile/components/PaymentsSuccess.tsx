@@ -52,10 +52,10 @@ const PaymentsSuccess = () => {
 
   return (
     <>
-      <div className='w-[100%] h-[100%] bg-black'>
+      <div className='w-[100%] h-[100%] bg-white'>
         <dialog ref={successModalRef} id='my_modal_4' className='modal'>
           <div className='modal-box w-11/12'>
-            <h3 className='font-bold text-white text-[20px]'>결제성공</h3>
+            <h3 className='font-bold text-black text-[20px]'>결제성공</h3>
             <div className='mt-1 border border-gray-500'></div>
             <div className='flex flex-col justify-center items-center'>
               <div className='flex justify-center items-center w-[150px] h-[150px] my-5'>
