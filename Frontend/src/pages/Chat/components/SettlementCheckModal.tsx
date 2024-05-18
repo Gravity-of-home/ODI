@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { IChatInfo } from '@/types/Chat';
 import axios from 'axios';
 import { ViteConfig } from '@/apis/ViteConfig';
@@ -17,6 +16,12 @@ interface SettlementCheckModalProps {
   chargeFee: () => void;
 }
 
+interface IScores {
+  kindScore: number;
+  promiseScore: number;
+  fastChatScore: number;
+}
+
 const SettlementCheckModal: React.FC<SettlementCheckModalProps> = ({
   info,
   paidAmount,
@@ -24,8 +29,6 @@ const SettlementCheckModal: React.FC<SettlementCheckModalProps> = ({
   onClose,
   chargeFee,
 }) => {
-  const navigate = useNavigate();
-
   const handleModalClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation(); // 모달 내부 클릭 이벤트 처리
   };
@@ -34,8 +37,9 @@ const SettlementCheckModal: React.FC<SettlementCheckModalProps> = ({
     chargeFee();
     onClose();
     // MUST : 동승자 평가 모달 open
-    evalOpen();
+    // evalOpen();
   };
+
   const settle = settleAmount && paidAmount ? settleAmount - paidAmount : 0;
 
   /**
@@ -45,24 +49,23 @@ const SettlementCheckModal: React.FC<SettlementCheckModalProps> = ({
   const evalModalRef = useRef<HTMLDialogElement>(null);
   const [isEval, setIsEval] = useState(false);
 
-  const evalOpen = () => {
-    if (evalModalRef.current) {
-      evalModalRef.current.showModal();
-    }
-  };
+  // const evalOpen = () => {
+  //   if (evalModalRef.current) {
+  //     evalModalRef.current.showModal();
+  //   }
+  // };
 
   const handleEvaluation = () => {
     setIsEval(true);
   };
 
   const closeModal = () => {
-    setIsEval(false);
     if (evalModalRef.current) {
       evalModalRef.current.close();
     }
+    setIsEval(false);
   };
 
-  // NOTE : 나를 제외한 평가 인원
   const participants = [info!.organizer, ...info!.participants].filter(
     user => user.id !== info!.me.id,
   );
@@ -77,30 +80,39 @@ const SettlementCheckModal: React.FC<SettlementCheckModalProps> = ({
     })),
   );
 
-  const handleNext = (index: number, scores: Partial<IEvaluation>) => {
+  const handleNext = (scores: IScores) => {
     const newReviews = [...reviews];
-    newReviews[index] = { ...newReviews[index], ...scores };
+    newReviews[currentStep] = { ...newReviews[currentStep], ...scores };
     setReviews(newReviews);
-    setCurrentStep(currentStep + 1);
+    if (currentStep < participants.length) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
-  const handleSubmit = async () => {
+  const handleEvalSubmit = async () => {
     console.log('평가 대상 PARTY ID', info!.partyId);
     console.log('평가 내용', reviews);
     try {
-      await axios.post(
-        `${ViteConfig.VITE_BASE_URL}/api/members/brix`,
-        {
-          partyId: info!.partyId,
-          memberBrixDTOList: reviews,
-        },
-        {
-          headers: {
-            AUTHORIZATION: getCookie('Authorization'),
+      await axios
+        .post(
+          `${ViteConfig.VITE_BASE_URL}/api/members/brix`,
+          {
+            partyId: info!.partyId,
+            memberBrixDTOList: reviews,
           },
-        },
-      );
-      toast.success('평가가 완료되었습니다.');
+          {
+            headers: {
+              AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+            },
+          },
+        )
+        .then(res => {
+          console.log(res.data);
+          if (res.data.status === 201) {
+            closeModal();
+            toast.success('평가가 완료되었습니다.');
+          }
+        });
     } catch (error) {
       console.error(error);
       toast.error('평가 전송에 실패했습니다.');
@@ -115,15 +127,20 @@ const SettlementCheckModal: React.FC<SettlementCheckModalProps> = ({
             <>
               <h3 className='font-bold text-[20px]'>동승자 평가</h3>
               <div className='mt-1 border border-gray-300'></div>
-              <div className='flex flex-col justify-between'>
+              <div className='flex flex-col justify-between gap-3'>
                 <StatusBar currentStep={currentStep} totalSteps={participants.length} />
                 {currentStep < participants.length ? (
                   <EvaluationForm
                     person={participants[currentStep]}
-                    onNext={scores => handleNext(currentStep, scores)}
+                    onNext={handleNext}
+                    initialScores={{
+                      kindScore: reviews[currentStep].kindScore,
+                      promiseScore: reviews[currentStep].promiseScore,
+                      fastChatScore: reviews[currentStep].fastChatScore,
+                    }} // initialScores 전달
                   />
                 ) : (
-                  <button onClick={handleSubmit} className='btn bg-green-500 text-white mt-4'>
+                  <button onClick={handleEvalSubmit} className='btn bg-green-500 text-white mt-4'>
                     평가 완료
                   </button>
                 )}

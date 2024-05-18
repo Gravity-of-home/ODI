@@ -167,9 +167,11 @@ const NavBar: React.FC<INavBarProps> = ({
           });
           sendSettlementMessage();
           fetchData();
-          toggleModal(); // 모달을 닫습니다.
-          evalOpen(); // 동승자 평가 모달을 엽니다.
+          toggleModal();
         }
+      })
+      .then(() => {
+        evalOpen();
       })
       .catch(err => {
         toast.error(err.response.data.reason);
@@ -187,6 +189,9 @@ const NavBar: React.FC<INavBarProps> = ({
           toast.success('정산을 완료했습니다');
           fetchData();
         }
+      })
+      .then(() => {
+        evalOpen();
       })
       .catch(err => {
         console.error(err);
@@ -207,6 +212,10 @@ const NavBar: React.FC<INavBarProps> = ({
     }
   };
 
+  /**
+   * @description 동승자 평가 여부 및 평가 모달
+   */
+
   const evalModalRef = useRef<HTMLDialogElement>(null);
   const [isEval, setIsEval] = useState(false);
 
@@ -221,10 +230,10 @@ const NavBar: React.FC<INavBarProps> = ({
   };
 
   const closeModal = () => {
-    setIsEval(false);
     if (evalModalRef.current) {
       evalModalRef.current.close();
     }
+    setIsEval(false);
   };
 
   const participants = [info!.organizer, ...info!.participants].filter(
@@ -269,7 +278,7 @@ const NavBar: React.FC<INavBarProps> = ({
         )
         .then(res => {
           console.log(res.data);
-          if (res.status === 201) {
+          if (res.data.status === 201) {
             closeModal();
             toast.success('평가가 완료되었습니다.');
           }
