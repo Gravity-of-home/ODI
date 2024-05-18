@@ -427,19 +427,24 @@ const NavBar: React.FC<INavBarProps> = ({
           </svg>
         </button>
       </div>
-      <div className='divider m-0'></div>
-      <div className='flex mt-2'>
-        <div className='px-4'>{stateComponent}</div>
-        <div className='flex-row'>
-          <p className='text-center'>
-            {departuresName}
-            {'    '}
-            {'>'}
-          </p>
-          <p className='text-center'>{arrivalsName}</p>
-          <p>{departuresDate}</p>
+      <div className='divider my-1'></div>
+      <div className='flex justify-between mx-4'>
+        <div className='text-xl font-bold'>
+          일정 :<p className='badge text-xl'>{departuresDate}</p>
         </div>
-        <div className='divider mb-2'></div>
+        {stateComponent}
+      </div>
+      <div className='flex'>
+        <div className='flex flex-col'>
+          <ul className='steps w-screen'>
+            <li data-content='●' className='step step-primary'>
+              <p>{departuresName}</p>
+            </li>
+            <li data-content='▶' className='step step-primary'>
+              <p>{arrivalsName}</p>
+            </li>
+          </ul>
+        </div>
       </div>
       {state === 'GATHERING' && me.role === 'ORGANIZER' && (
         <div>
@@ -463,13 +468,13 @@ const NavBar: React.FC<INavBarProps> = ({
         </div>
       )}
       {state === 'COMPLETED' && (
-        <div onClick={toggleModal} className='mt-1 btn btn-block btn-primary'>
+        <div onClick={toggleModal} className=' btn btn-block btn-primary'>
           <p className='font-bold text-white'>1/N 정산요청하기</p>
           <div className='divider'></div>
         </div>
       )}
       {state === 'SETTLING' && me.isPaid === false && (
-        <div onClick={toggleSettleCheckModal} className='mt-1 btn btn-block btn-accent'>
+        <div onClick={toggleSettleCheckModal} className=' btn btn-block btn-accent'>
           <p className='font-bold text-xl text-white'>정산하기</p>
           <div className='divider'></div>
         </div>
