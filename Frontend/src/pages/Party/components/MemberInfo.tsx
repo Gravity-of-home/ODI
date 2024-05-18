@@ -60,15 +60,15 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
     }
   };
   // 채팅 보내주는거
-  const handleSendMessage = (type: string, nickname: string) => {
+  const handleSendMessage = (type: string, nickname: string, memberId: number) => {
     if (client && client.connected) {
       client?.publish({
         destination: `/pub/chat/message`,
         body: JSON.stringify({
           partyId: partyId,
           roomId: roomId,
-          content: `${nickname}님이 파티에 입장하셨습니다`,
           type,
+          targetId: memberId,
         }),
         headers: {
           token: `${getCookie('Authorization')}`,
@@ -87,7 +87,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 201) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          handleSendMessage('ENTER', nickname);
+          handleSendMessage('ENTER', nickname, memberId);
           handleSendAlarm('ACCEPT', memberId);
         }
         fetchData();
@@ -122,7 +122,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          handleSendMessage('KICK', nickname);
+          handleSendMessage('KICK', nickname, memberId);
           handleSendAlarm('KICK', memberId);
         }
         fetchData();

@@ -52,6 +52,8 @@ public class RedisService {
                 chatMessage.setContent(chatMessage.getSenderNickname() + "님이 퇴장하셨습니다."); break;
             case MessageType.KICK:
                 chatMessage.setContent(targetNickname + "님이 강퇴되었습니다."); break;
+            case MessageType.CONFIRM:
+                chatMessage.setContent("파티가 성사되었습니다! 🎉"); break;
             case MessageType.SETTLEMENT_REQUEST:
                 chatMessage.setContent(chatMessage.getSenderNickname() + "님이 정산을 요청하셨습니다."); break;
             case MessageType.SETTLEMENT_SUCCESS:

@@ -6,6 +6,7 @@ public enum MessageType {
     KICK, // 강퇴
     TALK, // 채팅
     DATE, // 날짜
+    CONFIRM, // 파티성사
     SETTLEMENT_REQUEST, // 정산 요청
     SETTLEMENT_SUCCESS // 정산 완료
 }
