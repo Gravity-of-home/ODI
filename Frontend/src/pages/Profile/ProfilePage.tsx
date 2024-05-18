@@ -74,10 +74,12 @@ const ProfilePage = () => {
               </div>
             </div>
             <div
-              className='w-[5%] h-[100%] flex justify-center items-center'
+              className='w-[5%] h-[50%] flex justify-center items-center tooltip tooltip-left cursor-pointer'
               onClick={() => {
                 /* TODO : 자세한 프로필 내역 및 수정하기! */
-              }}>
+                nav('detail');
+              }}
+              data-tip={`${name}님 회원정보`}>
               <SvgGoInside style={{ width: '24px', height: '24px' }} />
             </div>
           </div>

@@ -9,7 +9,10 @@ import NaverLoginRedirect from './pages/Login/components/NaverLoginRedirect';
 import LoginPage from './pages/Login/LoginPage';
 import HomePage from './pages/Home/HomePage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import ProfileDetail from './pages/Profile/components/ProfileDetail';
 import Payments from './pages/Profile/components/Payments';
+import PaymentsSuccess from './pages/Profile/components/PaymentsSuccess';
+import PaymentsFail from './pages/Profile/components/PaymentsFail';
 import PartyHistory from './pages/Profile/components/PartyHistory';
 import PaymentsHistory from './pages/Profile/components/PaymentsHistory';
 import PartyCreatePage from './pages/Party/PartyCreatePage';
@@ -22,8 +25,6 @@ import ChatDetailPage from './pages/Chat/ChatDetailPage';
 
 import { WebSocketProvider } from './context/webSocketProvider';
 import { MatchSocketProvider } from './context/matchSocketProvider';
-import PaymentsSuccess from './pages/Profile/components/PaymentsSuccess';
-import PaymentsFail from './pages/Profile/components/PaymentsFail';
 
 type AuthWrapperProps = {
   children: React.ReactNode;
@@ -105,6 +106,14 @@ const router = createBrowserRouter([
     element: (
       <AuthWrapper>
         <ProfilePage />
+      </AuthWrapper>
+    ),
+  },
+  {
+    path: '/profile/detail',
+    element: (
+      <AuthWrapper>
+        <ProfileDetail />
       </AuthWrapper>
     ),
   },
