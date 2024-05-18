@@ -60,15 +60,15 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
     }
   };
   // 채팅 보내주는거
-  const handleSendMessage = (type: string, nickname: string) => {
+  const handleSendMessage = (type: string, nickname: string, memberId: number) => {
     if (client && client.connected) {
       client?.publish({
         destination: `/pub/chat/message`,
         body: JSON.stringify({
           partyId: partyId,
           roomId: roomId,
-          content: `${nickname}님이 파티에 입장하셨습니다`,
           type,
+          targetId: memberId,
         }),
         headers: {
           token: `${getCookie('Authorization')}`,
@@ -87,7 +87,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 201) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          handleSendMessage('ENTER', nickname);
+          handleSendMessage('ENTER', nickname, memberId);
           handleSendAlarm('ACCEPT', memberId);
         }
         fetchData();
@@ -122,7 +122,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         console.log(res.data);
         if (res.data.status === 204) {
           toast.success(`${res.data.message}`, { position: 'top-center' });
-          handleSendMessage('KICK', nickname);
+          handleSendMessage('KICK', nickname, memberId);
           handleSendAlarm('KICK', memberId);
         }
         fetchData();
@@ -139,7 +139,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
       <li className='flex justify-between my-4' key={person.id}>
         <div className='flex gap-x-2 items-center'>
           <img className='rounded-full w-10 h-10' src={person.profileImage} alt='' />
-          <div className='ml-4 font-bold'>
+          <div className='ml-4 font-bold flex gap-x-2'>
             <p>{person.nickname}</p>
             <p>{person.gender === 'M' ? '남' : '여'}</p>
             <p>{person.ageGroup}</p>
@@ -176,11 +176,13 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
 
   // 팟장에게 보일 파티 신청자 목록
   const applicantList = guests?.map((applicant: IParticipant) => (
-    <li className='flex justify-between content-center my-2' key={applicant.id}>
+    <li className='flex justify-between my-2' key={applicant.id}>
       <div className='user-profile flex gap-x-4 items-center'>
         <img src={applicant.profileImage} alt='user-img' className='rounded-full w-10 h-10' />
         <div className='ml-4 font-bold'>
-          <div>{applicant.nickname}</div>
+          <div>
+            {applicant.nickname} {applicant.ageGroup}
+          </div>
           <div>{applicant.gender === 'M' ? '남' : '여'}</div>
           <div>{applicant.ageGroup}</div>
         </div>
@@ -215,7 +217,7 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
   return (
     <div className='container p-2'>
       <div className='host-info mb-5'>
-        <div className='flex justify-between items-center mb-2'>
+        <div className='flex justify-between items-center'>
           <p className='font-bold text-xl'>팟장</p>
           {role === 'ORGANIZER' && (
             <span className='flex items-center justify-center h-10 w-10 rounded-full bg-blue-100'>
@@ -225,14 +227,14 @@ const MemberInfo: React.FC<IMemberInfoProps & { fetchData: () => void }> = ({
         </div>
 
         <div className='card card-side'>
-          <figure className='w-1/2 py-2'>
+          <figure className='w-1/2'>
             <img className='' src={hostImgUrl} alt='hostImg' />
           </figure>
-          <div className='card-body py-2'>
+          <div className='card-body'>
             <h2 className='card-title'>{hostName}</h2>
             <p>{hostGender === 'M' ? '남' : '여'}</p>
             <p>{hostAge}</p>
-            <div className='card-actions justify-end'>
+            <div className='card-actions h-12 justify-end'>
               <div className='w-full'>
                 <p className='text-xl font-bold'>당도</p>
                 <p className='font-bold'>{hostBrix.toFixed(1)}° Bx</p>

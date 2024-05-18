@@ -35,6 +35,7 @@ const PartyInfo: React.FC<IPartyProps> = ({
     AIRPORT: '공항',
     TRAVEL: '여행',
     RESERVIST: '예비군',
+    MATCHING: '자동매칭',
   };
 
   return (
@@ -60,9 +61,15 @@ const PartyInfo: React.FC<IPartyProps> = ({
           </div>
         </div>
       </div>
-      <div className='mt-4'>
+      <div className='flex flex-col gap-3 p-2'>
         <p>
-          일정 <span className='font-bold'>{departuresDate} 출발</span>
+          {category === 'MATCHING' ? (
+            ''
+          ) : (
+            <>
+              일정 <span className='font-bold'>{departuresDate} 출발</span>
+            </>
+          )}
         </p>
         <p>
           예상 시간 <span className='font-bold'>{expectedTime}분 소요</span>
@@ -72,7 +79,7 @@ const PartyInfo: React.FC<IPartyProps> = ({
           <span className='font-bold'>
             {' '}
             총 {Math.round(expectedCost).toLocaleString()}원 · 1인당{' '}
-            {(expectedCost / maxParticipants).toLocaleString()}원({maxParticipants}인 기준)
+            {(expectedCost / currentParticipants).toLocaleString()}원({currentParticipants}인 기준)
           </span>
         </p>
       </div>
