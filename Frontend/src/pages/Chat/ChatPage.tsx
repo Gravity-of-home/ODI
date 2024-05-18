@@ -77,6 +77,7 @@ const ChatPage = () => {
       {info && (
         <div className='fixed top-0 bg-white w-screen z-10'>
           <NavBar
+            info={info}
             title={info.title}
             departuresName={info.departuresName}
             arrivalsName={info.arrivalsName}

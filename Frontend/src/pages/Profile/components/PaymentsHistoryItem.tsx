@@ -40,9 +40,14 @@ const PaymentsHistoryItem: React.FC<PaymentsHistoryItemProps> = ({ item }) => {
         </div>
         <div className='h-[25%] text-black font-bold'>
           {(item.amount as number) > 0 ? '+ ' : '- '}
-          {item.amount}
+          {(item.amount as number) < 0 ? (item.amount as number) * -1 : (item.amount as number)}
         </div>
-        <div className='h-[25%] text-gray-500'>{item.content}</div>
+        <div className='h-[25%] text-gray-500'>
+          {item.type === 'CHARGE' ? item.content : item.detailContent!.split('(')[0]}
+        </div>
+        <div className='h-[25%] text-gray-500'>
+          {`${item.type === 'CHARGE' ? '' : '(' + item.detailContent!.split('(')[1]}`}
+        </div>
         {/* <div className='text-white'>Detail Content: {item.detailContent}</div> */}
         {/* <div className='text-white'>Party ID: {item.partyId}</div> */}
         {/* <div className='text-white'>Payment ID: {item.paymentId}</div> */}

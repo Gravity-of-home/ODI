@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtAxios from '@/utils/JWTUtil';
+import axios from 'axios';
+import { ViteConfig } from '@/apis/ViteConfig';
 import { toast } from 'react-toastify';
 import imageCompression from 'browser-image-compression';
 import { getCookie } from '@/utils/CookieUtil';
 import { useWebSocket } from '@/context/webSocketProvider';
-import { IUser } from '@/types/Chat';
+import { IEvaluation, IUser } from '@/types/Chat';
+import { IChatInfo } from '@/types/Chat';
 import SettlementFailModal from './SettlementFailModal';
 import SettlementCheckModal from './SettlementCheckModal';
+import StatusBar from './StatusBar';
+import EvaluationForm from './EvaluationForm';
 
 interface INavBarProps {
+  info?: IChatInfo;
   title: string;
   departuresName: string;
   arrivalsName: string;
@@ -20,7 +26,14 @@ interface INavBarProps {
   fetchData: () => void;
 }
 
+interface IScores {
+  kindScore: number;
+  promiseScore: number;
+  fastChatScore: number;
+}
+
 const NavBar: React.FC<INavBarProps> = ({
+  info,
   title,
   departuresName,
   arrivalsName,
@@ -73,9 +86,6 @@ const NavBar: React.FC<INavBarProps> = ({
 
   async function handleImageUpload(event: File) {
     const imageFile = event;
-    // console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
-    // console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
-
     const options = {
       maxSizeMB: 1,
       maxWidthOrHeight: 1920,
@@ -83,8 +93,6 @@ const NavBar: React.FC<INavBarProps> = ({
     };
     try {
       const compressedFile = await imageCompression(imageFile, options);
-      // console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
-      // console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
       const file = new File([compressedFile], imageFile.name, { type: imageFile.type });
 
       return file;
@@ -95,7 +103,6 @@ const NavBar: React.FC<INavBarProps> = ({
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     if (value === '' || /^\d+$/.test(value)) {
-      // 입력값이 빈 문자열이거나 숫자만 포함하는 경우에만 상태 업데이트
       setAmount(value);
     }
   };
@@ -107,9 +114,9 @@ const NavBar: React.FC<INavBarProps> = ({
       event.target.files[0].type.startsWith('image/')
     ) {
       try {
-        const compressedImage = await handleImageUpload(event.target.files[0]); // Wait for the compression to complete
+        const compressedImage = await handleImageUpload(event.target.files[0]);
         if (compressedImage) {
-          setImageFile(compressedImage); // Set the compressed image file
+          setImageFile(compressedImage);
         } else {
           alert('이미지 압축에 실패했습니다.');
           setImageFile(undefined);
@@ -160,7 +167,8 @@ const NavBar: React.FC<INavBarProps> = ({
           });
           sendSettlementMessage();
           fetchData();
-          toggleModal();
+          toggleModal(); // 모달을 닫습니다.
+          evalOpen(); // 동승자 평가 모달을 엽니다.
         }
       })
       .catch(err => {
@@ -192,51 +200,6 @@ const NavBar: React.FC<INavBarProps> = ({
     fetchData();
   };
 
-  // const successParty = () => {
-  //   jwtAxios
-  //     .post(
-  //       `/api/parties/${partyId}/success`,
-  //       {},
-  //       {
-  //         params: {
-  //           expected_cost: expectedCost,
-  //         },
-  //       },
-  //     )
-  //     .then(res => {
-  //       console.log(res.data);
-  //       if (res.data.status === 204) {
-  //         toast.success(
-  //           `${res.data.message} 선 차감된 금액: ${res.data.data.prepaidCost / currentParticipants}`,
-  //           {
-  //             position: 'top-center',
-  //           },
-  //         );
-  //         if (client && client.connected) {
-  //           client.publish({
-  //             destination: `/pub/chat/message`,
-  //             body: JSON.stringify({
-  //               partyId,
-  //               roomId,
-  //               content: messageContent,
-  //               type: 'TALK',
-  //             }),
-  //             headers: {
-  //               token: `${getCookie('Authorization')}`,
-  //             },
-  //           });
-  //         }
-  //       }
-  //       fetchData();
-  //     })
-  //     .catch(err => {
-  //       console.error(err);
-  //       toast.error(`${err.response.data.message} ${err.response.data.reason}`, {
-  //         position: 'top-center',
-  //       });
-  //     });
-  // };
-
   const showDialog = () => {
     const dialog = document.getElementById('my_modal_2') as HTMLDialogElement;
     if (dialog) {
@@ -244,8 +207,148 @@ const NavBar: React.FC<INavBarProps> = ({
     }
   };
 
+  const evalModalRef = useRef<HTMLDialogElement>(null);
+  const [isEval, setIsEval] = useState(false);
+
+  const evalOpen = () => {
+    if (evalModalRef.current) {
+      evalModalRef.current.showModal();
+    }
+  };
+
+  const handleEvaluation = () => {
+    setIsEval(true);
+  };
+
+  const closeModal = () => {
+    setIsEval(false);
+    if (evalModalRef.current) {
+      evalModalRef.current.close();
+    }
+  };
+
+  const participants = [info!.organizer, ...info!.participants].filter(
+    user => user.id !== info!.me.id,
+  );
+
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [reviews, setReviews] = useState<IEvaluation[]>(
+    participants.map(user => ({
+      reviewee_id: user.id,
+      kindScore: 1,
+      promiseScore: 1,
+      fastChatScore: 1,
+    })),
+  );
+
+  const handleNext = (scores: IScores) => {
+    const newReviews = [...reviews];
+    newReviews[currentStep] = { ...newReviews[currentStep], ...scores };
+    setReviews(newReviews);
+    if (currentStep < participants.length) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleEvalSubmit = async () => {
+    console.log('평가 대상 PARTY ID', info!.partyId);
+    console.log('평가 내용', reviews);
+    try {
+      await axios
+        .post(
+          `${ViteConfig.VITE_BASE_URL}/api/members/brix`,
+          {
+            partyId: info!.partyId,
+            memberBrixDTOList: reviews,
+          },
+          {
+            headers: {
+              AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+            },
+          },
+        )
+        .then(res => {
+          console.log(res.data);
+          if (res.status === 201) {
+            closeModal();
+            toast.success('평가가 완료되었습니다.');
+          }
+        });
+    } catch (error) {
+      console.error(error);
+      toast.error('평가 전송에 실패했습니다.');
+    }
+  };
+
+  let evalModal = (
+    <>
+      <dialog ref={evalModalRef} id='my_modal_4' className='modal'>
+        <div className='modal-box w-11/12'>
+          {isEval === true ? (
+            <>
+              <h3 className='font-bold text-[20px]'>동승자 평가</h3>
+              <div className='mt-1 border border-gray-300'></div>
+              <div className='flex flex-col justify-between gap-3'>
+                <StatusBar currentStep={currentStep} totalSteps={participants.length} />
+                {currentStep < participants.length ? (
+                  <EvaluationForm
+                    person={participants[currentStep]}
+                    onNext={handleNext}
+                    initialScores={{
+                      kindScore: reviews[currentStep].kindScore,
+                      promiseScore: reviews[currentStep].promiseScore,
+                      fastChatScore: reviews[currentStep].fastChatScore,
+                    }} // initialScores 전달
+                  />
+                ) : (
+                  <button onClick={handleEvalSubmit} className='btn bg-green-500 text-white mt-4'>
+                    평가 완료
+                  </button>
+                )}
+              </div>
+              <div className='modal-action'>
+                <button
+                  className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5'
+                  onClick={closeModal}
+                  type='button'>
+                  ✕
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className='font-bold text-[20px]'>동승자 평가</h3>
+              <div className='mt-1 border border-gray-300'></div>
+              <div className='flex flex-col justify-between'>
+                <h4 className='mt-5 text-lg text-black'>평가 진행 상황 </h4>
+                <h4 className='mt-5 text-lg text-gray-500'>
+                  동승자 평가를 통해 상대방을 평가해 주세요.
+                </h4>
+              </div>
+              <div className='modal-action'>
+                <button
+                  className='btn btn-sm btn-circle btn-ghost absolute right-5 top-5'
+                  onClick={closeModal}
+                  type='button'>
+                  ✕
+                </button>
+                <button
+                  className='btn bg-green-500 text-white'
+                  type='button'
+                  onClick={handleEvaluation}>
+                  평가하기
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </dialog>
+    </>
+  );
+
   return (
     <div className=''>
+      {evalModal}
       <div className='flex items-center justify-between'>
         <button onClick={goBack} className='btn btn-ghost btn-circle text-3xl'>
           {'<'}
@@ -355,6 +458,7 @@ const NavBar: React.FC<INavBarProps> = ({
       )}
       {isSettleCheckModalOpen && (
         <SettlementCheckModal
+          info={info}
           paidAmount={me.paidAmount}
           settleAmount={me.settleAmount}
           onClose={() => setIsSettleCheckModalOpen(false)}
