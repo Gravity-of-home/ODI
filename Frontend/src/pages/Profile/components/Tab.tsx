@@ -42,11 +42,11 @@ export const Tabs: React.FC<TabsProps> = ({ children, useStore }) => {
 
   return (
     <div>
-      <ul className='w-[100%] flex justify-center'>
+      <ul className='w-[100%] h-[95%] flex justify-center'>
         {React.Children.map(children, child => (
           <li
             key={child.props.value}
-            className={`w-[30%] m-3 p-2 text-center cursor-pointer font-semibold ${child.props.value === range ? 'text-blue-500 border-blue-500 border-b-2 animate-fadeIn' : 'text-slate-500 hover:text-slate-400'}`}
+            className={`w-[30%] m-3 p-2 text-center cursor-pointer font-semibold ${child.props.value === range ? 'text-OD_PURPLE border-OD_PURPLE border-b-2' : 'text-slate-500 hover:text-slate-700'}`}
             onClick={() => handleClick(child.props.value as string)}>
             {child.props.label}
           </li>
