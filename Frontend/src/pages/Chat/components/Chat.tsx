@@ -35,7 +35,6 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
     try {
       const res = await jwtAxios.get(`api/chat/room/${roomId}`);
       const beforeChat = res.data.chatMessages;
-
       setMessages(prevMessages => [...prevMessages, ...beforeChat]);
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -49,7 +48,6 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
         `/sub/chat/room/${roomId}`,
         message => {
           const newMessage = JSON.parse(message.body);
-          console.log(newMessage);
           if (['SETTLEMENT', 'ENTER', 'QUIT'].includes(newMessage.type)) {
             fetchData();
           }
@@ -122,16 +120,16 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
       )}
       {!isOwnMessage && showImage && <div className='chat-header'>{msg.senderNickname}</div>}
       <div
-        className={`chat-bubble ${isOwnMessage ? 'chat-bubble-primary' : 'chat-bubble-secondary'}`}>
-        <p className='break-words'>{msg.content}</p>
+        className={`chat-bubble ${isOwnMessage ? 'chat-bubble-primary bg-purple-500' : 'chat-bubble-secondary bg-black'}`}>
+        <p className='break-words text-white text-xl'>{msg.content}</p>
       </div>
       {showTime && <time className='chat-footer opacity-50'>{NewTimeFormat(msg.sendTime)}</time>}
     </div>
   );
 
   return (
-    <div className='flex flex-col'>
-      <div className='mb-12 p-4 flex-grow'>
+    <div className='flex flex-col h-full'>
+      <div className='flex-grow overflow-y-auto mt-20 mb-12 p-4'>
         {messages.map((msg, index) => {
           const prevMsg = messages[index - 1];
           const nextMsg = messages[index + 1];
@@ -163,7 +161,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className='fixed bottom-0 bg-white flex w-screen'>
+      <div className='fixed bottom-0 bg-white flex w-full p-2'>
         <input
           type='text'
           ref={inputRef}
@@ -173,7 +171,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, me, fetchData }) => {
             }
           }}
           placeholder='메세지를 입력하세요'
-          className='input w-full'
+          className='input flex-grow mr-2'
         />
         <button className='btn' onClick={handleSendMessage}>
           전송

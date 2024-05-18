@@ -23,6 +23,8 @@ interface INavBarProps {
   state: string;
   me: IUser;
   roomId: string;
+  currentParticipants: number;
+  taxifare: number;
   fetchData: () => void;
 }
 
@@ -41,6 +43,8 @@ const NavBar: React.FC<INavBarProps> = ({
   state,
   me,
   roomId,
+  currentParticipants,
+  taxifare,
   fetchData,
 }) => {
   const { partyId } = useParams();
@@ -205,6 +209,50 @@ const NavBar: React.FC<INavBarProps> = ({
     fetchData();
   };
 
+  const successParty = () => {
+    jwtAxios
+      .post(
+        `/api/parties/${partyId}/success`,
+        {},
+        {
+          params: {
+            expected_cost: taxifare,
+          },
+        },
+      )
+      .then(res => {
+        console.log(res.data);
+        if (res.data.status === 204) {
+          toast.success(
+            `${res.data.message} 선 차감된 금액: ${res.data.data.prepaidCost / currentParticipants}`,
+            {
+              position: 'top-center',
+            },
+          );
+          if (client && client.connected) {
+            client.publish({
+              destination: `/pub/chat/message`,
+              body: JSON.stringify({
+                partyId,
+                roomId,
+                type: 'CONFIRM',
+              }),
+              headers: {
+                token: `${getCookie('Authorization')}`,
+              },
+            });
+          }
+        }
+        fetchData();
+      })
+      .catch(err => {
+        console.error(err);
+        toast.error(`${err.response.data.message} ${err.response.data.reason}`, {
+          position: 'top-center',
+        });
+      });
+  };
+
   const showDialog = () => {
     const dialog = document.getElementById('my_modal_2') as HTMLDialogElement;
     if (dialog) {
@@ -356,7 +404,7 @@ const NavBar: React.FC<INavBarProps> = ({
   );
 
   return (
-    <div className=''>
+    <div className='container'>
       {evalModal}
       <div className='flex items-center justify-between'>
         <button onClick={goBack} className='btn btn-ghost btn-circle text-3xl'>
@@ -382,10 +430,13 @@ const NavBar: React.FC<INavBarProps> = ({
       <div className='divider m-0'></div>
       <div className='flex mt-2'>
         <div className='px-4'>{stateComponent}</div>
-        <div>
-          <p>
-            {departuresName} {'>'} {arrivalsName}
+        <div className='flex-row'>
+          <p className='text-center'>
+            {departuresName}
+            {'    '}
+            {'>'}
           </p>
+          <p className='text-center'>{arrivalsName}</p>
           <p>{departuresDate}</p>
         </div>
         <div className='divider mb-2'></div>
@@ -401,7 +452,9 @@ const NavBar: React.FC<INavBarProps> = ({
             <div className='modal-box'>
               <h3 className='font-bold text-lg'>팟 확정하기!</h3>
               <p className='py-4'>현재 인원으로 파티를 확정하시겠습니까?</p>
-              <button className='btn'>확인</button>
+              <button onClick={successParty} className='btn'>
+                확인
+              </button>
             </div>
             <form method='dialog' className='modal-backdrop'>
               <button>close</button>
