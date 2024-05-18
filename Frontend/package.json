@@ -26,6 +26,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.0",
     "react-toastify": "^10.0.5",
+    "react-transition-group": "^4.4.5",
     "sockjs-client": "^1.6.1",
     "zustand": "^4.5.2"
   },
@@ -33,6 +34,7 @@
     "@types/navermaps": "^3.7.5",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
+    "@types/react-transition-group": "^4.4.10",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react-swc": "^3.5.0",

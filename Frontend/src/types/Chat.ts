@@ -57,3 +57,10 @@ export interface IMessage {
   sendTime: string;
   type: string;
 }
+
+export interface IEvaluation {
+  reviewee_id: number;
+  kindScore: number;
+  promiseScore: number;
+  fastChatScore: number;
+}
