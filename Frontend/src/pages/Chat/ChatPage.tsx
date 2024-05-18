@@ -11,46 +11,73 @@ const ChatPage = () => {
   const [info, setInfo] = useState<IChatInfo>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState('');
-
+  const [taxifare, setTaxifare] = useState(0);
   const navigate = useNavigate();
+
   function goBack() {
     navigate(`/home`);
   }
 
   const fetchData = async () => {
-    await jwtAxios
-      .get(`api/party-boards/${partyId}/chat-info`, {
+    try {
+      const res = await jwtAxios.get(`api/party-boards/${partyId}/chat-info`, {
         headers: {
           AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
         },
-      })
-      .then(res => {
-        console.log(res);
-        setInfo(res.data.data);
-      })
-      .catch(err => {
-        console.error(err);
-        setError(err.response.data.message);
       });
+      setInfo(res.data.data);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err);
+        setError(err.message);
+      } else {
+        console.error('Unexpected error', err);
+        setError('Unexpected error occurred');
+      }
+    }
+  };
 
-    setIsLoading(false);
+  const fetchTaxifare = async () => {
+    try {
+      const res = await jwtAxios.get(`/api/maps/${partyId}/taxi-fare`, {
+        headers: {
+          AUTHORIZATION: `Bearer ${getCookie('Authorization')}`,
+        },
+      });
+      setTaxifare(res.data.data);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err);
+        setError(err.message);
+      } else {
+        console.error('Unexpected error', err);
+        setError('Unexpected error occurred');
+      }
+    }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    const fetchDataAndFare = async () => {
+      await fetchData();
+      await fetchTaxifare();
+      setIsLoading(false);
+    };
+
+    fetchDataAndFare();
+  }, [partyId]);
+
   if (isLoading)
     return (
-      <div className='flex h-screen justify-center'>
-        <span className='loading loading-ball loading-xs'></span>
-        <span className='loading loading-ball loading-sm'></span>
-        <span className='loading loading-ball loading-md'></span>
+      <div className='flex h-screen justify-center items-center'>
         <span className='loading loading-ball loading-lg'></span>
       </div>
     );
+
   if (error)
     return (
-      <div role='alert' className='alert alert-error bg-white h-screen content-center'>
+      <div
+        role='alert'
+        className='alert alert-error bg-white h-screen flex flex-col items-center justify-center'>
         <svg
           xmlns='http://www.w3.org/2000/svg'
           className='stroke-current shrink-0 h-12 w-12 text-red-600'
@@ -72,10 +99,11 @@ const ChatPage = () => {
         </button>
       </div>
     );
+
   return (
-    <div className='chat-page max-h-full flex flex-col'>
+    <div className='chat-page h-screen flex flex-col'>
       {info && (
-        <div className='fixed top-0 bg-white w-screen z-10'>
+        <div className='fixed top-0 bg-white w-full z-10'>
           <NavBar
             title={info.title}
             departuresName={info.departuresName}
@@ -84,11 +112,13 @@ const ChatPage = () => {
             state={info.state}
             me={info.me}
             roomId={info.roomId}
+            currentParticipants={info.currentParticipants}
+            taxifare={taxifare}
             fetchData={fetchData}
           />
         </div>
       )}
-      <div className='flex-grow overflow-y-auto' style={{ paddingTop: '10rem' }}>
+      <div className='flex-grow pt-24 overflow-hidden'>
         {info && <Chat roomId={info.roomId} me={info.me} fetchData={fetchData} />}
       </div>
     </div>
