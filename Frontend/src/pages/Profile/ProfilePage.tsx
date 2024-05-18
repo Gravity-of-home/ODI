@@ -74,10 +74,12 @@ const ProfilePage = () => {
               </div>
             </div>
             <div
-              className='w-[5%] h-[100%] flex justify-center items-center'
+              className='w-[5%] h-[50%] flex justify-center items-center tooltip tooltip-left cursor-pointer'
               onClick={() => {
                 /* TODO : 자세한 프로필 내역 및 수정하기! */
-              }}>
+                nav('detail');
+              }}
+              data-tip={`${name}님 회원정보`}>
               <SvgGoInside style={{ width: '24px', height: '24px' }} />
             </div>
           </div>
@@ -92,7 +94,7 @@ const ProfilePage = () => {
           <div className='w-[100%] h-[15%] flex flex-col justify-evenly my-3 px-5'>
             <div className='font-semibold text-black text-[20px]'>내 포인트</div>
             <div className='font-semibold text-black text-[18px] flex justify-end'>
-              {point}
+              {point!.toLocaleString()}
               <span className='text-slate-500 px-2'>오디</span>
             </div>
             <button

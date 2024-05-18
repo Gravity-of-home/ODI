@@ -89,7 +89,7 @@ const EvaluationForm: React.FC<IEvaluationFormProps> = ({ person, onNext, initia
             </div>
             <form onSubmit={handleSubmit}>
               <div className='mb-4'>
-                <label className='block text-gray-700'>친절도:</label>
+                <label className='block text-gray-600'>{`${person.nickname}님은 친절한가요?`}</label>
                 <input
                   type='range'
                   name='kindScore'
@@ -107,7 +107,7 @@ const EvaluationForm: React.FC<IEvaluationFormProps> = ({ person, onNext, initia
                 </div>
               </div>
               <div className='mb-4'>
-                <label className='block text-gray-700'>약속 준수:</label>
+                <label className='block text-gray-600'>{`${person.nickname}님은 약속을 잘 지키나요?`}</label>
                 <input
                   type='range'
                   name='promiseScore'
@@ -125,7 +125,7 @@ const EvaluationForm: React.FC<IEvaluationFormProps> = ({ person, onNext, initia
                 </div>
               </div>
               <div className='mb-4'>
-                <label className='block text-gray-700'>빠른 채팅:</label>
+                <label className='block text-gray-600'>{`${person.nickname}님은 응답이 빠른가요?`}</label>
                 <input
                   type='range'
                   name='fastChatScore'
