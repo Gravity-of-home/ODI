@@ -607,13 +607,13 @@ const MapRef = () => {
       <div className='fixed w-[100%] h-[5%] bg-black z-10 flex items-center'>
         <div className='fixed w-[100%] flex pl-3 text-[18px] font-semibold text-white'>
           {`${curLocAdd.split(' ')[0]} ${curLocAdd.split(' ')[1] === undefined ? '' : curLocAdd.split(' ')[1]} ${curLocAdd.split(' ')[2] === undefined ? '' : curLocAdd.split(' ')[2]}`}
-          <div
+          {/* <div
             className='flex justify-center items-center px-2'
             onClick={() => {
               console.log('주소 변경 클릭~!');
             }}>
             <div className='border border-slate-500 rounded-full px-2 text-[12px]'>변경</div>
-          </div>
+          </div> */}
         </div>
         <div className='fixed w-[100%] flex justify-end px-3'>
           <div
@@ -623,9 +623,9 @@ const MapRef = () => {
             }}>
             <SvgChat />
           </div>
-          <div className='px-2 z-10 cursor-pointer' onClick={() => {}}>
+          {/* <div className='px-2 z-10 cursor-pointer' onClick={() => {}}>
             <SvgNotification />
-          </div>
+          </div> */}
           <div
             className='px-2 z-10 cursor-pointer'
             onClick={() => {

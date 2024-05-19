@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,7 +51,7 @@ public class MemberService {
 
     //사용자 정보 수정
     public MemberResponseDTO updateMemberInfo(MemberUpdateRequestDTO memberUpdateRequestDTO, Member member) {
-        if (!memberUpdateRequestDTO.getNewNickname().isEmpty()) {
+        if (memberUpdateRequestDTO.getNewNickname()!=null) {
             boolean IsExistNickname = memberRepository.existsByNicknameAndDeletedAtIsNull(memberUpdateRequestDTO.getNewNickname());
 
             if (IsExistNickname) {//이미 존재하는 닉네임이면 변경 불가
@@ -61,7 +62,7 @@ public class MemberService {
         }
 
         //이미지를 변경한다면
-        if (!memberUpdateRequestDTO.getNewImage().isEmpty()) {
+        if (memberUpdateRequestDTO.getNewImage()!=null) {
             String oldImgS3Url = member.getImage();
             String newImgS3Url = s3Service.saveFile(memberUpdateRequestDTO.getNewImage(), S3Folder.PROFILE_IMAGE);
 
