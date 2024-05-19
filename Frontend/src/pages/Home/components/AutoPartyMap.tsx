@@ -1,10 +1,7 @@
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
 import { ViteConfig } from '@/apis/ViteConfig';
 import { useEffect, useRef } from 'react';
-import watchPositionHook from '@/hooks/useRefreshLocation';
-import partyStore from '@/stores/usePartyStore';
-import LatLngAddStore from '@/stores/useLatLngAddStore';
-import DarkModeStyle from '@/components/Maps/DarkModeStyle';
+import autoPartyStore from '@/stores/useAutoPartyStore';
 import DEPARTURE from '@/assets/image/icons/departureMarker.png';
 import ARRIVAL from '@/assets/image/icons/arrivalMarker.png';
 import jwtAxios from '@/utils/JWTUtil';
@@ -12,8 +9,7 @@ import { ILocation } from '@/types/Map';
 
 const MapRef = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const { currentLat, currentLng } = LatLngAddStore();
-  const { departuresName, departuresLocation, arrivalsName, arrivalsLocation } = partyStore();
+  const { depLoc, arrLoc } = autoPartyStore();
 
   useEffect(() => {
     if (!ref.current) return;
@@ -21,6 +17,7 @@ const MapRef = () => {
     const map = new window.google.maps.Map(ref.current, {
       disableDefaultUI: true,
       // styles: DarkModeStyle,
+      clickableIcons: false,
       zoom: 16,
       minZoom: 5,
       maxZoom: 18,
@@ -99,40 +96,33 @@ const MapRef = () => {
     };
 
     // 초기 위치 설정과 마커 추가
-    if (
-      departuresLocation &&
-      departuresLocation.latitude !== 0 &&
-      departuresLocation.longitude !== 0
-    ) {
-      const startPos = new google.maps.LatLng(
-        departuresLocation.latitude,
-        departuresLocation.longitude,
-      );
+    if (depLoc && depLoc.latitude !== 0 && depLoc.longitude !== 0) {
+      const startPos = new google.maps.LatLng(depLoc.latitude, depLoc.longitude);
       startMarker.setPosition(startPos);
       startMarker.setMap(map);
       bounds.extend(startPos);
     }
 
     if (
-      departuresLocation &&
-      departuresLocation.latitude !== 0 &&
-      departuresLocation.longitude !== 0 &&
-      arrivalsLocation &&
-      arrivalsLocation.latitude !== 0 &&
-      arrivalsLocation.longitude !== 0
+      depLoc &&
+      depLoc.latitude !== 0 &&
+      depLoc.longitude !== 0 &&
+      arrLoc &&
+      arrLoc.latitude !== 0 &&
+      arrLoc.longitude !== 0
     ) {
-      const endPos = new google.maps.LatLng(arrivalsLocation.latitude, arrivalsLocation.longitude);
+      const endPos = new google.maps.LatLng(arrLoc.latitude, arrLoc.longitude);
       endMarker.setPosition(endPos);
       endMarker.setMap(map);
       bounds.extend(endPos);
-      directionRoute(departuresLocation, arrivalsLocation);
+      directionRoute(depLoc, arrLoc);
     }
 
     // 모든 마커가 추가된 후, 맵 경계를 조정
     if (!bounds.isEmpty()) {
       map.fitBounds(bounds);
     }
-  }, [departuresLocation, arrivalsLocation]);
+  }, [depLoc, arrLoc]);
 
   return <div ref={ref} id='map' className='w-[100%] h-[100%]' />;
 };
@@ -152,17 +142,10 @@ const render = (status: Status) => {
   }
 };
 
-/**
- * NOTE :
- * 구글 맵으로 열심히 커스텀해서 만들었는데...
- * 충격적이게도 구글 맵은 자바스크립트를 이용한 경로 생성을 지원하지 않습니다...
- * 그래서 출발지와 도착지가 다 생성이 되었다면, 네이버 맵을 이용하여 컴포넌트를 만들어야 할 것 같습니다.
- */
-
-const PartyMap = () => {
+const AutoPartyMap = () => {
   return (
     <Wrapper apiKey={ViteConfig.VITE_GOOGLE_MAP_API_KEY} render={render} libraries={['marker']} />
   );
 };
 
-export default PartyMap;
+export default AutoPartyMap;
