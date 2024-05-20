@@ -1,9 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import svgr from 'vite-plugin-svgr';
-import { VitePWA } from 'vite-plugin-pwa';
+// import { VitePWA } from 'vite-plugin-pwa';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -12,7 +11,15 @@ export default defineConfig({
         icon: true,
       },
     }),
-    VitePWA({ registerType: 'autoUpdate' }),
+    // VitePWA({
+    //   registerType: 'autoUpdate',
+    //   srcDir: '.',
+    //   filename: 'service-worker.js',
+    //   workbox: {
+    //     navigateFallback: '/index.html',
+    //     navigateFallbackDenylist: [/^\/oauth2\/authorization\/naver/],
+    //   },
+    // }),
   ],
   resolve: {
     alias: [{ find: '@', replacement: '/src' }],
@@ -22,7 +29,6 @@ export default defineConfig({
     port: 3000,
     host: true,
   },
-  // SockJS global 설정 필요해서 추가
   define: {
     global: 'window',
   },
